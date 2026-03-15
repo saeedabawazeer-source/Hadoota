@@ -1,0 +1,5 @@
+{
+  "name": "Hadotaa",
+  "description": "AI-powered growth and storytelling app for kids in Saudi Arabia.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
