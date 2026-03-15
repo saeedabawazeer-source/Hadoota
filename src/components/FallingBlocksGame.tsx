@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Heart, Trophy, X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Heart, Trophy, X, ArrowLeft, ArrowRight, Star } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export function FallingBlocksGame({ onClose, addStars, showToast, playSound, advanceQuest, gameData }: any) {
   const [lane, setLane] = useState(1); // 0, 1, 2
@@ -45,6 +46,12 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
       if (playerAnswer === correct) {
         playSound('win');
         setScore(s => s + 1);
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.8, x: lane === 0 ? 0.3 : lane === 1 ? 0.5 : 0.7 },
+          colors: ['#a3e635', '#ffffff']
+        });
         generateQuestion();
       } else {
         playSound('wrong');
@@ -60,7 +67,7 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
         generateQuestion();
       }
     }
-  }, [blockY, lane, answers, currentQuestion, gameOver, score, playSound, addStars, showToast]);
+  }, [blockY, lane, answers, currentQuestion, gameOver, score, playSound, addStars, showToast, confetti]);
 
   const moveLeft = () => setLane(l => Math.max(0, l - 1));
   const moveRight = () => setLane(l => Math.min(2, l + 1));
@@ -127,9 +134,14 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
               className="absolute w-full flex justify-center transition-all duration-75"
               style={{ top: `${blockY}%` }}
             >
-              <div className="bg-blue-500 border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <span className="text-white font-black text-2xl md:text-3xl">{answers[i]}</span>
-              </div>
+              <motion.div 
+                animate={{ scale: [1, 1.05, 1], rotate: [0, -2, 2, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative"
+              >
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-12 bg-white/20 blur-md rounded-full"></div>
+                <span className="text-white font-black text-2xl md:text-3xl relative z-10" style={{ textShadow: '2px 2px 0px black' }}>{answers[i]}</span>
+              </motion.div>
             </div>
           </div>
         ))}
@@ -139,10 +151,14 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
           className="absolute bottom-10 w-1/3 flex justify-center transition-all duration-200"
           style={{ left: `${lane * 33.33}%` }}
         >
-          <div className="bg-lime-400 border-4 border-black w-24 h-16 md:w-32 md:h-20 rounded-t-3xl rounded-b-xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
-            <div className="absolute -top-4 w-16 h-4 bg-gray-800 rounded-t-lg"></div>
-            {gameData.mascot && <div className="w-10 h-10 md:w-12 md:h-12 text-black">{gameData.mascot}</div>}
-          </div>
+            <motion.div 
+              animate={{ y: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="bg-gradient-to-t from-lime-500 to-lime-300 border-4 border-black w-24 h-16 md:w-32 md:h-20 rounded-t-3xl rounded-b-xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 w-full h-8 bg-white/20"></div>
+              {gameData.mascot && <div className="w-10 h-10 md:w-12 md:h-12 text-black relative z-10 drop-shadow-md">{gameData.mascot}</div>}
+            </motion.div>
         </div>
       </div>
 

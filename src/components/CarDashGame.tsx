@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Car, Heart, Trophy, X } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQuest }: any) {
   const [lane, setLane] = useState(1); // 0, 1, 2
@@ -52,6 +53,12 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
       if (carAnswer === correct) {
         playSound('win');
         setScore(s => s + 1);
+        confetti({
+          particleCount: 50,
+          spread: 80,
+          origin: { y: 0.8, x: lane === 0 ? 0.3 : lane === 1 ? 0.5 : 0.7 },
+          colors: ['#a3e635', '#ffffff']
+        });
         generateQuestion();
       } else {
         playSound('wrong');
@@ -67,7 +74,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
         generateQuestion();
       }
     }
-  }, [blockY, lane, answers, question, gameOver, score, playSound, addStars, showToast]);
+  }, [blockY, lane, answers, question, gameOver, score, playSound, addStars, showToast, confetti]);
 
   const moveLeft = () => setLane(l => Math.max(0, l - 1));
   const moveRight = () => setLane(l => Math.min(2, l + 1));
@@ -128,12 +135,18 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
           <div key={i} className="flex-1 border-r-2 border-gray-700/50 relative" onClick={() => setLane(i)}>
             {/* Block */}
             <div 
-              className="absolute w-full flex justify-center transition-all duration-75"
+              className="absolute w-full flex justify-center transition-all px-2 md:px-4"
               style={{ top: `${blockY}%` }}
             >
-              <div className="bg-blue-500 border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <span className="text-white font-black text-3xl">{answers[i]}</span>
-              </div>
+              <motion.div 
+                animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className="bg-gradient-to-br from-gray-300 to-gray-500 border-4 border-black w-full aspect-square max-w-[100px] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
+              >
+                <div className="absolute top-2 right-2 w-4 h-4 bg-gray-200 rounded-full opacity-50"></div>
+                <div className="absolute bottom-4 left-4 w-6 h-6 bg-gray-600 rounded-full opacity-30"></div>
+                <span className="text-black font-black text-3xl md:text-5xl relative z-10">{answers[i]}</span>
+              </motion.div>
             </div>
           </div>
         ))}
@@ -143,13 +156,29 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
           className="absolute bottom-10 w-1/3 flex justify-center transition-all duration-200"
           style={{ left: `${lane * 33.33}%` }}
         >
-          <div className="bg-lime-400 border-4 border-black w-20 h-24 md:w-24 md:h-32 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
-            <Car className="w-12 h-12 text-black" />
-            <div className="absolute -bottom-4 left-2 w-4 h-8 bg-gray-800 rounded-full"></div>
-            <div className="absolute -bottom-4 right-2 w-4 h-8 bg-gray-800 rounded-full"></div>
-            <div className="absolute -top-4 left-2 w-4 h-8 bg-gray-800 rounded-full"></div>
-            <div className="absolute -top-4 right-2 w-4 h-8 bg-gray-800 rounded-full"></div>
-          </div>
+          <motion.div 
+            animate={{ y: [0, -3, 0], rotate: [0, -1, 1, 0] }}
+            transition={{ repeat: Infinity, duration: 0.5 }}
+            className="bg-gradient-to-t from-red-600 to-red-400 border-4 border-black w-20 h-28 md:w-24 md:h-32 rounded-3xl flex flex-col items-center justify-start pt-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-10"
+          >
+            <div className="w-12 h-6 bg-blue-300/80 rounded-t-lg border-2 border-black mb-1"></div>
+            <div className="w-12 h-8 bg-blue-300/80 rounded-b-lg border-2 border-black"></div>
+            
+            <div className="absolute -bottom-2 left-0 w-6 h-10 bg-black rounded-lg transform -skew-x-12"></div>
+            <div className="absolute -bottom-2 right-0 w-6 h-10 bg-black rounded-lg transform skew-x-12"></div>
+            <div className="absolute -top-2 left-1 w-5 h-8 bg-black rounded-lg"></div>
+            <div className="absolute -top-2 right-1 w-5 h-8 bg-black rounded-lg"></div>
+            
+            {/* Headlights */}
+            <div className="absolute top-2 left-2 w-3 h-3 bg-yellow-300 rounded-full border-2 border-orange-500 shadow-[0_0_10px_#fde047]"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 bg-yellow-300 rounded-full border-2 border-orange-500 shadow-[0_0_10px_#fde047]"></div>
+          </motion.div>
+          {/* Dust trail */}
+          <motion.div 
+            animate={{ opacity: [0.5, 0], scale: [1, 2] }}
+            transition={{ repeat: Infinity, duration: 0.8 }}
+            className="absolute -bottom-8 bg-white/20 blur-md w-16 h-16 rounded-full"
+          ></motion.div>
         </div>
       </div>
 
