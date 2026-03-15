@@ -10,7 +10,8 @@ import { GoogleGenAI, Modality, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { CarDashGame } from './components/CarDashGame';
-import { FallingBlocksGame } from './components/FallingBlocksGame';
+import { WordPopGame } from './components/WordPopGame';
+import { MemoryMatchGame } from './components/MemoryMatchGame';
 import { QuestMap } from './components/QuestMap';
 
 // --- Helpers & Hooks ---
@@ -275,23 +276,39 @@ export default function App() {
                 setAssignedTasks(assignedTasks.filter((t: any) => t.id !== task.id));
               }
             }} />}
-            {(activeModal === 'Game: Spelling' || activeModal === 'Game: Logic') && (
-              <FallingBlocksGame 
+            {activeModal === 'Game: Spelling' && (
+              <WordPopGame 
                 onClose={() => setActiveModal(null)} 
                 addStars={addStars} 
                 showToast={showToast} 
                 playSound={playSound} 
                 advanceQuest={() => {
                   setQuestProgress(p => p + 1);
-                  const gameTitle = activeModal === 'Game: Spelling' ? 'Word Ninja' : 'Logic Blocks';
-                  const task = assignedTasks?.find((t: any) => t.title === gameTitle);
+                  const task = assignedTasks?.find((t: any) => t.title === 'Word Ninja');
                   if (task) {
                     addStars(task.reward);
                     showToast(`Quest Complete! +${task.reward} Stars!`);
                     setAssignedTasks(assignedTasks.filter((t: any) => t.id !== task.id));
                   }
                 }} 
-                gameData={activeModal === 'Game: Spelling' ? gameData['Spelling'] : gameData['Logic']} 
+                gameData={gameData['Spelling']} 
+              />
+            )}
+            {activeModal === 'Game: Logic' && (
+              <MemoryMatchGame 
+                onClose={() => setActiveModal(null)} 
+                addStars={addStars} 
+                showToast={showToast} 
+                playSound={playSound} 
+                advanceQuest={() => {
+                  setQuestProgress(p => p + 1);
+                  const task = assignedTasks?.find((t: any) => t.title === 'Logic Blocks');
+                  if (task) {
+                    addStars(task.reward);
+                    showToast(`Quest Complete! +${task.reward} Stars!`);
+                    setAssignedTasks(assignedTasks.filter((t: any) => t.id !== task.id));
+                  }
+                }} 
               />
             )}
             {activeModal.startsWith('Game:') && !activeModal.startsWith('Game: Math Dash') && activeModal !== 'Game: Spelling' && activeModal !== 'Game: Logic' && <InteractiveGame gameType={activeModal.split(': ')[1]} onClose={() => setActiveModal(null)} addStars={addStars} showToast={showToast} advanceQuest={() => {
@@ -578,13 +595,19 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
       />
 
       {/* Today's Chores (Preview) */}
-      {(assignedTasks || []).filter((t: any) => t.isChore).length > 0 && (
-        <div className="flex flex-col gap-3 md:gap-4 shrink-0">
-          <div className="flex justify-between items-center">
-            <h3 className="font-black text-xl md:text-2xl uppercase tracking-widest text-black">Today's Chores</h3>
-            <button onClick={() => setActiveTab('chores')} className="bg-white border-2 border-black px-3 py-1 rounded-full font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400">View All</button>
+      <div className="flex flex-col gap-3 md:gap-4 shrink-0">
+        <div className="flex justify-between items-center">
+          <h3 className="font-black text-xl md:text-2xl uppercase tracking-widest text-black">Today's Chores</h3>
+          <button onClick={() => setActiveTab('chores')} className="bg-white border-2 border-black px-3 py-1 rounded-full font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400">View All</button>
+        </div>
+        
+        {(!assignedTasks || assignedTasks.filter((t: any) => t.isChore).length === 0) ? (
+          <div className="bg-white border-4 border-dashed border-gray-300 rounded-3xl p-6 text-center mt-2">
+            <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-gray-300 mx-auto mb-2" />
+            <p className="font-black text-gray-400 text-base md:text-xl uppercase tracking-widest">No chores yet!</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mt-2">
             {(assignedTasks || []).filter((t: any) => t.isChore).slice(0, 2).map((chore: any) => (
               <div key={chore.id} className="bg-blue-100 border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between">
                 <span className="font-black text-lg truncate pr-2">{chore.title}</span>
@@ -600,8 +623,8 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Continue Playing */}
       <div className="flex flex-col gap-3 md:gap-4 shrink-0">
@@ -828,9 +851,11 @@ function ModalWrapper({ children, onClose, fullScreen }: any) {
         exit={{ scale: fullScreen ? 1 : 0.9, y: fullScreen ? 0 : 50 }}
         className={`w-full h-full relative flex flex-col ${fullScreen ? 'bg-purple-600' : 'bg-purple-600 max-w-4xl rounded-3xl md:rounded-[2rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden'}`}
       >
-        <button onClick={onClose} className="absolute top-3 right-3 md:top-6 md:right-6 z-50 p-2 md:p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full text-black transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <X className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
+        {!fullScreen && (
+          <button onClick={onClose} className="absolute top-3 right-3 md:top-6 md:right-6 z-50 p-2 md:p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full text-black transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <X className="w-6 h-6 md:w-8 md:h-8" />
+          </button>
+        )}
         <div className={`flex-1 overflow-y-auto flex flex-col ${fullScreen ? 'p-6 md:p-12' : 'p-4 md:p-10'}`}>
           {children}
         </div>
