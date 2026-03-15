@@ -11,6 +11,7 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
   const [answers, setAnswers] = useState<any[]>([]);
   const [blockY, setBlockY] = useState(0); // 0 to 100
   const [gameOver, setGameOver] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
   const currentQuestion = gameData.questions[questionIndex % gameData.questions.length];
 
@@ -55,6 +56,8 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
         generateQuestion();
       } else {
         playSound('wrong');
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
         setLives(l => {
           if (l <= 1) {
             setGameOver(true);
@@ -102,7 +105,11 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border-4 border-black">
+    <motion.div 
+      animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
+      transition={{ duration: 0.4 }}
+      className="w-full h-full flex flex-col bg-indigo-950 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+    >
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black/50 backdrop-blur-sm">
         <div className="flex gap-2">
@@ -125,22 +132,40 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
       </div>
 
       {/* Game Area */}
-      <div className="flex-1 relative flex mt-40">
+      <div className="flex-1 relative flex mt-40 border-t-4 border-black overflow-hidden bg-indigo-900">
+        {/* Animated Stars Background */}
+        <motion.div 
+          animate={{ y: [0, 800] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{ height: '200%', top: '-100%' }}
+        >
+          <div className="absolute top-[10%] left-[20%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+          <div className="absolute top-[30%] left-[70%] w-3 h-3 bg-white rounded-full shadow-[0_0_15px_white]"></div>
+          <div className="absolute top-[60%] left-[40%] w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+          <div className="absolute top-[80%] left-[80%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+          <div className="absolute top-[110%] left-[30%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+          <div className="absolute top-[140%] left-[60%] w-3 h-3 bg-white rounded-full shadow-[0_0_15px_white]"></div>
+          <div className="absolute top-[170%] left-[20%] w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+          <div className="absolute top-[190%] left-[80%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+        </motion.div>
+
         {/* Lanes */}
         {[0, 1, 2].map(i => (
-          <div key={i} className="flex-1 border-r-2 border-gray-700/50 relative" onClick={() => setLane(i)}>
+          <div key={i} className="flex-1 border-r-2 border-indigo-700/50 relative z-10" onClick={() => setLane(i)}>
             {/* Block */}
             <div 
               className="absolute w-full flex justify-center transition-all duration-75"
               style={{ top: `${blockY}%` }}
             >
               <motion.div 
-                animate={{ scale: [1, 1.05, 1], rotate: [0, -2, 2, 0] }}
+                animate={{ scale: [1, 1.1, 1], rotate: [0, -5, 5, 0] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative"
+                className="bg-gradient-to-br from-orange-400 to-red-600 border-4 border-black w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-[0_0_20px_#ef4444] relative overflow-hidden"
               >
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-12 bg-white/20 blur-md rounded-full"></div>
-                <span className="text-white font-black text-2xl md:text-3xl relative z-10" style={{ textShadow: '2px 2px 0px black' }}>{answers[i]}</span>
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-12 h-20 bg-yellow-400 blur-xl rounded-full opacity-60"></div>
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-black/30 rounded-full"></div>
+                <span className="text-white font-black text-3xl md:text-4xl relative z-10" style={{ textShadow: '2px 2px 0px black' }}>{answers[i]}</span>
               </motion.div>
             </div>
           </div>
@@ -177,6 +202,6 @@ export function FallingBlocksGame({ onClose, addStars, showToast, playSound, adv
           <ArrowRight className="w-10 h-10" />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

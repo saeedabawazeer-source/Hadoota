@@ -238,7 +238,7 @@ export default function App() {
             <NavButton icon={<Gamepad2 />} label="Games" active={activeTab === 'games'} onClick={() => setActiveTab('games')} />
           </div>
           
-          <div className="absolute left-1/2 -translate-x-1/2 -top-10 z-30">
+          <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-30">
             <motion.button 
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
@@ -576,6 +576,32 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
           }
         }} 
       />
+
+      {/* Today's Chores (Preview) */}
+      {(assignedTasks || []).filter((t: any) => t.isChore).length > 0 && (
+        <div className="flex flex-col gap-3 md:gap-4 shrink-0">
+          <div className="flex justify-between items-center">
+            <h3 className="font-black text-xl md:text-2xl uppercase tracking-widest text-black">Today's Chores</h3>
+            <button onClick={() => setActiveTab('chores')} className="bg-white border-2 border-black px-3 py-1 rounded-full font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400">View All</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            {(assignedTasks || []).filter((t: any) => t.isChore).slice(0, 2).map((chore: any) => (
+              <div key={chore.id} className="bg-blue-100 border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between">
+                <span className="font-black text-lg truncate pr-2">{chore.title}</span>
+                <button 
+                  onClick={() => {
+                     addStars(chore.reward);
+                     showToast(`Chore Complete! +${chore.reward} Stars!`);
+                  }}
+                  className="shrink-0 bg-lime-400 border-2 border-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-lime-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+                >
+                  <CheckCircle className="w-6 h-6 text-black" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Continue Playing */}
       <div className="flex flex-col gap-3 md:gap-4 shrink-0">

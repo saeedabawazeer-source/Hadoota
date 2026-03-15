@@ -11,6 +11,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
   const [answers, setAnswers] = useState([3, 4, 5]);
   const [blockY, setBlockY] = useState(0); // 0 to 100
   const [gameOver, setGameOver] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
   const generateQuestion = () => {
     const isAdd = Math.random() > 0.5;
@@ -62,6 +63,8 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
         generateQuestion();
       } else {
         playSound('wrong');
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
         setLives(l => {
           if (l <= 1) {
             setGameOver(true);
@@ -109,7 +112,11 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border-4 border-black">
+    <motion.div 
+      animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
+      transition={{ duration: 0.4 }}
+      className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+    >
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black/50 backdrop-blur-sm">
         <div className="flex gap-2">
@@ -129,23 +136,35 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
       </div>
 
       {/* Game Area */}
-      <div className="flex-1 relative flex">
+      <div className="flex-1 relative flex bg-gray-800 overflow-hidden">
+        {/* Moving Road Dashes */}
+        <motion.div 
+          animate={{ y: [0, 300] }}
+          transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+          className="absolute inset-0 flex pointer-events-none z-0"
+          style={{ height: '200%', top: '-100%' }}
+        >
+          <div className="flex-1 border-r-8 border-dashed border-white/20"></div>
+          <div className="flex-1 border-r-8 border-dashed border-white/20"></div>
+          <div className="flex-1"></div>
+        </motion.div>
+
         {/* Lanes */}
         {[0, 1, 2].map(i => (
-          <div key={i} className="flex-1 border-r-2 border-gray-700/50 relative" onClick={() => setLane(i)}>
+          <div key={i} className="flex-1 relative z-10" onClick={() => setLane(i)}>
             {/* Block */}
             <div 
               className="absolute w-full flex justify-center transition-all px-2 md:px-4"
               style={{ top: `${blockY}%` }}
             >
               <motion.div 
-                animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="bg-gradient-to-br from-gray-300 to-gray-500 border-4 border-black w-full aspect-square max-w-[100px] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 180, 270, 360] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                className="bg-fuchsia-600 border-4 border-fuchsia-300 w-full aspect-square max-w-[100px] rounded-full flex items-center justify-center shadow-[0_0_30px_#d946ef] relative overflow-hidden"
               >
-                <div className="absolute top-2 right-2 w-4 h-4 bg-gray-200 rounded-full opacity-50"></div>
-                <div className="absolute bottom-4 left-4 w-6 h-6 bg-gray-600 rounded-full opacity-30"></div>
-                <span className="text-black font-black text-3xl md:text-5xl relative z-10">{answers[i]}</span>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.4),_transparent)] rounded-full pt-1 pl-1"></div>
+                <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full opacity-60 filter blur-[1px]"></div>
+                <span className="text-white font-black text-4xl md:text-5xl relative z-10" style={{ textShadow: '3px 3px 0px black' }}>{answers[i]}</span>
               </motion.div>
             </div>
           </div>
@@ -197,6 +216,6 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
           RIGHT
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
