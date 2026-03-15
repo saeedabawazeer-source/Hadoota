@@ -135,27 +135,27 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden bg-orange-500 font-sans selection:bg-lime-400 flex flex-col md:flex-row p-4 md:p-6 gap-4 md:gap-6">
+    <div className="min-h-screen w-full bg-orange-500 font-sans selection:bg-lime-400 flex flex-col md:flex-row p-4 md:p-6 gap-4 md:gap-6 overflow-x-hidden">
       
       {/* Floating Desktop Sidebar */}
       {view === 'kid' && (
-        <nav className="hidden md:flex flex-col w-24 lg:w-32 bg-purple-600 border-4 border-black rounded-[2rem] items-center py-6 gap-6 z-40 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] shrink-0">
+        <nav className="sticky top-6 h-[calc(100vh-3rem)] hidden md:flex flex-col w-24 lg:w-32 bg-purple-600 border-4 border-black rounded-[2rem] items-center py-6 gap-6 z-40 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] shrink-0">
           <div className="bg-lime-400 p-3 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4">
             <Sparkles className="w-8 h-8 text-black" />
           </div>
           <div className="flex flex-col gap-4 flex-1 w-full px-3">
             <NavButton icon={<Home />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
             <NavButton icon={<Gamepad2 />} label="Games" active={activeTab === 'games'} onClick={() => setActiveTab('games')} />
-            <NavButton icon={<Store />} label="Store" active={activeTab === 'store'} onClick={() => setActiveTab('store')} />
+            <NavButton icon={<CheckCircle />} label="Chores" active={activeTab === 'chores'} onClick={() => setActiveTab('chores')} />
             <NavButton icon={<BookOpen />} label="Stories" active={activeTab === 'stories'} onClick={() => setActiveTab('stories')} />
             
             <motion.button 
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => { playSound('pop'); setActiveModal('Voice Assistant'); }}
-              className="bg-lime-400 border-4 border-black p-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-auto my-4"
+              onClick={() => { playSound('pop'); setActiveTab('store'); }}
+              className={`bg-lime-400 border-4 border-black p-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-auto my-4 transition-colors ${activeTab === 'store' ? 'ring-4 ring-white' : ''}`}
             >
-              <Mic className="w-8 h-8 text-black" />
+              <Store className="w-8 h-8 text-black" />
             </motion.button>
             
             <NavButton icon={<Settings />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
@@ -164,7 +164,7 @@ export default function App() {
       )}
 
       {/* Main Content Column */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 gap-4 md:gap-6 relative">
+      <div className="flex-1 flex flex-col min-w-0 gap-4 md:gap-6 relative">
         
         {/* Unified Floating Header (No background, no border) */}
         <header className="flex justify-between items-center shrink-0 z-20">
@@ -184,18 +184,17 @@ export default function App() {
           </button>
         </header>
 
-        {/* Main Viewport (Strictly contained, no scroll) */}
-        <main className="flex-1 min-h-0 relative z-10">
-          <div className="w-full h-full max-w-6xl mx-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={view + activeTab}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="w-full h-full"
-              >
+        {/* Main Viewport */}
+        <main className="flex-1 relative z-10 w-full max-w-6xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={view + activeTab}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="w-full"
+            >
                 {view === 'kid' ? (
                   <KidViews 
                     activeTab={activeTab} 
@@ -210,6 +209,7 @@ export default function App() {
                     setQuestProgress={setQuestProgress}
                     showToast={showToast}
                     assignedTasks={assignedTasks}
+                    addStars={addStars}
                   />
                 ) : (
                   <ParentDashboard 
@@ -221,24 +221,23 @@ export default function App() {
                 )}
               </motion.div>
             </AnimatePresence>
-          </div>
         </main>
       </div>
 
       {/* Floating Mobile Bottom Nav */}
       {view === 'kid' && (
-        <nav className="md:hidden h-20 bg-purple-600 border-4 border-black rounded-[2rem] px-2 flex justify-around items-center z-40 shrink-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <nav className="md:hidden fixed bottom-4 left-4 right-4 h-20 bg-purple-600 border-4 border-black rounded-[2rem] px-2 flex justify-around items-center z-40 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <NavButton icon={<Home />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
           <NavButton icon={<Gamepad2 />} label="Games" active={activeTab === 'games'} onClick={() => setActiveTab('games')} />
-          <NavButton icon={<Store />} label="Store" active={activeTab === 'store'} onClick={() => setActiveTab('store')} />
+          <NavButton icon={<CheckCircle />} label="Chores" active={activeTab === 'chores'} onClick={() => setActiveTab('chores')} />
           
           <motion.button 
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => { playSound('pop'); setActiveModal('Voice Assistant'); }}
-            className="bg-lime-400 border-4 border-black p-3 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -mt-10 relative z-30"
+            onClick={() => { playSound('pop'); setActiveTab('store'); }}
+            className={`bg-lime-400 border-4 border-black p-3 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -mt-10 relative z-30 transition-colors ${activeTab === 'store' ? 'ring-4 ring-white ring-offset-4 ring-offset-purple-600' : ''}`}
           >
-            <Mic className="w-8 h-8 text-black" />
+            <Store className="w-8 h-8 text-black" />
           </motion.button>
           
           <NavButton icon={<BookOpen />} label="Stories" active={activeTab === 'stories'} onClick={() => setActiveTab('stories')} />
@@ -332,11 +331,11 @@ function NavButton({ icon, label, active, onClick }: any) {
 }
 
 // --- Kid Views (Strictly contained within h-full) ---
-function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks }: any) {
+function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars }: any) {
   
   if (activeTab === 'store') {
     return (
-      <div className="w-full h-full flex flex-col gap-4 md:gap-6">
+      <div className="w-full flex flex-col gap-4 md:gap-6 pb-28 md:pb-0">
         <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex justify-between items-center">
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">REWARD STORE</h2>
           <div className="bg-lime-400 border-4 border-black px-4 py-2 rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
@@ -344,7 +343,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
             <span className="font-black text-xl md:text-3xl">{stars}</span>
           </div>
         </div>
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 min-h-0 overflow-y-auto pb-24 md:pb-0 pr-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {rewards.map((reward: any) => (
             <div key={reward.id} className="bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-center gap-4">
               <div className="w-24 h-24 bg-purple-100 rounded-full border-4 border-black flex items-center justify-center">
@@ -384,21 +383,64 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
     );
   }
 
+  if (activeTab === 'chores') {
+    return (
+      <div className="w-full flex flex-col gap-4 md:gap-6 pb-28 md:pb-0">
+        <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex justify-between items-center">
+          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">MY CHORES</h2>
+          <div className="bg-lime-400 border-4 border-black p-2 md:p-3 rounded-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-black" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          {assignedTasks?.filter((t: any) => t.isChore).map((chore: any) => (
+             <div key={chore.id} className="bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-center gap-4">
+               <div className="w-20 h-20 bg-blue-100 rounded-full border-4 border-black flex items-center justify-center">
+                 <Target className="w-10 h-10 text-blue-500" />
+               </div>
+               <h3 className="font-black text-2xl uppercase tracking-tighter">{chore.title}</h3>
+               <div className="flex-1"></div>
+               <button 
+                 onClick={() => {
+                   // Optimistic completion for now, real app would wait for parent approval
+                   addStars(chore.reward);
+                   showToast(`Chore Complete! +${chore.reward} Stars!`);
+                   // Note: Here we'd ideally mark as pending parent approval
+                 }}
+                 className="w-full py-4 rounded-2xl border-4 border-black font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 bg-lime-400 hover:bg-lime-500 transition-transform active:translate-y-1 active:shadow-none text-black"
+               >
+                 <Check className="w-6 h-6" /> I Did It! (+{chore.reward})
+               </button>
+             </div>
+          ))}
+          {(!assignedTasks || assignedTasks.filter((t: any) => t.isChore).length === 0) && (
+            <div className="col-span-full flex flex-col items-center justify-center text-gray-500 py-12">
+              <CheckCircle className="w-24 h-24 mb-4 opacity-50 text-lime-600" />
+              <p className="font-black text-2xl uppercase text-black">All Done!</p>
+              <p className="font-bold text-lg text-black">No chores assigned right now.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (activeTab === 'games') {
     return (
-      <div className="w-full h-full flex flex-col gap-4 md:gap-6">
+      <div className="w-full flex flex-col gap-4 md:gap-6 pb-28 md:pb-0">
         <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">GAMES</h2>
         </div>
         
-        {assignedTasks && assignedTasks.length > 0 && (
+        {assignedTasks && assignedTasks.filter((t: any) => !t.isChore).length > 0 && (
           <div className="shrink-0 bg-yellow-300 border-4 border-black p-4 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <h3 className="font-black text-xl md:text-2xl uppercase mb-4 flex items-center gap-2">
               <Target className="w-6 h-6 text-red-500" />
               Assigned Quests
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {assignedTasks.map((task: any) => (
+              {assignedTasks.filter((t: any) => !t.isChore).map((task: any) => (
                 <button 
                   key={task.id}
                   onClick={() => setActiveModal(`Game: ${task.title}`)}
@@ -414,7 +456,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
           </div>
         )}
 
-        <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 min-h-0 overflow-y-auto pb-24 md:pb-0 pr-2">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-28 md:pb-0">
           <ActionCard color="bg-purple-500" title="Math Dash" icon={<Car />} onClick={() => setActiveModal('Game: Math Dash')} textColor="text-white" />
           <ActionCard color="bg-lime-400" title="Word Jump" icon={<Rocket />} onClick={() => setActiveModal('Game: Spelling')} textColor="text-black" />
           <ActionCard color="bg-white" title="Logic Blocks" icon={<Gamepad2 />} onClick={() => setActiveModal('Game: Logic')} textColor="text-black" />
@@ -426,15 +468,30 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
 
   if (activeTab === 'stories') {
     return (
-      <div className="w-full h-full flex flex-col gap-4 md:gap-6">
+      <div className="w-full flex flex-col gap-4 md:gap-6 pb-28 md:pb-0">
         <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">STORIES</h2>
         </div>
-        <div className="flex-1 grid grid-cols-2 gap-4 md:gap-6 min-h-0">
+        <div className="grid grid-cols-2 gap-4 md:gap-6">
           <ActionCard color="bg-lime-400" title="Magic Maker" icon={<Wand2 />} onClick={() => setActiveModal('Story: Magic')} textColor="text-black" />
           <StoryCard title="Jungle Quest" image="jungle explorer" onClick={() => setActiveModal('Story: Jungle Explorer')} />
           <StoryCard title="Space Dino" image="dinosaur in space" onClick={() => setActiveModal('Story: Space Dinosaur')} />
           <StoryCard title="Ocean Explorer" image="submarine ocean" onClick={() => setActiveModal('Story: Ocean Explorer')} />
+        </div>
+        
+        <div className="mt-8 bg-blue-100 border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between">
+          <div>
+            <h3 className="font-black text-2xl uppercase mb-2">Need a story buddy?</h3>
+            <p className="font-bold">Talk to the friendly book wizard!</p>
+          </div>
+          <motion.button 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { playSound('pop'); setActiveModal('Voice Assistant'); }}
+            className="bg-lime-400 border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+          >
+            <Mic className="w-10 h-10 text-black" />
+          </motion.button>
         </div>
       </div>
     );
@@ -442,16 +499,16 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
 
   if (activeTab === 'settings') {
     return (
-      <div className="w-full h-full flex flex-col gap-4 md:gap-6 max-w-3xl mx-auto">
+      <div className="w-full flex flex-col gap-4 md:gap-6 max-w-3xl mx-auto pb-28 md:pb-0">
         <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">SETTINGS</h2>
         </div>
-        <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
-          <button onClick={() => setActiveModal('Settings')} className="flex-1 bg-purple-500 border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between text-white hover:bg-purple-600 transition-colors">
+        <div className="flex flex-col gap-4 md:gap-6">
+          <button onClick={() => setActiveModal('Settings')} className="h-40 bg-purple-500 border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between text-white hover:bg-purple-600 transition-colors">
             <span className="font-black uppercase text-2xl md:text-4xl" style={{ textShadow: '2px 2px 0px black' }}>Change Avatar</span>
             <User className="w-12 h-12 md:w-16 md:h-16" />
           </button>
-          <button className="flex-1 bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between text-black hover:bg-gray-100 transition-colors">
+          <button className="h-40 bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between text-black hover:bg-gray-100 transition-colors">
             <span className="font-black uppercase text-2xl md:text-4xl">Sound Options</span>
             <Volume2 className="w-12 h-12 md:w-16 md:h-16" />
           </button>
@@ -462,7 +519,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
 
   // HOME SCREEN
   return (
-    <div className="w-full h-full flex flex-col gap-4 md:gap-6 overflow-y-auto pb-24 md:pb-0 pr-2">
+    <div className="w-full flex flex-col gap-4 md:gap-6 pb-28 md:pb-0">
       {/* Hero Profile */}
       <div className="shrink-0 flex items-center justify-between bg-white border-4 border-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         <div className="absolute -right-10 -top-10 w-40 h-40 bg-lime-400 rounded-full opacity-20 blur-2xl"></div>
@@ -542,9 +599,9 @@ function StoryCard({ title, image, onClick }: any) {
     <motion.div 
       whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }}
       onClick={() => { playSound('pop'); onClick(); }}
-      className="bg-white border-4 border-black rounded-2xl md:rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] cursor-pointer group flex flex-col h-full"
+      className="bg-white border-4 border-black rounded-2xl md:rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] cursor-pointer group flex flex-col"
     >
-      <div className="flex-1 bg-black overflow-hidden relative border-b-4 border-black min-h-0">
+      <div className="aspect-video bg-black overflow-hidden relative border-b-4 border-black">
         <img src={`https://image.pollinations.ai/prompt/cute%20cartoon%20${encodeURIComponent(image)}%203d%20pixar?width=600&height=400&nologo=true`} alt={title} className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500" />
         <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-lime-400" />
@@ -575,7 +632,7 @@ function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks 
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 md:gap-6">
+    <div className="w-full flex flex-col gap-4 md:gap-6 pb-8">
       <div className="shrink-0 bg-white border-4 border-black p-4 md:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-2xl md:rounded-3xl">
         <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-black uppercase text-center">PARENT HUB</h2>
       </div>
@@ -591,8 +648,8 @@ function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks 
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 min-h-0">
-        <div className="bg-white border-4 border-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col min-h-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="bg-white border-4 border-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
           <h3 className="font-black text-xl md:text-3xl uppercase border-b-4 border-black pb-3 md:pb-4 mb-4 md:mb-6 shrink-0">Manage Rewards</h3>
           
           <div className="flex gap-2 mb-4 shrink-0">
@@ -618,7 +675,7 @@ function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks 
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+          <div className="space-y-2">
             {rewards.map((reward: any) => (
               <div key={reward.id} className="flex justify-between items-center bg-gray-100 border-4 border-black p-4 rounded-xl">
                 <div className="flex items-center gap-4">
@@ -644,41 +701,64 @@ function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks 
           </div>
         </div>
 
-        <div className="bg-white border-4 border-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col min-h-0">
-          <h3 className="font-black text-xl md:text-3xl uppercase border-b-4 border-black pb-3 md:pb-4 mb-4 md:mb-6 shrink-0">Assign Tasks</h3>
+        <div className="bg-white border-4 border-black p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
+          <h3 className="font-black text-xl md:text-3xl uppercase border-b-4 border-black pb-3 md:pb-4 mb-4 md:mb-6 shrink-0">Assign Tasks & Chores</h3>
           
           <div className="flex flex-col gap-4 mb-4 shrink-0">
-            <button 
-              onClick={() => {
-                if (!assignedTasks?.find((t: any) => t.id === 'math-dash')) {
-                  setAssignedTasks([...(assignedTasks || []), { id: 'math-dash', title: 'Math Dash', type: 'Math', reward: 100 }]);
-                }
-              }}
-              className="bg-blue-400 border-4 border-black p-4 rounded-xl font-black text-xl uppercase hover:bg-blue-500 transition-colors text-white flex justify-between items-center"
-            >
-              <span>Assign Math Dash</span>
-              <span className="bg-white text-blue-500 px-3 py-1 rounded-full text-sm">+100 Stars</span>
-            </button>
-            <button 
-              onClick={() => {
-                if (!assignedTasks?.find((t: any) => t.id === 'subtraction-safari')) {
-                  setAssignedTasks([...(assignedTasks || []), { id: 'subtraction-safari', title: 'Subtraction Safari', type: 'Subtraction Safari', reward: 120 }]);
-                }
-              }}
-              className="bg-orange-400 border-4 border-black p-4 rounded-xl font-black text-xl uppercase hover:bg-orange-500 transition-colors text-white flex justify-between items-center"
-            >
-              <span>Assign Subtraction Safari</span>
-              <span className="bg-white text-orange-500 px-3 py-1 rounded-full text-sm">+120 Stars</span>
-            </button>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Custom Task/Chore" 
+                className="flex-1 border-4 border-black p-2 md:p-4 rounded-xl font-bold text-lg min-w-0"
+                id="custom-task-title"
+              />
+              <input 
+                type="number" 
+                placeholder="Pts" 
+                className="w-20 md:w-24 border-4 border-black p-2 md:p-4 rounded-xl font-bold text-lg"
+                id="custom-task-pts"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  const titleInput = document.getElementById('custom-task-title') as HTMLInputElement;
+                  const ptsInput = document.getElementById('custom-task-pts') as HTMLInputElement;
+                  if (titleInput?.value && ptsInput?.value) {
+                    setAssignedTasks([...(assignedTasks || []), { id: Date.now().toString(), title: titleInput.value, type: 'Custom', reward: parseInt(ptsInput.value), isChore: false }]);
+                    titleInput.value = '';
+                    ptsInput.value = '';
+                  }
+                }}
+                className="flex-1 bg-yellow-400 border-4 border-black p-3 md:p-4 rounded-xl font-black text-lg md:text-xl uppercase hover:bg-yellow-500 transition-colors text-black flex justify-center items-center gap-2"
+              >
+                + Game Quest
+              </button>
+              <button 
+                onClick={() => {
+                  const titleInput = document.getElementById('custom-task-title') as HTMLInputElement;
+                  const ptsInput = document.getElementById('custom-task-pts') as HTMLInputElement;
+                  if (titleInput?.value && ptsInput?.value) {
+                    setAssignedTasks([...(assignedTasks || []), { id: Date.now().toString(), title: titleInput.value, type: 'Custom', reward: parseInt(ptsInput.value), isChore: true }]);
+                    titleInput.value = '';
+                    ptsInput.value = '';
+                  }
+                }}
+                className="flex-1 bg-blue-400 border-4 border-black p-3 md:p-4 rounded-xl font-black text-lg md:text-xl uppercase hover:bg-blue-500 transition-colors text-white flex justify-center items-center gap-2"
+              >
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                + Real Chore
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+          <div className="space-y-2">
             <h4 className="font-bold text-gray-500 uppercase tracking-wider mb-2">Currently Assigned</h4>
             {(assignedTasks || []).map((task: any) => (
               <div key={task.id} className="flex justify-between items-center bg-gray-100 border-4 border-black p-4 rounded-xl">
                 <div className="flex items-center gap-4">
-                  <Target className="w-6 h-6 text-red-500 shrink-0" />
-                  <span className="font-bold text-xl truncate">{task.title}</span>
+                  {task.isChore ? <CheckCircle className="w-6 h-6 text-blue-500 shrink-0" /> : <Target className="w-6 h-6 text-red-500 shrink-0" />}
+                  <span className="font-bold text-xl truncate">{task.title} <span className="text-sm text-gray-500">({task.reward} pts)</span></span>
                 </div>
                 <button 
                   onClick={() => setAssignedTasks((assignedTasks || []).filter((t: any) => t.id !== task.id))}

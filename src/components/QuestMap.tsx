@@ -14,8 +14,9 @@ export function QuestMap({ progress, onNodeClick }: any) {
   return (
     <div className="bg-white border-4 border-black p-6 md:p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
       <h3 className="font-black text-2xl md:text-4xl uppercase tracking-tighter text-black mb-10">Adventure Path</h3>
-      <div className="relative flex items-center justify-between px-2 md:px-8 py-4">
-        {/* Path Line */}
+      <div className="overflow-x-auto pb-6 -mx-4 px-4 md:px-0 md:mx-0 md:overflow-visible custom-scrollbar">
+        <div className="relative flex items-center justify-between px-2 md:px-8 py-4 min-w-[450px] md:min-w-full">
+          {/* Path Line */}
         <div className="absolute left-0 right-0 h-4 md:h-6 bg-gray-200 top-1/2 -translate-y-1/2 z-0 rounded-full border-y-4 border-black"></div>
         <div 
           className="absolute left-0 h-4 md:h-6 bg-lime-400 top-1/2 -translate-y-1/2 z-0 rounded-full border-y-4 border-black transition-all duration-1000"
@@ -31,7 +32,7 @@ export function QuestMap({ progress, onNodeClick }: any) {
               whileHover={isUnlocked ? { scale: 1.1, y: -5 } : {}}
               whileTap={isUnlocked ? { scale: 0.9 } : {}}
               onClick={() => isUnlocked && onNodeClick(node)}
-              className={`relative z-10 w-14 h-14 md:w-24 md:h-24 rounded-full border-4 border-black flex items-center justify-center cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors
+              className={`relative z-10 w-14 h-14 md:w-24 md:h-24 rounded-full border-4 border-black flex items-center justify-center cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors shrink-0
                 ${isUnlocked ? node.color : 'bg-gray-300'}
                 ${isCurrent ? 'ring-4 ring-lime-400 ring-offset-4' : ''}
               `}
@@ -52,6 +53,7 @@ export function QuestMap({ progress, onNodeClick }: any) {
             </motion.div>
           );
         })}
+      </div>
       </div>
     </div>
   );
