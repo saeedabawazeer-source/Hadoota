@@ -34,7 +34,7 @@ export default function App() {
   const [parentPin, setParentPin] = useStickyState('1234', 'h_pin');
 
   // App state
-  const [view, setView] = useStickyState<'landing' | 'onboarding' | 'kid' | 'parent'>('landing', 'h_view');
+  const [view, setView] = useState<'landing' | 'onboarding' | 'kid' | 'parent'>('landing');
   const [stars, setStars] = useStickyState(0, 'h_stars');
   const [rewards, setRewards] = useStickyState<Reward[]>(DEFAULT_REWARDS, 'h_rewards');
   const [assignedTasks, setAssignedTasks] = useStickyState<Task[]>([], 'h_tasks');
@@ -65,15 +65,14 @@ export default function App() {
     setGameStats((s: GameStats) => ({ ...s, gamesPlayed: s.gamesPlayed + 1 }));
   };
 
-  // Handle initial view based on setup state
+  // Handle initial view if needed
   useEffect(() => {
-    if (setupDone && view === 'landing') setView('kid');
     if (setupDone && view === 'onboarding') setView('kid');
   }, [setupDone]);
 
   // Landing Page
-  if (!setupDone && view === 'landing') {
-    return <LandingPage onTryApp={() => setView('onboarding')} />;
+  if (view === 'landing') {
+    return <LandingPage setupDone={setupDone} onTryApp={() => setView(setupDone ? 'kid' : 'onboarding')} />;
   }
 
   // Onboarding

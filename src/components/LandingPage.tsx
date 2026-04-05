@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, ArrowRight, Download, Smartphone, CheckCircle } from 'lucide-react';
 
-export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
+export function LandingPage({ onTryApp, setupDone }: { onTryApp: () => void, setupDone?: boolean }) {
   return (
     <div className="h-[100dvh] w-full bg-orange-500 font-sans overflow-y-auto overflow-x-hidden selection:bg-lime-400 custom-scrollbar relative">
 
@@ -17,8 +17,8 @@ export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
           </div>
           <div className="flex items-center gap-3">
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onTryApp}
-              className="bg-lime-400 border-2 border-black text-black px-4 py-2 rounded-full font-black text-sm uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors hidden sm:flex items-center gap-1.5">
-              Try Web Demo <ArrowRight className="w-4 h-4" />
+              className="bg-lime-400 border-2 border-black text-black px-4 py-2 rounded-full font-black text-sm uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors hidden sm:flex items-center gap-1.5 cursor-pointer">
+              {setupDone ? 'Early Access Login' : 'Try Web Demo'} <ArrowRight className="w-4 h-4" />
             </motion.button>
             <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
               className="bg-black text-white px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 hover:bg-gray-800 transition-colors border-2 border-black">
@@ -86,8 +86,8 @@ export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
         {/* Web demo link */}
         <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
           whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onTryApp}
-          className="relative z-10 mt-6 text-white/70 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-2">
-          <Smartphone className="w-4 h-4" /> Or try the free web demo →
+          className="relative z-10 mt-6 text-white/70 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-2 cursor-pointer">
+          <Smartphone className="w-4 h-4" /> {setupDone ? 'Or play right now →' : 'Or try the free web demo →'}
         </motion.button>
       </header>
 
@@ -264,8 +264,8 @@ export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
             </a>
           </div>
           <button onClick={onTryApp}
-            className="mt-6 text-gray-500 hover:text-gray-700 font-bold text-sm uppercase tracking-widest underline underline-offset-4 transition-colors">
-            Or try the free web demo
+            className="mt-6 text-gray-500 hover:text-gray-700 font-bold text-sm uppercase tracking-widest underline underline-offset-4 transition-colors cursor-pointer">
+            {setupDone ? 'Or play right now' : 'Or try the free web demo'}
           </button>
         </div>
       </section>
