@@ -163,47 +163,86 @@ export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="px-6 py-16 md:py-24 max-w-5xl mx-auto">
-        <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-          className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center mb-12 md:mb-16"
-          style={{ textShadow: '3px 3px 0px black' }}>How It Works</motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-          {[
-            { s: 1, t: 'Download', d: 'Get Hadoota from the App Store or Google Play. Set up your child\'s profile in 30 seconds.' },
-            { s: 2, t: 'Play & Learn', d: 'Kids explore 8+ games across Math, Science, Language & more. They earn stars as they learn.' },
-            { s: 3, t: 'Track & Reward', d: 'Parents monitor real progress, assign chores, and set tangible rewards for earned stars.' },
-          ].map(step => (
-            <motion.div key={step.s} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              transition={{ delay: step.s * 0.15 }} className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-black text-lime-400 rounded-full border-4 border-lime-400 flex items-center justify-center font-black text-3xl md:text-4xl shadow-[4px_4px_0px_0px_rgba(163,230,53,1)]">{step.s}</div>
-              <h3 className="font-black text-2xl md:text-3xl text-white uppercase" style={{ textShadow: '2px 2px 0px black' }}>{step.t}</h3>
-              <p className="font-bold text-black/70 text-sm md:text-base max-w-xs">{step.d}</p>
-            </motion.div>
-          ))}
+      {/* Parent Features Highlight */}
+      <section className="px-6 py-16 md:py-24 bg-purple-600 border-y-4 md:border-y-[6px] border-black">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
+          <div className="flex-1 text-white">
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6" style={{ textShadow: '3px 3px 0px black' }}>Real Reports. Real Rewards.</h2>
+            <p className="text-xl md:text-2xl font-bold text-white/90 mb-8 leading-relaxed">
+              Stop guessing if your child is actually learning. The Parent Dashboard gives you total control and visibility.
+            </p>
+            <ul className="flex flex-col gap-5">
+              {[
+                { i: '📊', b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
+                { i: '🎁', b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
+                { i: '🧹', b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
+                { i: '🔒', b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-4 bg-black/20 p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="text-3xl">{item.i}</span>
+                  <div>
+                    <span className="font-black text-lg block uppercase">{item.b}</span>
+                    <span className="font-bold text-white/80">{item.t}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex-1 w-full max-w-sm relative">
+            <div className="absolute inset-0 bg-lime-400 rounded-[3rem] rotate-6 border-4 border-black" />
+            <div className="bg-white border-4 border-black p-6 rounded-[2.5rem] relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4">
+              <div className="text-center pb-4 border-b-4 border-black">
+                <h3 className="font-black text-2xl uppercase text-black">Parent Area</h3>
+              </div>
+              <div className="bg-blue-100 border-2 border-black p-3 rounded-xl">
+                <span className="font-black uppercase text-xs">Math Accuracy</span>
+                <div className="h-4 bg-white border-2 border-black rounded-full mt-1 overflow-hidden"><div className="w-[85%] h-full bg-blue-500" /></div>
+              </div>
+              <div className="bg-purple-100 border-2 border-black p-3 rounded-xl">
+                <span className="font-black uppercase text-xs">Pending Chores</span>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="font-bold text-sm">Clean Room</span>
+                  <button className="bg-lime-400 border-2 border-black px-2 py-1 rounded text-xs font-black uppercase">Approve</button>
+                </div>
+              </div>
+              <div className="bg-amber-100 border-2 border-black p-3 rounded-xl">
+                <span className="font-black uppercase text-xs">Manage Store</span>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="font-bold text-sm">Ice Cream Trip</span>
+                  <span className="bg-white border-2 border-black px-2 py-1 rounded text-xs font-black">1500 ⭐</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="px-6 py-16 md:py-20 max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter text-center mb-10"
-          style={{ textShadow: '3px 3px 0px black' }}>Parents Love It</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { q: '"My 6-year-old asks to play Hadoota instead of watching TV. Never thought that would happen!"', n: 'Sarah M.', r: '⭐⭐⭐⭐⭐' },
-            { q: '"The chore system is genius. My kids actually WANT to clean their room now for stars."', n: 'Ahmed K.', r: '⭐⭐⭐⭐⭐' },
-            { q: '"The AI stories are incredible. My daughter generates a new bedtime story every night."', n: 'Layla R.', r: '⭐⭐⭐⭐⭐' },
-          ].map((t, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white border-4 border-black p-6 md:p-8 rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-              <p className="text-lg md:text-xl font-bold text-gray-700 mb-4 italic leading-relaxed">{t.q}</p>
-              <div className="flex justify-between items-center">
-                <span className="font-black text-black uppercase tracking-wider text-sm">— {t.n}</span>
-                <span className="text-lg">{t.r}</span>
-              </div>
-            </motion.div>
-          ))}
+      {/* Why We Are Better */}
+      <section className="px-6 py-16 md:py-24 max-w-5xl mx-auto">
+        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center mb-12 md:mb-16"
+          style={{ textShadow: '3px 3px 0px black' }}>Why Hadoota Is Better</h2>
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+          <div className="flex-1 bg-white/50 border-4 border-dashed border-gray-400 p-8 rounded-3xl opacity-70">
+            <div className="flex items-center justify-center w-16 h-16 bg-gray-200 border-4 border-gray-400 rounded-2xl mb-6 mx-auto"><span className="text-3xl">🥱</span></div>
+            <h3 className="font-black text-2xl uppercase text-center mb-6 text-gray-500">Other Apps</h3>
+            <ul className="flex flex-col gap-4 font-bold text-gray-600">
+              <li className="flex gap-2"><span>❌</span> Boring multiple choice tests disguise as "games"</li>
+              <li className="flex gap-2"><span>❌</span> Virtual coins that buy useless virtual stickers</li>
+              <li className="flex gap-2"><span>❌</span> Generic repetitive questions</li>
+              <li className="flex gap-2"><span>❌</span> Parents have no idea what the kid is learning</li>
+            </ul>
+          </div>
+          <div className="flex-1 bg-lime-400 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] scale-100 md:scale-110 z-10">
+            <div className="flex items-center justify-center w-16 h-16 bg-white border-4 border-black rounded-2xl mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-auto"><Sparkles className="w-8 h-8 text-orange-500" /></div>
+            <h3 className="font-black text-3xl uppercase text-center mb-6 text-black" style={{ textShadow: '1px 1px 0px white' }}>Hadoota</h3>
+            <ul className="flex flex-col gap-4 font-black">
+              <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> Fast-paced arcade/puzzle gameplay kids love</li>
+              <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> Stars buy REAL life rewards (Screen time, toys)</li>
+              <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> AI-generated, perfectly personalized bedtime stories</li>
+              <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> Deep parent metrics on accuracy & win-rates</li>
+              <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> Integrated real-world Chore approval system</li>
+            </ul>
+          </div>
         </div>
       </section>
 
