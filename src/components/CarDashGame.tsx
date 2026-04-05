@@ -95,7 +95,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-purple-600 p-6 rounded-3xl">
         <Trophy className="w-32 h-32 text-yellow-400 mb-6" />
-        <h2 className="text-5xl font-black text-white uppercase mb-4">Game Over!</h2>
+        <h2 className="text-5xl font-bold text-white uppercase mb-4">Game Over!</h2>
         <p className="text-3xl font-bold text-white mb-8">Score: {score}</p>
         <p className="text-2xl font-bold text-lime-400 mb-8">+{score * 10} Stars!</p>
         <button 
@@ -103,7 +103,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
             advanceQuest();
             onClose();
           }}
-          className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-full font-black text-2xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-500"
+          className="bg-lime-400 border border-slate-200 text-slate-800 px-8 py-4 rounded-full font-bold text-2xl uppercase shadow-xl shadow-slate-200/50 hover:bg-lime-500"
         >
           Back to Games
         </button>
@@ -115,24 +115,24 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
     <motion.div 
       animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
       transition={{ duration: 0.4 }}
-      className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+      className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border border-slate-200 shadow-xl shadow-slate-200/50"
     >
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black/50 backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-slate-800/50 backdrop-blur-sm">
         <div className="flex gap-2">
           {[...Array(3)].map((_, i) => (
             <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-600'}`} />
           ))}
         </div>
-        <div className="text-white font-black text-3xl">{score}</div>
-        <button onClick={onClose} className="bg-white rounded-full p-2 border-2 border-black">
-          <X className="w-6 h-6 text-black" />
+        <div className="text-white font-bold text-3xl">{score}</div>
+        <button onClick={onClose} className="bg-white rounded-full p-2 border border-slate-200">
+          <X className="w-6 h-6 text-slate-800" />
         </button>
       </div>
 
       {/* Question */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-white border-4 border-black px-8 py-4 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h2 className="text-4xl font-black text-black">{question.num1} {question.op} {question.num2} = ?</h2>
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-white border border-slate-200 px-8 py-4 rounded-full shadow-xl shadow-slate-200/50">
+        <h2 className="text-4xl font-bold text-slate-800">{question.num1} {question.op} {question.num2} = ?</h2>
       </div>
 
       {/* Game Area */}
@@ -164,7 +164,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.4),_transparent)] rounded-full pt-1 pl-1"></div>
                 <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full opacity-60 filter blur-[1px]"></div>
-                <span className="text-white font-black text-4xl md:text-5xl relative z-10" style={{ textShadow: '3px 3px 0px black' }}>{answers[i]}</span>
+                <span className="text-white font-bold text-4xl md:text-5xl relative z-10" >{answers[i]}</span>
               </motion.div>
             </div>
           </div>
@@ -178,15 +178,15 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
           <motion.div 
             animate={{ y: [0, -3, 0], rotate: [0, -1, 1, 0] }}
             transition={{ repeat: Infinity, duration: 0.5 }}
-            className="bg-gradient-to-t from-red-600 to-red-400 border-4 border-black w-20 h-28 md:w-24 md:h-32 rounded-3xl flex flex-col items-center justify-start pt-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-10"
+            className="bg-gradient-to-t from-red-600 to-red-400 border border-slate-200 w-20 h-28 md:w-24 md:h-32 rounded-3xl flex flex-col items-center justify-start pt-4 shadow-xl shadow-slate-200/50 relative z-10"
           >
-            <div className="w-12 h-6 bg-blue-300/80 rounded-t-lg border-2 border-black mb-1"></div>
-            <div className="w-12 h-8 bg-blue-300/80 rounded-b-lg border-2 border-black"></div>
+            <div className="w-12 h-6 bg-blue-300/80 rounded-t-lg border border-slate-200 mb-1"></div>
+            <div className="w-12 h-8 bg-blue-300/80 rounded-b-lg border border-slate-200"></div>
             
-            <div className="absolute -bottom-2 left-0 w-6 h-10 bg-black rounded-lg transform -skew-x-12"></div>
-            <div className="absolute -bottom-2 right-0 w-6 h-10 bg-black rounded-lg transform skew-x-12"></div>
-            <div className="absolute -top-2 left-1 w-5 h-8 bg-black rounded-lg"></div>
-            <div className="absolute -top-2 right-1 w-5 h-8 bg-black rounded-lg"></div>
+            <div className="absolute -bottom-2 left-0 w-6 h-10 bg-slate-800 rounded-lg transform -skew-x-12"></div>
+            <div className="absolute -bottom-2 right-0 w-6 h-10 bg-slate-800 rounded-lg transform skew-x-12"></div>
+            <div className="absolute -top-2 left-1 w-5 h-8 bg-slate-800 rounded-lg"></div>
+            <div className="absolute -top-2 right-1 w-5 h-8 bg-slate-800 rounded-lg"></div>
             
             {/* Headlights */}
             <div className="absolute top-2 left-2 w-3 h-3 bg-yellow-300 rounded-full border-2 border-orange-500 shadow-[0_0_10px_#fde047]"></div>
@@ -205,13 +205,13 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
       <div className="h-32 bg-gray-800 border-t-4 border-black flex items-center justify-center gap-8 p-4 z-20">
         <button 
           onClick={moveLeft}
-          className="flex-1 h-full bg-white border-4 border-black rounded-2xl font-black text-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+          className="flex-1 h-full bg-white border border-slate-200 rounded-2xl font-bold text-3xl shadow-xl shadow-slate-200/50 active:translate-y-1 active:shadow-none"
         >
           LEFT
         </button>
         <button 
           onClick={moveRight}
-          className="flex-1 h-full bg-white border-4 border-black rounded-2xl font-black text-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+          className="flex-1 h-full bg-white border border-slate-200 rounded-2xl font-bold text-3xl shadow-xl shadow-slate-200/50 active:translate-y-1 active:shadow-none"
         >
           RIGHT
         </button>

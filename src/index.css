@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --orange-primary: #f97316;
+  --orange-primary: #f8fafc; /* Changed to slate-50 for softer backgrounds where variables are used */
   --lime-accent: #a3e635;
-  --purple-deep: #9333ea;
-  --black: #000000;
+  --purple-deep: #a855f7;
+  --black: #1e293b; /* Softer slate-800 instead of pure black */
   --white: #ffffff;
 }
 

@@ -7,19 +7,19 @@ export function QuestMap({ progress, onNodeClick }: any) {
   const pct = Math.min((progress / 10) * 100, 100);
 
   return (
-    <div className="bg-white border-4 border-black px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shrink-0 w-full">
+    <div className="bg-white border border-slate-200 px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-xl shadow-slate-200/50 shrink-0 w-full">
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-purple-600" />
-          <span className="font-black text-sm md:text-base uppercase tracking-widest text-black">Level {level}</span>
+          <span className="font-bold text-sm md:text-base uppercase tracking-widest text-slate-800">Level {level}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-          <span className="font-black text-sm text-gray-500 uppercase tracking-widest">{progress} Completed</span>
+          <span className="font-bold text-sm text-gray-500 uppercase tracking-widest">{progress} Completed</span>
         </div>
       </div>
       {/* Progress bar */}
-      <div className="w-full h-5 bg-gray-200 rounded-full border-2 border-black overflow-hidden relative">
+      <div className="w-full h-5 bg-gray-200 rounded-full border border-slate-200 overflow-hidden relative">
         <motion.div 
           className="h-full bg-gradient-to-r from-lime-400 to-green-500 rounded-full" 
           initial={{ width: 0 }}

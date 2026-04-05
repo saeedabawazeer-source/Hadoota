@@ -118,12 +118,12 @@ export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClos
       {pages.length === 0 && !loadingState && (
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-6 md:gap-8 max-w-xl mx-auto w-full">
           <Wand2 className="w-20 h-20 md:w-28 md:h-28 text-lime-400 mx-auto shrink-0" />
-          <h2 className="text-4xl md:text-6xl font-black text-white uppercase shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Magic Story</h2>
+          <h2 className="text-4xl md:text-6xl font-bold text-white uppercase shrink-0" >Magic Story</h2>
           <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="What is it about?"
-            className="w-full bg-white border-4 border-black p-4 md:p-6 rounded-2xl md:rounded-3xl text-xl md:text-3xl font-black text-black text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 shrink-0"
+            className="w-full bg-white border border-slate-200 p-4 md:p-6 rounded-2xl md:rounded-3xl text-xl md:text-3xl font-bold text-slate-800 text-center shadow-xl shadow-slate-200/50 focus:outline-none focus:ring-4 focus:ring-lime-400 shrink-0"
             aria-label="Story topic" />
           <button onClick={generateStory} disabled={!prompt}
-            className="w-full bg-lime-400 border-4 border-black text-black py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-2xl md:text-3xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 shrink-0">
+            className="w-full bg-lime-400 border border-slate-200 text-slate-800 py-4 md:py-6 rounded-2xl md:rounded-3xl font-bold text-2xl md:text-3xl uppercase shadow-xl shadow-slate-200/50 disabled:opacity-50 shrink-0">
             Generate
           </button>
         </div>
@@ -131,38 +131,38 @@ export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClos
       {loadingState && (
         <div className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8">
           <Loader2 className="w-16 h-16 md:w-24 md:h-24 text-lime-400 animate-spin shrink-0" />
-          <p className="font-black text-white text-2xl md:text-4xl uppercase tracking-widest shrink-0 text-center" style={{ textShadow: '2px 2px 0px black' }}>{loadingState}</p>
+          <p className="font-bold text-white text-2xl md:text-4xl uppercase tracking-widest shrink-0 text-center" >{loadingState}</p>
         </div>
       )}
       {pages.length > 0 && !loadingState && (
         <motion.div key={currentPage} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
           <div className="flex justify-between items-center shrink-0">
-            <span className="bg-white text-black font-black px-4 py-2 rounded-xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-widest">Page {currentPage + 1}/{pages.length}</span>
-            <button onClick={() => { setPages([]); setPrompt(''); }} className="bg-white text-black font-black px-4 py-2 rounded-xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase hover:bg-red-400 transition-colors">Close Book</button>
+            <span className="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 uppercase tracking-widest">Page {currentPage + 1}/{pages.length}</span>
+            <button onClick={() => { setPages([]); setPrompt(''); }} className="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 uppercase hover:bg-red-400 transition-colors">Close Book</button>
           </div>
-          <div className="w-full flex-1 bg-black border-4 border-black rounded-2xl md:rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative flex items-center justify-center min-h-0">
+          <div className="w-full flex-1 bg-slate-800 border border-slate-200 rounded-2xl md:rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 relative flex items-center justify-center min-h-0">
             {pages[currentPage].imageUrl ? (
               <motion.img initial={{ opacity: 0 }} animate={{ opacity: 1 }} src={pages[currentPage].imageUrl} alt="Story Illustration" className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center gap-3"><Loader2 className="w-10 h-10 text-lime-400 animate-spin" /><span className="font-black uppercase text-lime-400 text-sm tracking-widest">Drawing Page...</span></div>
+              <div className="flex flex-col items-center gap-3"><Loader2 className="w-10 h-10 text-lime-400 animate-spin" /><span className="font-bold uppercase text-lime-400 text-sm tracking-widest">Drawing Page...</span></div>
             )}
           </div>
-          <div className="shrink-0 bg-white border-4 border-black p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-[30vh] overflow-y-auto">
-            <p className="font-black text-black whitespace-pre-wrap text-xl md:text-3xl leading-relaxed uppercase">{pages[currentPage].text}</p>
+          <div className="shrink-0 bg-white border border-slate-200 p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-xl shadow-slate-200/50 max-h-[30vh] overflow-y-auto">
+            <p className="font-bold text-slate-800 whitespace-pre-wrap text-xl md:text-3xl leading-relaxed uppercase">{pages[currentPage].text}</p>
           </div>
           <div className="flex gap-4 shrink-0">
             <button onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}
-              className="flex-1 bg-white border-4 border-black text-black py-4 md:py-5 rounded-2xl font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 flex items-center justify-center gap-2">
+              className="flex-1 bg-white border border-slate-200 text-slate-800 py-4 md:py-5 rounded-2xl font-bold text-xl uppercase shadow-xl shadow-slate-200/50 disabled:opacity-50 flex items-center justify-center gap-2">
               <ArrowLeft className="w-6 h-6" /> Prev
             </button>
             {currentPage < pages.length - 1 ? (
               <button onClick={() => setCurrentPage(p => p + 1)}
-                className="flex-1 bg-lime-400 border-4 border-black text-black py-4 md:py-5 rounded-2xl font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2">
+                className="flex-1 bg-lime-400 border border-slate-200 text-slate-800 py-4 md:py-5 rounded-2xl font-bold text-xl uppercase shadow-xl shadow-slate-200/50 flex items-center justify-center gap-2">
                 Next <ArrowRight className="w-6 h-6" />
               </button>
             ) : (
               <button onClick={() => { setPages([]); setPrompt(''); }}
-                className="flex-1 bg-purple-500 border-4 border-black text-white py-4 md:py-5 rounded-2xl font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2">
+                className="flex-1 bg-purple-500 border border-slate-200 text-white py-4 md:py-5 rounded-2xl font-bold text-xl uppercase shadow-xl shadow-slate-200/50 flex items-center justify-center gap-2">
                 Finish <Star className="w-6 h-6 fill-white" />
               </button>
             )}
@@ -176,15 +176,15 @@ export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClos
 export function StoryCard({ title, image, onClick }: { title: string; image: string; onClick: () => void }) {
   return (
     <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} onClick={onClick}
-      className="bg-white border-4 border-black rounded-2xl md:rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] cursor-pointer group flex flex-col">
-      <div className="aspect-video bg-black overflow-hidden relative border-b-4 border-black">
+      className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 md:shadow-xl shadow-slate-200/50 cursor-pointer group flex flex-col">
+      <div className="aspect-video bg-slate-800 overflow-hidden relative border-b-4 border-black">
         <img src={`https://image.pollinations.ai/prompt/cute%20cartoon%20${encodeURIComponent(image)}%203d%20pixar?width=600&height=400&nologo=true`} alt={title} className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500" />
-        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute inset-0 bg-slate-800/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-lime-400" />
         </div>
       </div>
       <div className="p-3 md:p-5 bg-purple-500 flex items-center justify-center shrink-0">
-        <h4 className="font-black text-white text-lg md:text-2xl uppercase tracking-tight text-center leading-none" style={{ textShadow: '2px 2px 0px black' }}>{title}</h4>
+        <h4 className="font-bold text-white text-lg md:text-2xl uppercase tracking-tight text-center leading-none" >{title}</h4>
       </div>
     </motion.div>
   );
