@@ -4,7 +4,7 @@ import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, 
 
 export function LandingPage({ onTryApp }: { onTryApp: () => void }) {
   return (
-    <div className="min-h-[100dvh] w-full bg-orange-500 font-sans overflow-y-auto overflow-x-hidden selection:bg-lime-400">
+    <div className="h-[100dvh] w-full bg-orange-500 font-sans overflow-y-auto overflow-x-hidden selection:bg-lime-400 custom-scrollbar relative">
 
       {/* Sticky Nav */}
       <nav className="sticky top-0 z-50 bg-orange-500/90 backdrop-blur-md border-b-4 border-black/10">
