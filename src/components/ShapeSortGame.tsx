@@ -135,13 +135,13 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-violet-400 to-purple-600 p-6 rounded-3xl">
         <Trophy className="w-28 h-28 md:w-36 md:h-36 text-yellow-300 mb-6 drop-shadow-lg" />
-        <h2 className="text-4xl md:text-5xl font-bold text-white uppercase mb-3" >
+        <h2 className="text-4xl md:text-5xl font-black text-white uppercase mb-3" style={{ textShadow: '2px 2px 0px black' }}>
           {score >= maxRounds * 0.7 ? 'Shape Master!' : score > 0 ? 'Good Job!' : 'Game Over!'}
         </h2>
         <p className="text-2xl md:text-3xl font-bold text-white mb-2">{score} / {maxRounds} Correct</p>
         <button
           onClick={() => { advanceQuest(); onClose(); }}
-          className="bg-lime-400 border border-slate-200 text-slate-800 px-8 py-4 rounded-full font-bold text-xl uppercase shadow-xl shadow-slate-200/50 hover:bg-lime-500 mt-6 transition-colors"
+          className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-full font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-500 mt-6 transition-colors"
         >
           Back to Games
         </button>
@@ -150,25 +150,25 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-b from-indigo-300 to-violet-500 rounded-3xl overflow-hidden relative border border-slate-200 shadow-xl shadow-slate-200/50">
+    <div className="w-full h-full flex flex-col bg-gradient-to-b from-indigo-300 to-violet-500 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 shrink-0 z-20 bg-slate-800/20 backdrop-blur-sm">
+      <div className="flex justify-between items-center p-4 shrink-0 z-20 bg-black/20 backdrop-blur-sm">
         <div className="flex gap-1.5">
           {[...Array(3)].map((_, i) => (
             <Heart key={i} className={`w-7 h-7 md:w-8 md:h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-500/50'}`} />
           ))}
         </div>
-        <div className="bg-white border border-slate-200 px-4 py-1.5 rounded-full font-bold text-sm md:text-base shadow-xl shadow-slate-200/50 uppercase tracking-widest">
+        <div className="bg-white border-3 border-black px-4 py-1.5 rounded-full font-black text-sm md:text-base shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-widest">
           {round + 1} / {maxRounds}
         </div>
-        <button onClick={onClose} className="bg-white rounded-full p-2 border border-slate-200 hover:bg-red-100 transition-colors" aria-label="Close game">
-          <X className="w-5 h-5 md:w-6 md:h-6 text-slate-800" />
+        <button onClick={onClose} className="bg-white rounded-full p-2 border-2 border-black hover:bg-red-100 transition-colors" aria-label="Close game">
+          <X className="w-5 h-5 md:w-6 md:h-6 text-black" />
         </button>
       </div>
 
       {/* Prompt */}
       <div className="text-center py-3 md:py-4 shrink-0 z-10 px-4">
-        <h2 className="text-2xl md:text-4xl font-bold text-white uppercase" >
+        <h2 className="text-2xl md:text-4xl font-black text-white uppercase" style={{ textShadow: '2px 2px 0px black' }}>
           {challenge.prompt}
         </h2>
       </div>
@@ -188,7 +188,7 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
                 key={i}
                 animate={{ y: [0, -8, 0], rotate: [0, 3, -3, 0] }}
                 transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
-                className={`w-24 h-24 md:w-32 md:h-32 ${shape.color} border border-slate-200 rounded-3xl flex items-center justify-center shadow-xl shadow-slate-200/50`}
+                className={`w-24 h-24 md:w-32 md:h-32 ${shape.color} border-4 border-black rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
               >
                 <span className="text-5xl md:text-6xl">{shape.emoji}</span>
               </motion.div>
@@ -200,11 +200,11 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
       {/* Answer options */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 px-4 pb-4 shrink-0">
         {challenge.options.map(opt => {
-          let btnClass = 'bg-white border border-slate-200 text-slate-800 hover:bg-lime-100';
+          let btnClass = 'bg-white border-4 border-black text-black hover:bg-lime-100';
           if (answered) {
-            if (opt === challenge.answer) btnClass = 'bg-green-500 border border-slate-200 text-white';
-            else if (opt === selectedAnswer) btnClass = 'bg-red-500 border border-slate-200 text-white';
-            else btnClass = 'bg-gray-300 border border-slate-200 text-gray-500 opacity-50';
+            if (opt === challenge.answer) btnClass = 'bg-green-500 border-4 border-black text-white';
+            else if (opt === selectedAnswer) btnClass = 'bg-red-500 border-4 border-black text-white';
+            else btnClass = 'bg-gray-300 border-4 border-black text-gray-500 opacity-50';
           }
           return (
             <motion.button
@@ -213,7 +213,7 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
               whileTap={!answered ? { scale: 0.92 } : {}}
               onClick={() => handleAnswer(opt)}
               disabled={answered}
-              className={`py-4 md:py-5 rounded-2xl font-bold text-lg md:text-2xl uppercase shadow-xl shadow-slate-200/50 transition-all ${btnClass}`}
+              className={`py-4 md:py-5 rounded-2xl font-black text-lg md:text-2xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all ${btnClass}`}
             >
               {opt}
             </motion.button>

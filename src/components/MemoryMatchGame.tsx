@@ -60,14 +60,14 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-purple-600 p-6 rounded-3xl">
         <Trophy className="w-32 h-32 text-yellow-400 mb-6" />
-        <h2 className="text-5xl font-bold text-white uppercase mb-4">You Win!</h2>
+        <h2 className="text-5xl font-black text-white uppercase mb-4">You Win!</h2>
         <p className="text-3xl font-bold text-white mb-8">Moves: {moves}</p>
         <button 
           onClick={() => {
             advanceQuest();
             onClose();
           }}
-          className="bg-lime-400 border border-slate-200 text-slate-800 px-8 py-4 rounded-full font-bold text-2xl uppercase shadow-xl shadow-slate-200/50 hover:bg-lime-500"
+          className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-full font-black text-2xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-500"
         >
           Back to Games
         </button>
@@ -76,10 +76,10 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-indigo-900 rounded-3xl overflow-hidden relative border border-slate-200 p-4 md:p-8">
+    <div className="w-full h-full flex flex-col bg-indigo-900 rounded-3xl overflow-hidden relative border-4 border-black p-4 md:p-8">
       <div className="flex justify-between items-center mb-8 shrink-0">
-        <h2 className="text-3xl md:text-5xl font-bold text-white uppercase" >Memory Match</h2>
-        <div className="bg-white border border-slate-200 px-4 py-2 rounded-xl font-bold text-xl shadow-xl shadow-slate-200/50 uppercase">
+        <h2 className="text-3xl md:text-5xl font-black text-white uppercase" style={{ textShadow: '2px 2px 0px black' }}>Memory Match</h2>
+        <div className="bg-white border-4 border-black px-4 py-2 rounded-xl font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase">
           Moves: {moves}
         </div>
       </div>
@@ -106,15 +106,15 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
               >
                 {/* Back of Card (Hidden) */}
                 <div 
-                  className="absolute inset-0 w-full h-full bg-lime-400 border border-slate-200 rounded-2xl md:rounded-3xl shadow-xl shadow-slate-200/50 flex items-center justify-center backface-hidden"
+                  className="absolute inset-0 w-full h-full bg-lime-400 border-4 border-black rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center backface-hidden"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <Star className="w-10 h-10 md:w-16 md:h-16 text-slate-800 opacity-30" />
+                  <Star className="w-10 h-10 md:w-16 md:h-16 text-black opacity-30" />
                 </div>
                 
                 {/* Front of Card (Visible when flipped) */}
                 <div 
-                  className="absolute inset-0 w-full h-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl shadow-xl shadow-slate-200/50 flex items-center justify-center backface-hidden [transform:rotateY(180deg)]"
+                  className="absolute inset-0 w-full h-full bg-white border-4 border-black rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center backface-hidden [transform:rotateY(180deg)]"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
                   <Icon className={`w-12 h-12 md:w-20 md:h-20 ${matched.includes(idx) ? 'text-green-500' : 'text-purple-500'}`} />

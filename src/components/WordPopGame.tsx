@@ -84,7 +84,7 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-blue-400 p-6 rounded-3xl">
         <Trophy className="w-32 h-32 text-yellow-400 mb-6" />
-        <h2 className="text-5xl font-bold text-white uppercase mb-4">Game Over!</h2>
+        <h2 className="text-5xl font-black text-white uppercase mb-4">Game Over!</h2>
         <p className="text-3xl font-bold text-white mb-8">Score: {score}</p>
         <p className="text-2xl font-bold text-lime-400 mb-8">+{score * 10} Stars!</p>
         <button 
@@ -92,7 +92,7 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
             advanceQuest();
             onClose();
           }}
-          className="bg-lime-400 border border-slate-200 text-slate-800 px-8 py-4 rounded-full font-bold text-2xl uppercase shadow-xl shadow-slate-200/50 hover:bg-lime-500"
+          className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-full font-black text-2xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-500"
         >
           Back to Games
         </button>
@@ -104,25 +104,25 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
     <motion.div 
       animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
       transition={{ duration: 0.4 }}
-      className="w-full h-full flex flex-col bg-sky-300 rounded-3xl overflow-hidden relative border border-slate-200 shadow-xl shadow-slate-200/50"
+      className="w-full h-full flex flex-col bg-sky-300 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
     >
       {/* Background Clouds */}
       <motion.div animate={{ x: [-50, 50, -50] }} transition={{ repeat: Infinity, duration: 20, ease: "linear" }} className="absolute top-20 left-10 w-32 h-16 bg-white/80 rounded-full blur-sm"></motion.div>
       <motion.div animate={{ x: [50, -50, 50] }} transition={{ repeat: Infinity, duration: 25, ease: "linear" }} className="absolute top-40 right-20 w-40 h-20 bg-white/60 rounded-full blur-sm"></motion.div>
       
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-slate-800/20 backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black/20 backdrop-blur-sm">
         <div className="flex gap-2">
           {[...Array(3)].map((_, i) => (
             <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-600/50'}`} />
           ))}
         </div>
-        <div className="text-white font-bold text-3xl" >{score}</div>
+        <div className="text-white font-black text-3xl" style={{ textShadow: '2px 2px 0px black' }}>{score}</div>
       </div>
 
       {/* Question */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 bg-white border border-slate-200 px-8 py-4 rounded-3xl shadow-xl shadow-slate-200/50 text-center w-[90%] max-w-md">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">{currentQuestion.q}</h2>
+      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 bg-white border-4 border-black px-8 py-4 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center w-[90%] max-w-md">
+        <h2 className="text-2xl md:text-3xl font-black text-black mb-2">{currentQuestion.q}</h2>
         <div className="flex justify-center scale-75 md:scale-100 origin-top">
           {currentQuestion.visual}
         </div>
@@ -150,14 +150,14 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
               className="absolute bottom-0 w-20 h-24 md:w-28 md:h-32 flex flex-col items-center justify-end cursor-pointer"
             >
               {/* Balloon */}
-              <div className={`w-full h-[80%] ${balloon.color} rounded-[50%] border border-slate-200 shadow-[ inset_-10px_-10px_0px_rgba(0,0,0,0.2) ] flex items-center justify-center relative overflow-hidden`}>
+              <div className={`w-full h-[80%] ${balloon.color} rounded-[50%] border-4 border-black shadow-[ inset_-10px_-10px_0px_rgba(0,0,0,0.2) ] flex items-center justify-center relative overflow-hidden`}>
                 <div className="absolute top-2 left-4 w-6 h-6 bg-white/40 rounded-full blur-[2px]"></div>
-                <span className="text-white font-bold text-4xl md:text-5xl z-10" >{balloon.letter}</span>
+                <span className="text-white font-black text-4xl md:text-5xl z-10" style={{ textShadow: '3px 3px 0px black' }}>{balloon.letter}</span>
               </div>
               {/* String */}
-              <div className="w-1 h-[20%] bg-slate-800"></div>
+              <div className="w-1 h-[20%] bg-black"></div>
               {/* Knot */}
-              <div className="w-4 h-3 bg-current text-white border border-slate-200 rounded-b-full"></div>
+              <div className="w-4 h-3 bg-current text-white border-2 border-black rounded-b-full"></div>
             </motion.div>
           ))}
         </AnimatePresence>
