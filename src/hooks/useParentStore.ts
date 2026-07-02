@@ -25,23 +25,19 @@ export function useParentStore() {
   const isParentSetup = parentAccount !== null;
 
   // --- Parent Account ---
-  const createParentAccount = (name: string, pin: string) => {
+  const createParentAccount = (name: string) => {
     setParentAccount({
-      parents: [{ id: Date.now().toString(), name, pin }],
+      parents: [{ id: Date.now().toString(), name }],
       kids: [],
       createdAt: Date.now()
     });
   };
 
-  const addParent = (name: string, pin: string) => {
+  const addParent = (name: string) => {
     setParentAccount(prev => {
       if (!prev) return prev;
-      return { ...prev, parents: [...prev.parents, { id: Date.now().toString(), name, pin }] };
+      return { ...prev, parents: [...prev.parents, { id: Date.now().toString(), name }] };
     });
-  };
-
-  const verifyPin = (pin: string) => {
-    return parentAccount?.parents.find(p => p.pin === pin);
   };
 
   // --- Kid Profiles ---
@@ -145,7 +141,7 @@ export function useParentStore() {
 
   return {
     parentAccount, isParentSetup,
-    createParentAccount, addParent, verifyPin,
+    createParentAccount, addParent,
     addKid, updateKid, removeKid, getKidByLinkCode, getKidById, regenerateLinkCode,
     addStarsToKid, recordAnswerForKid, recordGamePlayedForKid, advanceQuestForKid,
     rewards, setRewards,

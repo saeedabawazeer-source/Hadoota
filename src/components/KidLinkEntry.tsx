@@ -125,6 +125,9 @@ export function KidLinkEntry({ onLink, onBack, getKidByLinkCode }: KidLinkEntryP
           </motion.button>
         </div>
       </div>
+      <p className="mt-6 text-black/40 font-bold text-xs max-w-[250px] text-center">
+        Note: Hadoota stores data locally. The parent must set up the account on THIS specific device first.
+      </p>
     </div>
   );
 }

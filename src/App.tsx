@@ -109,8 +109,8 @@ export default function App() {
   if (view === 'parent-setup') {
     return (
       <Onboarding
-        onComplete={({ parentName, pin, kid }) => {
-          store.createParentAccount(parentName, pin);
+        onComplete={({ parentName, kid }) => {
+          store.createParentAccount(parentName);
           // Small delay to ensure account is created before adding kid
           setTimeout(() => {
             const newKid = store.addKid(kid);
@@ -134,24 +134,33 @@ export default function App() {
     );
   }
 
-  // Parent PIN check (when parent is already set up and clicks "Parent Login")
+  // Parent Selector (when multiple parents exist)
   if (view === 'parent' && !activeParent && store.isParentSetup) {
+    if (store.parentAccount!.parents.length === 1) {
+      setActiveParent(store.parentAccount!.parents[0]);
+      if (!activeKid && store.parentAccount!.kids.length > 0) {
+        setActiveKid(store.parentAccount!.kids[0]);
+      }
+      return <div className="h-[100dvh] bg-purple-600" />;
+    }
+
     return (
       <div className="h-[100dvh] w-full bg-purple-600 font-sans flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <PinPad verifyPin={(p) => !!store.verifyPin(p)} onSuccess={(pin) => {
-            const parent = store.verifyPin(pin);
-            if (parent) setActiveParent(parent);
-            // Set first kid as active if exists
-            if (!activeKid && store.parentAccount!.kids.length > 0) {
-              setActiveKid(store.parentAccount!.kids[0]);
-            }
-          }} />
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-            onClick={() => setView('landing')}
-            className="mt-6 w-full bg-white/20 border-4 border-white/40 text-white px-6 py-4 rounded-2xl font-black text-lg uppercase flex items-center justify-center gap-2 hover:bg-white/30 transition-colors cursor-pointer">
+        <div className="w-full max-w-md bg-white border-4 border-black p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
+          <h2 className="text-3xl font-black uppercase mb-6 text-black">Who's Managing?</h2>
+          <div className="flex flex-col gap-4">
+            {store.parentAccount!.parents.map(p => (
+              <motion.button key={p.id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => {
+                setActiveParent(p);
+                if (!activeKid && store.parentAccount!.kids.length > 0) setActiveKid(store.parentAccount!.kids[0]);
+              }} className="bg-lime-400 border-4 border-black p-4 rounded-2xl font-black text-2xl uppercase hover:bg-lime-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+                {p.name}
+              </motion.button>
+            ))}
+          </div>
+          <button onClick={() => setView('landing')} className="mt-8 bg-gray-200 border-4 border-black p-3 rounded-xl font-bold uppercase hover:bg-gray-300 flex items-center justify-center gap-2 w-full cursor-pointer transition-colors">
             <ArrowLeft className="w-5 h-5" /> Back
-          </motion.button>
+          </button>
         </div>
       </div>
     );
@@ -197,8 +206,8 @@ export default function App() {
             <Star className="w-4 h-4 md:w-5 md:h-5 fill-amber-400 text-amber-400" />
             <motion.span key={stars} initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="font-black text-sm md:text-base">{stars}</motion.span>
           </motion.div>
-          <button onClick={() => { playSound('pop'); view === 'kid' ? setActiveModal('PIN') : setView('kid'); }}
-            className="w-10 h-10 md:w-12 md:h-12 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400 transition-colors"
+          <button onClick={() => { playSound('pop'); view === 'kid' ? setView('parent') : setView('kid'); }}
+            className="w-10 h-10 md:w-12 md:h-12 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400 transition-colors cursor-pointer"
             aria-label={view === 'kid' ? 'Open parent controls' : 'Switch to kid mode'}>
             {view === 'kid' ? <Lock className="w-4 h-4 md:w-5 md:h-5 text-black" /> : <Unlock className="w-4 h-4 md:w-5 md:h-5 text-black" />}
           </button>
@@ -248,13 +257,6 @@ export default function App() {
       <AnimatePresence>
         {activeModal && (
           <ModalWrap onClose={() => setActiveModal(null)} fullScreen={activeModal.startsWith('Game:') || activeModal.startsWith('Story:')}>
-            {activeModal === 'PIN' && <PinPad verifyPin={(p) => !!store.verifyPin(p)} onSuccess={(pin) => { 
-                const parent = store.verifyPin(pin);
-                if (parent) setActiveParent(parent);
-                setView('parent'); 
-                setActiveModal(null); 
-                showToast('Parent Mode Unlocked'); 
-             }} />}
             {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} setAvatarSeed={setAvatarSeed} onClose={() => setActiveModal(null)} />}
             {activeModal === 'Game: Math Dash' && <CarDashGame onClose={() => setActiveModal(null)} {...gameModalProps} />}
             {activeModal === 'Game: Spelling' && <WordPopGame onClose={() => setActiveModal(null)} {...gameModalProps}
@@ -567,41 +569,6 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
         <div className={`flex-1 overflow-y-auto flex flex-col ${fullScreen ? 'p-6 md:p-12' : 'p-4 md:p-10'}`}>{children}</div>
       </motion.div>
     </motion.div>
-  );
-}
-
-// --- PIN Pad ---
-function PinPad({ verifyPin, onSuccess }: { verifyPin: (pin: string) => boolean; onSuccess: (pin: string) => void }) {
-  const [entry, setEntry] = useState('');
-  const [shake, setShake] = useState(false);
-  const handlePress = (num: string) => {
-    const newPin = entry + num;
-    if (newPin.length < 4) {
-      setEntry(newPin);
-    } else {
-      if (verifyPin(newPin)) onSuccess(newPin);
-      else { setEntry(newPin); setShake(true); setTimeout(() => { setShake(false); setEntry(''); }, 500); }
-    }
-  };
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center max-w-sm mx-auto w-full">
-      <div className="w-16 h-16 md:w-20 md:h-20 bg-black text-lime-400 rounded-full flex items-center justify-center mb-6 md:mb-8 border-4 border-lime-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shrink-0">
-        <Lock className="w-8 h-8 md:w-10 md:h-10" />
-      </div>
-      <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-2 md:mb-4 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Parent Area</h2>
-      <p className="text-lime-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-sm md:text-lg shrink-0">Enter your PIN</p>
-      <motion.div animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}} className="flex justify-center gap-4 md:gap-6 mb-8 md:mb-10 shrink-0">
-        {[0,1,2,3].map(i => <div key={i} className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-black ${i < entry.length ? 'bg-lime-400' : 'bg-white'}`} />)}
-      </motion.div>
-      <div className="grid grid-cols-3 gap-3 md:gap-6 w-full shrink-0">
-        {[1,2,3,4,5,6,7,8,9].map(n => (
-          <button key={n} onClick={() => handlePress(n.toString())} className="h-16 md:h-20 bg-white border-4 border-black hover:bg-lime-400 rounded-xl md:rounded-2xl text-3xl md:text-4xl font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors">{n}</button>
-        ))}
-        <div />
-        <button onClick={() => handlePress('0')} className="h-16 md:h-20 bg-white border-4 border-black hover:bg-lime-400 rounded-xl md:rounded-2xl text-3xl md:text-4xl font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors">0</button>
-        <button onClick={() => setEntry(entry.slice(0, -1))} className="h-16 md:h-20 bg-orange-400 border-4 border-black hover:bg-orange-500 rounded-xl md:rounded-2xl text-xl md:text-2xl font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors">DEL</button>
-      </div>
-    </div>
   );
 }
 

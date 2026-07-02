@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Sparkles, Lock, Check, User, Heart, Gift, Copy, 
 import type { KidProfile, Difficulty } from '../types';
 
 interface ParentOnboardingProps {
-  onComplete: (data: { parentName: string; pin: string; kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'> }) => void;
+  onComplete: (data: { parentName: string; kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'> }) => void;
   onBack: () => void;
 }
 
@@ -16,9 +16,6 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
   const [step, setStep] = useState(0);
   // Parent info
   const [parentName, setParentName] = useState('');
-  const [pin, setPin] = useState('');
-  const [pinConfirm, setPinConfirm] = useState('');
-  const [pinError, setPinError] = useState('');
   // Kid info
   const [kidName, setKidName] = useState('');
   const [kidAge, setKidAge] = useState(6);
@@ -35,7 +32,7 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
   ];
 
   const canAdvance = () => {
-    if (step === 0) return parentName.trim().length >= 1 && pin.length === 4 && pin === pinConfirm;
+    if (step === 0) return parentName.trim().length >= 1;
     if (step === 1) return kidName.trim().length >= 1;
     if (step === 2) return true;
     if (step === 3) return true;
@@ -44,11 +41,9 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
   };
 
   const handleNext = () => {
-    if (step === 0 && pin !== pinConfirm) { setPinError('PINs do not match'); return; }
     if (step === 4) {
       onComplete({
         parentName: parentName.trim(),
-        pin,
         kid: { name: kidName.trim(), age: kidAge, avatarSeed, interests, difficulty },
       });
       return;
@@ -105,7 +100,7 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
               {steps[step].subtitle}
             </p>
 
-            {/* Step 0: Parent Name + PIN */}
+            {/* Step 0: Parent Name */}
             {step === 0 && (
               <div className="w-full flex flex-col gap-4">
                 <div>
@@ -120,30 +115,6 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
                     className="w-full bg-white border-4 border-black p-4 md:p-5 rounded-2xl text-xl md:text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 placeholder:text-gray-300"
                     aria-label="Parent name"
                   />
-                </div>
-                <div className="bg-black/20 rounded-2xl p-4">
-                  <div className="flex items-center gap-2 text-lime-400 mb-2">
-                    <Lock className="w-5 h-5" />
-                    <span className="font-bold text-sm uppercase tracking-widest">Set Your PIN</span>
-                  </div>
-                  <p className="text-white/70 font-bold text-xs mb-3">This PIN protects the parent dashboard. Don't share it with your child.</p>
-                  <div className="flex gap-3">
-                    <input
-                      type="password" inputMode="numeric" maxLength={4} value={pin}
-                      onChange={e => { setPin(e.target.value.replace(/\D/g, '')); setPinError(''); }}
-                      placeholder="PIN"
-                      className="flex-1 bg-white border-4 border-black p-3 rounded-2xl text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[0.5em]"
-                      aria-label="Enter PIN"
-                    />
-                    <input
-                      type="password" inputMode="numeric" maxLength={4} value={pinConfirm}
-                      onChange={e => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinError(''); }}
-                      placeholder="Confirm"
-                      className="flex-1 bg-white border-4 border-black p-3 rounded-2xl text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[0.5em]"
-                      aria-label="Confirm PIN"
-                    />
-                  </div>
-                  {pinError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-300 font-bold text-sm uppercase text-center mt-2">{pinError}</motion.p>}
                 </div>
               </div>
             )}

@@ -3,7 +3,6 @@
 export interface ParentProfile {
   id: string;
   name: string;
-  pin: string;
 }
 
 export interface ParentAccount {

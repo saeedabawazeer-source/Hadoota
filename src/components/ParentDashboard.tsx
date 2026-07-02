@@ -13,7 +13,7 @@ interface ParentDashboardProps {
   activeKid: KidProfile | null;
   parentAccount: ParentAccount | null;
   activeParent: ParentProfile | null;
-  addParent: (name: string, pin: string) => void;
+  addParent: (name: string) => void;
   onSelectKid: (kid: KidProfile) => void;
   onBack: () => void;
 }
@@ -27,7 +27,6 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
   const [copiedCode, setCopiedCode] = useState('');
   const [showAddParent, setShowAddParent] = useState(false);
   const [newParentName, setNewParentName] = useState('');
-  const [newParentPin, setNewParentPin] = useState('');
 
   const accuracy = gameStats.totalCorrect + gameStats.totalWrong > 0
     ? Math.round((gameStats.totalCorrect / (gameStats.totalCorrect + gameStats.totalWrong)) * 100) : 0;
@@ -192,9 +191,7 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                   <div className="flex gap-2">
                     <input type="text" placeholder="Name" value={newParentName} onChange={e => setNewParentName(e.target.value)}
                       className="flex-1 border-2 border-black p-2 rounded-lg font-bold min-w-0" />
-                    <input type="password" inputMode="numeric" maxLength={4} placeholder="PIN" value={newParentPin} onChange={e => setNewParentPin(e.target.value.replace(/\D/g, ''))}
-                      className="w-20 border-2 border-black p-2 rounded-lg font-bold text-center tracking-widest" />
-                    <button onClick={() => { if (newParentName && newParentPin.length === 4) { addParent(newParentName, newParentPin); setShowAddParent(false); setNewParentName(''); setNewParentPin(''); } }}
+                    <button onClick={() => { if (newParentName) { addParent(newParentName); setShowAddParent(false); setNewParentName(''); } }}
                       className="bg-blue-500 text-white border-2 border-black px-4 py-2 rounded-lg font-bold hover:bg-blue-600 cursor-pointer">
                       Add
                     </button>
