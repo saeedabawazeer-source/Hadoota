@@ -61,11 +61,15 @@ export default function App() {
     store.recordAnswerForKid(activeKid.id, correct);
   };
 
-  const advanceQuest = () => {
-    if (!activeKid) return;
-    store.advanceQuestForKid(activeKid.id);
-    setActiveKid(prev => prev ? { ...prev, questProgress: prev.questProgress + 1 } : prev);
-  };
+  const advanceQuest = () => { if (activeKid) store.advanceQuestForKid(activeKid.id, 25); };
+
+  if (!store.isLoaded) {
+    return (
+      <div className="h-[100dvh] w-full bg-purple-600 font-sans flex items-center justify-center text-white text-2xl font-black uppercase tracking-widest">
+        Loading...
+      </div>
+    );
+  }
 
   const setAvatarSeed = (seed: string) => {
     if (!activeKid) return;
@@ -206,11 +210,6 @@ export default function App() {
             <Star className="w-4 h-4 md:w-5 md:h-5 fill-amber-400 text-amber-400" />
             <motion.span key={stars} initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="font-black text-sm md:text-base">{stars}</motion.span>
           </motion.div>
-          <button onClick={() => { playSound('pop'); view === 'kid' ? setView('parent') : setView('kid'); }}
-            className="w-10 h-10 md:w-12 md:h-12 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400 transition-colors cursor-pointer"
-            aria-label={view === 'kid' ? 'Open parent controls' : 'Switch to kid mode'}>
-            {view === 'kid' ? <Lock className="w-4 h-4 md:w-5 md:h-5 text-black" /> : <Unlock className="w-4 h-4 md:w-5 md:h-5 text-black" />}
-          </button>
         </header>
 
         <main className="flex-1 relative z-10 w-full max-w-6xl mx-auto min-h-0 flex flex-col" role="main">

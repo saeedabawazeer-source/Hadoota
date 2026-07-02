@@ -1,42 +1,77 @@
-import { useStickyState } from './useStickyState';
-import type { ParentAccount, KidProfile, Reward, Task, GameStats } from '../types';
-
-const DEFAULT_STATS: GameStats = {
-  gamesPlayed: 0, totalCorrect: 0, totalWrong: 0, totalStarsEarned: 0,
-  subjectStats: {}, dailyActivity: [],
-};
+import { useState, useEffect } from 'react';
+import type { ParentAccount, KidProfile, Reward, Task } from '../types';
 
 const DEFAULT_REWARDS: Reward[] = [
-  { id: '1', title: 'Extra 30m Screen Time', cost: 500, icon: 'tv' },
-  { id: '2', title: 'Ice Cream Trip', cost: 1500, icon: 'ice-cream' },
-  { id: '3', title: 'New Toy ($10)', cost: 5000, icon: 'gift' },
+  { id: '1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'gamepad' },
+  { id: '2', title: 'Choose Movie Night', cost: 100, icon: 'film' },
+  { id: '3', title: 'Stay Up Late (1hr)', cost: 150, icon: 'moon' },
 ];
 
 function generateLinkCode(): string {
   return String(Math.floor(10000 + Math.random() * 90000));
 }
 
+const getApiUrl = () => `http://${window.location.hostname}:3001/api/data`;
+
 export function useParentStore() {
-  const [parentAccount, setParentAccount] = useStickyState<ParentAccount | null>(null, 'h_parent');
-  const [rewards, setRewards] = useStickyState<Reward[]>(DEFAULT_REWARDS, 'h_rewards');
-  const [tasks, setTasks] = useStickyState<Task[]>([], 'h_tasks');
-  const [activeKidId, setActiveKidId] = useStickyState<string | null>(null, 'h_active_kid');
+  const [parentAccount, setParentAccount] = useState<ParentAccount | null>(null);
+  const [rewards, setRewards] = useState<Reward[]>(DEFAULT_REWARDS);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [activeKidId, setActiveKidId] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch(getApiUrl())
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          if (data.parentAccount) setParentAccount(data.parentAccount);
+          if (data.rewards) setRewards(data.rewards);
+          if (data.tasks) setTasks(data.tasks);
+          if (data.activeKidId) setActiveKidId(data.activeKidId);
+        }
+        setIsLoaded(true);
+      })
+      .catch(err => {
+        console.error('Failed to load data from backend:', err);
+        setIsLoaded(true); // Still loaded so app can render (maybe offline)
+      });
+  }, []);
+
+  const saveData = (newState: { parentAccount?: ParentAccount | null, rewards?: Reward[], tasks?: Task[], activeKidId?: string | null }) => {
+    const payload = {
+      parentAccount: newState.parentAccount !== undefined ? newState.parentAccount : parentAccount,
+      rewards: newState.rewards !== undefined ? newState.rewards : rewards,
+      tasks: newState.tasks !== undefined ? newState.tasks : tasks,
+      activeKidId: newState.activeKidId !== undefined ? newState.activeKidId : activeKidId,
+    };
+    
+    fetch(getApiUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(console.error);
+  };
 
   const isParentSetup = parentAccount !== null;
 
   // --- Parent Account ---
   const createParentAccount = (name: string) => {
-    setParentAccount({
+    const newAccount = {
       parents: [{ id: Date.now().toString(), name }],
       kids: [],
       createdAt: Date.now()
-    });
+    };
+    setParentAccount(newAccount);
+    saveData({ parentAccount: newAccount });
   };
 
   const addParent = (name: string) => {
     setParentAccount(prev => {
       if (!prev) return prev;
-      return { ...prev, parents: [...prev.parents, { id: Date.now().toString(), name }] };
+      const newAccount = { ...prev, parents: [...prev.parents, { id: Date.now().toString(), name }] };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
   };
 
@@ -46,28 +81,34 @@ export function useParentStore() {
       ...kid,
       id: Date.now().toString(),
       linkCode: generateLinkCode(),
-      stars: 0,
-      streak: 0,
-      questProgress: 0,
-      gameStats: { ...DEFAULT_STATS },
+      stars: 0, streak: 0, questProgress: 0,
+      gameStats: { gamesPlayed: 0, totalStarsEarned: 0, totalCorrect: 0, totalWrong: 0, subjectStats: {}, dailyActivity: [] }
     };
-    setParentAccount(prev => prev ? { ...prev, kids: [...prev.kids, newKid] } : prev);
+    setParentAccount(prev => {
+      if (!prev) return prev;
+      const newAccount = { ...prev, kids: [...prev.kids, newKid] };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
+    });
     return newKid;
   };
 
-  const updateKid = (kidId: string, updates: Partial<KidProfile>) => {
+  const updateKid = (id: string, updates: Partial<KidProfile>) => {
     setParentAccount(prev => {
       if (!prev) return prev;
-      return { ...prev, kids: prev.kids.map(k => k.id === kidId ? { ...k, ...updates } : k) };
+      const newAccount = { ...prev, kids: prev.kids.map(k => k.id === id ? { ...k, ...updates } : k) };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
   };
 
-  const removeKid = (kidId: string) => {
+  const removeKid = (id: string) => {
     setParentAccount(prev => {
       if (!prev) return prev;
-      return { ...prev, kids: prev.kids.filter(k => k.id !== kidId) };
+      const newAccount = { ...prev, kids: prev.kids.filter(k => k.id !== id) };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
-    if (activeKidId === kidId) setActiveKidId(null);
   };
 
   const getKidByLinkCode = (code: string): KidProfile | undefined => {
@@ -78,45 +119,94 @@ export function useParentStore() {
     return parentAccount?.kids.find(k => k.id === id);
   };
 
-  const regenerateLinkCode = (kidId: string) => {
-    updateKid(kidId, { linkCode: generateLinkCode() });
+  const regenerateLinkCode = (kidId: string): string => {
+    const newCode = generateLinkCode();
+    updateKid(kidId, { linkCode: newCode });
+    return newCode;
   };
 
-  // --- Kid-specific state helpers ---
+  // --- Game Stats & Progress ---
   const addStarsToKid = (kidId: string, amount: number) => {
-    updateKid(kidId, {
-      stars: (getKidById(kidId)?.stars || 0) + amount,
-      gameStats: {
-        ...(getKidById(kidId)?.gameStats || DEFAULT_STATS),
-        totalStarsEarned: (getKidById(kidId)?.gameStats.totalStarsEarned || 0) + amount,
-      },
+    setParentAccount(prev => {
+      if (!prev) return prev;
+      const newAccount = {
+        ...prev,
+        kids: prev.kids.map(k => {
+          if (k.id === kidId) {
+            return {
+              ...k,
+              stars: k.stars + amount,
+              gameStats: { ...k.gameStats, totalStarsEarned: k.gameStats.totalStarsEarned + amount }
+            };
+          }
+          return k;
+        })
+      };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
   };
 
-  const recordAnswerForKid = (kidId: string, correct: boolean) => {
-    const kid = getKidById(kidId);
-    if (!kid) return;
-    updateKid(kidId, {
-      gameStats: {
-        ...kid.gameStats,
-        totalCorrect: kid.gameStats.totalCorrect + (correct ? 1 : 0),
-        totalWrong: kid.gameStats.totalWrong + (correct ? 0 : 1),
-      },
+  const recordAnswerForKid = (kidId: string, isCorrect: boolean) => {
+    setParentAccount(prev => {
+      if (!prev) return prev;
+      const newAccount = {
+        ...prev,
+        kids: prev.kids.map(k => {
+          if (k.id === kidId) {
+            return {
+              ...k,
+              gameStats: {
+                ...k.gameStats,
+                totalCorrect: isCorrect ? k.gameStats.totalCorrect + 1 : k.gameStats.totalCorrect,
+                totalWrong: !isCorrect ? k.gameStats.totalWrong + 1 : k.gameStats.totalWrong
+              }
+            };
+          }
+          return k;
+        })
+      };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
   };
 
   const recordGamePlayedForKid = (kidId: string) => {
-    const kid = getKidById(kidId);
-    if (!kid) return;
-    updateKid(kidId, {
-      gameStats: { ...kid.gameStats, gamesPlayed: kid.gameStats.gamesPlayed + 1 },
+    setParentAccount(prev => {
+      if (!prev) return prev;
+      const newAccount = {
+        ...prev,
+        kids: prev.kids.map(k => {
+          if (k.id === kidId) {
+            return {
+              ...k,
+              gameStats: { ...k.gameStats, gamesPlayed: k.gameStats.gamesPlayed + 1 }
+            };
+          }
+          return k;
+        })
+      };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
     });
   };
 
-  const advanceQuestForKid = (kidId: string) => {
-    const kid = getKidById(kidId);
-    if (!kid) return;
-    updateKid(kidId, { questProgress: kid.questProgress + 1 });
+  const advanceQuestForKid = (kidId: string, amount: number = 25) => {
+    setParentAccount(prev => {
+      if (!prev) return prev;
+      const newAccount = {
+        ...prev,
+        kids: prev.kids.map(k => {
+          if (k.id === kidId) {
+            const newProgress = k.questProgress + amount;
+            return { ...k, questProgress: newProgress >= 100 ? 0 : newProgress };
+          }
+          return k;
+        })
+      };
+      saveData({ parentAccount: newAccount });
+      return newAccount;
+    });
     recordGamePlayedForKid(kidId);
   };
 
@@ -140,6 +230,7 @@ export function useParentStore() {
   };
 
   return {
+    isLoaded,
     parentAccount, isParentSetup,
     createParentAccount, addParent,
     addKid, updateKid, removeKid, getKidByLinkCode, getKidById, regenerateLinkCode,
