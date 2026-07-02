@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 interface MascotProps {
   seed: string;
@@ -8,38 +9,48 @@ interface MascotProps {
 }
 
 export function Mascot({ seed, color, emotion = 'idle' }: MascotProps) {
-  const [internalEmotion, setInternalEmotion] = useState(emotion);
+  const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
-    if (emotion !== 'idle') {
-      setInternalEmotion(emotion);
-      const t = setTimeout(() => setInternalEmotion('idle'), 1000);
+    if (emotion === 'happy') {
+      setIsVisible(true);
+      // Fire confetti from bottom left
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { x: 0.1, y: 0.9 },
+        colors: ['#a3e635', '#f97316', '#9333ea', '#ffffff']
+      });
+      
+      const t = setTimeout(() => setIsVisible(false), 2500);
+      return () => clearTimeout(t);
+    } else if (emotion === 'sad') {
+      setIsVisible(true);
+      const t = setTimeout(() => setIsVisible(false), 2500);
       return () => clearTimeout(t);
     }
   }, [emotion]);
 
   const currentSeed = ['Fin', 'Jae', 'Poh', 'Mol'].includes(seed) ? seed : 'Fin';
-  
-  const getAnim = () => {
-    switch(internalEmotion) {
-      case 'happy': return { y: [0, -20, 0], scale: [1, 1.1, 1] };
-      case 'sad': return { y: [0, 5, 0], scale: [1, 0.9, 1], rotate: [0, -10, 0] };
-      default: return { y: [0, -5, 0] }; // idle
-    }
-  };
 
   return (
-    <motion.div 
-      animate={getAnim()} 
-      transition={internalEmotion === 'idle' ? { repeat: Infinity, duration: 4, ease: "easeInOut" } : { duration: 0.5 }}
-      className="absolute bottom-4 left-4 z-50 pointer-events-none"
-    >
-      <img 
-        src={`/characters/Wormies - ${currentSeed}.svg`} 
-        alt="Mascot" 
-        className="w-24 h-24 md:w-32 md:h-32 object-contain wormie-stroke" 
-        style={{ filter: `hue-rotate(${color}deg)` }} 
-      />
-    </motion.div>
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ x: -200, rotate: -20 }}
+          animate={{ x: 0, rotate: 0 }}
+          exit={{ x: -200, rotate: -20 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+          className="absolute bottom-4 left-4 z-50 pointer-events-none"
+        >
+          <img 
+            src={`/characters/Wormies - ${currentSeed}.svg`} 
+            alt="Mascot" 
+            className="w-24 h-24 md:w-32 md:h-32 object-contain wormie-stroke" 
+            style={{ filter: `hue-rotate(${color}deg)` }} 
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -12,96 +12,73 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
   return (
     <div className="h-[100dvh] w-full bg-orange-500 font-sans overflow-y-auto overflow-x-hidden selection:bg-lime-400 custom-scrollbar relative">
 
-      {/* Sticky Nav */}
-      <nav className="sticky top-0 z-50 bg-orange-500/90 backdrop-blur-md border-b-4 border-black/10">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-white p-1.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              <Sparkles className="w-5 h-5 text-orange-500" />
-            </div>
-            <span className="font-black text-xl text-white uppercase tracking-tight" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
+      {/* Hero Section (Codepen Layout) */}
+      <header className="relative min-h-[95vh] flex items-center justify-center p-4 md:p-8 w-full max-w-[1400px] mx-auto mt-4">
+        <div className="relative w-full h-full min-h-[85vh] bg-purple-600 rounded-[2rem] md:rounded-[3rem] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center overflow-hidden z-10 p-6 md:p-8">
+          
+          {/* Top Left Cutout / Logo Tab */}
+          <div className="absolute top-0 left-0 bg-orange-500 md:bg-white border-b-4 border-r-4 border-black rounded-br-[1.5rem] md:rounded-br-[2rem] px-4 py-3 md:px-6 md:py-4 flex items-center gap-2 md:gap-3 z-30">
+            <img src="/characters/Wormies - Party.svg" alt="Hadoota" className="w-8 h-8 md:w-10 md:h-10 object-contain wormie-stroke" />
+            <span className="font-black text-xl md:text-3xl uppercase tracking-tighter text-white md:text-black" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
           </div>
-          <div className="flex items-center gap-3">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
-              className="bg-lime-400 border-2 border-black text-black px-4 py-2 rounded-full font-black text-sm uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors hidden sm:flex items-center gap-1.5 cursor-pointer">
-              {isParentSetup ? 'Parent Login' : "I'm a Parent"} <ArrowRight className="w-4 h-4" />
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink}
-              className="bg-white text-black px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 hover:bg-gray-100 transition-colors border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
-              <KeyRound className="w-4 h-4" /> I'm a Kid
-            </motion.button>
+
+          {/* Top Nav Links (Center/Right) */}
+          <nav className="absolute top-0 right-0 left-0 hidden md:flex justify-end lg:justify-center items-center px-8 py-6 z-30 pointer-events-none">
+             <div className="flex gap-8 font-bold text-white text-sm uppercase tracking-widest pointer-events-auto mr-auto lg:mr-0 lg:ml-32">
+                <a href="#" className="hover:text-lime-400 transition-colors">Games</a>
+                <a href="#" className="hover:text-lime-400 transition-colors">Stories</a>
+                <a href="#" className="hover:text-lime-400 transition-colors">Parents</a>
+                <a href="#" className="hover:text-lime-400 transition-colors">Rewards</a>
+             </div>
+             
+             {/* Top Right Buttons */}
+             <div className="absolute right-8 top-4 flex items-center gap-3 pointer-events-auto">
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
+                  className="bg-lime-400 border-2 border-black text-black px-5 py-2.5 rounded-full font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-2 cursor-pointer">
+                  <Users className="w-4 h-4" /> Parent Login
+                </button>
+             </div>
+          </nav>
+
+          {/* Huge Background Text */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
+             <span className="text-[28vw] md:text-[22vw] font-black text-white uppercase tracking-tighter leading-none whitespace-nowrap opacity-90" style={{ fontFamily: '"Anton", sans-serif' }}>
+               HADOOTA
+             </span>
+          </div>
+
+          {/* Center Mascot (The "Product") */}
+          <motion.div initial={{ scale: 0, y: 50 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="relative z-20 mt-16 md:mt-8">
+            <img src="/characters/Wormies - Spring.svg" alt="Hadoota Mascot" className="h-[45vh] md:h-[65vh] object-contain wormie-stroke" />
+          </motion.div>
+
+          {/* Bottom Controls / Info */}
+          <div className="absolute bottom-6 md:bottom-8 left-6 md:left-8 right-6 md:right-8 z-30 flex flex-col md:flex-row justify-between items-end gap-6 md:gap-0">
+            {/* Bottom Left Info */}
+            <div className="max-w-sm text-left">
+              <h2 className="text-3xl md:text-5xl font-black text-lime-400 uppercase tracking-tight mb-3" style={{ textShadow: '2px 2px 0px black' }}>PREMIUM</h2>
+              <p className="font-bold text-white mb-6 text-sm leading-relaxed max-w-xs">
+                Engineered for daily learning adventures. Durable curriculum, lightweight games, built to grow with your child.
+              </p>
+              <div className="flex gap-3">
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink} className="bg-yellow-400 border-2 border-black px-6 py-3 rounded-full font-black text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow-300 transition-colors flex items-center gap-2 cursor-pointer">
+                  <KeyRound className="w-4 h-4" /> Start Playing
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Bottom Right Stats Box */}
+            <div className="hidden sm:flex flex-col bg-white/20 backdrop-blur-md border-2 border-white/50 p-5 rounded-2xl w-56">
+               <span className="text-4xl font-black text-white" style={{ textShadow: '2px 2px 0px rgba(0,0,0,0.3)' }}>98%</span>
+               <div className="flex -space-x-2 my-2">
+                 <div className="w-8 h-8 rounded-full bg-orange-400 border-2 border-white flex items-center justify-center font-bold text-xs">J</div>
+                 <div className="w-8 h-8 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center font-bold text-xs">A</div>
+                 <div className="w-8 h-8 rounded-full bg-lime-400 border-2 border-white flex items-center justify-center font-bold text-xs">M</div>
+               </div>
+               <span className="text-xs font-bold text-white/90 leading-tight">Customer satisfaction rating across all kids</span>
+            </div>
           </div>
         </div>
-      </nav>
-
-      {/* Hero Section */}
-      <header className="relative min-h-[85vh] flex flex-col items-center justify-center px-6 py-20 text-center overflow-hidden">
-        {/* Floating decorations */}
-        <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 5 }}
-          className="absolute top-[12%] left-[8%] w-14 h-14 md:w-20 md:h-20 bg-lime-400 rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center opacity-80">
-          <Star className="w-7 h-7 md:w-10 md:h-10 text-black fill-yellow-300" />
-        </motion.div>
-        <motion.div animate={{ y: [0, 15, 0], rotate: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 6, delay: 1 }}
-          className="absolute top-[18%] right-[10%] w-14 h-14 md:w-18 md:h-18 bg-purple-500 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center opacity-80">
-          <Brain className="w-7 h-7 md:w-9 md:h-9 text-white" />
-        </motion.div>
-        <motion.div animate={{ y: [0, -12, 0] }} transition={{ repeat: Infinity, duration: 7, delay: 2 }}
-          className="absolute bottom-[22%] left-[12%] w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl border-4 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center opacity-70">
-          <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-purple-600" />
-        </motion.div>
-        <motion.div animate={{ y: [0, 18, 0] }} transition={{ repeat: Infinity, duration: 5.5, delay: 0.5 }}
-          className="absolute bottom-[28%] right-[8%] w-14 h-14 md:w-18 md:h-18 bg-yellow-300 rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center opacity-80">
-          <Gamepad2 className="w-7 h-7 md:w-9 md:h-9 text-black" />
-        </motion.div>
-
-        {/* Logo / Character */}
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1, y: [0, -15, 0] }} transition={{ scale: { type: 'spring', stiffness: 200, damping: 15 }, y: { repeat: Infinity, duration: 4, ease: "easeInOut" } }}
-          className="relative z-10 mb-8 flex items-center justify-center">
-          <img src="/characters/Wormies - Party.svg" alt="Wormies Party" className="h-48 md:h-64 object-contain wormie-stroke" />
-        </motion.div>
-
-        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="relative z-10 text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-4"
-          style={{ textShadow: '4px 4px 0px black' }}>
-          Hadoota
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="relative z-10 text-xl md:text-3xl font-black text-black/80 uppercase tracking-wider mb-2 max-w-lg">
-          Where Learning Becomes an Adventure
-        </motion.p>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-          className="relative z-10 text-base md:text-lg font-bold text-black/60 max-w-md mb-10 leading-relaxed">
-          Fun educational games, AI-powered stories, and a reward system that makes kids aged 3-12 excited to learn every single day.
-        </motion.p>
-
-        {/* Action Buttons */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-          className="relative z-10 flex flex-col sm:flex-row gap-4 items-center">
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
-            className="bg-black border-4 border-black text-white px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] hover:bg-gray-900 transition-colors flex items-center gap-3 cursor-pointer">
-            <Users className="w-7 h-7" />
-            {isParentSetup ? 'Parent Login' : "I'm a Parent — Set Up"}
-          </motion.button>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink}
-            className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-3 cursor-pointer">
-            <KeyRound className="w-7 h-7" />
-            I'm a Kid — Enter Code
-          </motion.button>
-        </motion.div>
-
-        {/* App Store links */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
-          className="relative z-10 mt-6 flex gap-4 items-center">
-          <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-            className="text-white/60 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-1.5">
-            <Download className="w-4 h-4" /> App Store
-          </a>
-          <span className="text-white/30">|</span>
-          <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
-            className="text-white/60 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-1.5">
-            <Download className="w-4 h-4" /> Google Play
-          </a>
-        </motion.div>
       </header>
 
       {/* App Preview / Mock */}

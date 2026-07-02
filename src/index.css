@@ -70,25 +70,17 @@ html { scroll-behavior: smooth; }
 /* Wormie Character SVG Outline Effect */
 .wormie-stroke {
   filter: 
-    drop-shadow(3px 0px 0px black)
-    drop-shadow(-3px 0px 0px black)
-    drop-shadow(0px 3px 0px black)
-    drop-shadow(0px -3px 0px black)
-    drop-shadow(3px 3px 0px black)
-    drop-shadow(-3px -3px 0px black)
-    drop-shadow(3px -3px 0px black)
-    drop-shadow(-3px 3px 0px black)
-    drop-shadow(8px 8px 0px rgba(0,0,0,1));
+    drop-shadow(1px 0px 0px black)
+    drop-shadow(-1px 0px 0px black)
+    drop-shadow(0px 1px 0px black)
+    drop-shadow(0px -1px 0px black)
+    drop-shadow(2px 2px 0px rgba(0,0,0,1));
 }
 
 .wormie-base {
   filter: 
-    drop-shadow(3px 0px 0px black)
-    drop-shadow(-3px 0px 0px black)
-    drop-shadow(0px 3px 0px black)
-    drop-shadow(0px -3px 0px black)
-    drop-shadow(3px 3px 0px black)
-    drop-shadow(-3px -3px 0px black)
-    drop-shadow(3px -3px 0px black)
-    drop-shadow(-3px 3px 0px black);
+    drop-shadow(1px 0px 0px black)
+    drop-shadow(-1px 0px 0px black)
+    drop-shadow(0px 1px 0px black)
+    drop-shadow(0px -1px 0px black);
 }
