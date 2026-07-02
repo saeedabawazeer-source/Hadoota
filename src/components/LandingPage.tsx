@@ -36,7 +36,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
                   className="bg-lime-400 border-2 border-black text-black px-5 py-2.5 rounded-full font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-2 cursor-pointer">
                   <Users className="w-4 h-4" /> Parent Login
-                </button>
+                </motion.button>
              </div>
           </nav>
 
