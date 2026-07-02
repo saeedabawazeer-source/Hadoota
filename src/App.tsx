@@ -387,14 +387,14 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
           </select>
         </div>
         <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 overflow-y-auto pr-2 pb-4 md:pb-0 content-start">
-          <GameCard color="bg-purple-500" title="Math Dash" icon={<Car />} onClick={() => setActiveModal('Game: Math Dash')} white />
-          <GameCard color="bg-lime-400" title="Word Jump" icon={<Rocket />} onClick={() => setActiveModal('Game: Spelling')} />
-          <GameCard color="bg-white" title="Logic Blocks" icon={<Gamepad2 />} onClick={() => setActiveModal('Game: Logic')} />
-          <GameCard color="bg-black" title="Memory Match" icon={<Brain />} onClick={() => setActiveModal('Game: Memory Quiz')} lime />
-          <GameCard color="bg-sky-400" title="Counting" icon={<Hash />} onClick={() => setActiveModal('Game: Counting')} white />
-          <GameCard color="bg-violet-500" title="Shapes" icon={<Shapes />} onClick={() => setActiveModal('Game: Shapes')} white />
-          <GameCard color="bg-amber-400" title="Science" icon={<Lightbulb />} onClick={() => setActiveModal('Game: Science')} />
-          <GameCard color="bg-emerald-500" title="Geography" icon={<Calculator />} onClick={() => setActiveModal('Game: Geography')} white />
+          <GameCard color="bg-purple-500" title="Math Dash" iconImg="/icons/Item/Book/64px/Blue Book 1st 64px.png" onClick={() => setActiveModal('Game: Math Dash')} white />
+          <GameCard color="bg-lime-400" title="Word Jump" iconImg="/icons/Item/Pencil/64px/Blue Pencil 1st 64px.png" onClick={() => setActiveModal('Game: Spelling')} />
+          <GameCard color="bg-white" title="Logic Blocks" iconImg="/icons/Item/Dice/64px/Dice 1st 64px.png" onClick={() => setActiveModal('Game: Logic')} />
+          <GameCard color="bg-black" title="Memory Match" iconImg="/icons/Item/Crown/64px/Crown 1st 64px.png" onClick={() => setActiveModal('Game: Memory Quiz')} lime />
+          <GameCard color="bg-sky-400" title="Counting" iconImg="/icons/Item/Target/64px/Golden Target 1st 64px.png" onClick={() => setActiveModal('Game: Counting')} white />
+          <GameCard color="bg-violet-500" title="Shapes" iconImg="/icons/Item/Magnet/64px/Golden Magnet 1st 64px.png" onClick={() => setActiveModal('Game: Shapes')} white />
+          <GameCard color="bg-amber-400" title="Science" iconImg="/icons/Item/Potion/64px/Blue Potion 1st 64px.png" onClick={() => setActiveModal('Game: Science')} />
+          <GameCard color="bg-emerald-500" title="Geography" iconImg="/icons/Nature/Planet/64px/Golden Planet 1st 64px.png" onClick={() => setActiveModal('Game: Geography')} white />
         </div>
       </div>
     );
@@ -407,7 +407,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">STORIES</h2>
         </div>
         <div className="flex-1 grid grid-cols-2 gap-4 md:gap-6 overflow-y-auto pr-2 pb-4 md:pb-0 content-start">
-          <GameCard color="bg-lime-400" title="Magic Maker" icon={<Wand2 />} onClick={() => setActiveModal('Story: Magic')} />
+          <GameCard color="bg-lime-400" title="Magic Maker" iconImg="/icons/Main/Star/64px/Blue Star 1st 64px.png" onClick={() => setActiveModal('Story: Magic')} />
           <StoryCard title="Jungle Quest" image="jungle explorer" onClick={() => setActiveModal('Story: Jungle Explorer')} />
           <StoryCard title="Space Dino" image="dinosaur in space" onClick={() => setActiveModal('Story: Space Dinosaur')} />
           <StoryCard title="Ocean Explorer" image="submarine ocean" onClick={() => setActiveModal('Story: Ocean Explorer')} />
@@ -550,15 +550,16 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
 }
 
 // --- Game Card ---
-function GameCard({ color, title, icon, onClick, white, lime }: { color: string; title: string; icon: React.ReactElement; onClick: () => void; white?: boolean; lime?: boolean }) {
-  const textClass = white ? 'text-white' : lime ? 'text-lime-400' : 'text-black';
+function GameCard({ color, title, iconImg, onClick, white, lime }: { color: string; title: string; iconImg: string; onClick: () => void; white?: boolean; lime?: boolean }) {
+  const textColor = white ? 'text-white' : lime ? 'text-lime-400' : 'text-black';
   return (
     <motion.button whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} onClick={onClick}
-      className={`${color} border-4 border-black p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center gap-3 md:gap-6 h-full`}>
-      <div className={`p-3 md:p-6 rounded-xl md:rounded-2xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${color === 'bg-black' ? 'bg-lime-400' : 'bg-white/50'}`}>
-        {React.cloneElement(icon, { className: "w-10 h-10 md:w-16 md:h-16 text-black" })}
+      className={`${color} border-4 border-black p-4 md:p-6 rounded-[2rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center gap-2 md:gap-4 group h-36 md:h-48 cursor-pointer transition-colors relative overflow-hidden`}>
+      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+      <div className="relative z-10 drop-shadow-md">
+        <img src={iconImg} alt={title} className="w-10 h-10 md:w-16 md:h-16 object-contain" />
       </div>
-      <span className={`font-black uppercase tracking-widest ${textClass} text-xl md:text-3xl lg:text-4xl leading-none text-center`} style={white ? { textShadow: '2px 2px 0px black' } : {}}>{title}</span>
+      <span className={`font-black uppercase tracking-tighter text-lg md:text-2xl text-center leading-tight relative z-10 ${textColor}`}>{title}</span>
     </motion.button>
   );
 }

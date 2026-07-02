@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Trophy, X, Check } from 'lucide-react';
+import { Heart, Trophy, X, Check, Circle, Square, Triangle, Star, Hexagon, Diamond, Pentagon } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const SHAPES = [
-  { name: 'Circle', emoji: '🔴', color: 'bg-red-400', sides: 0 },
-  { name: 'Square', emoji: '🟦', color: 'bg-blue-400', sides: 4 },
-  { name: 'Triangle', emoji: '🔺', color: 'bg-yellow-400', sides: 3 },
-  { name: 'Star', emoji: '⭐', color: 'bg-amber-400', sides: 5 },
-  { name: 'Diamond', emoji: '🔷', color: 'bg-cyan-400', sides: 4 },
-  { name: 'Heart', emoji: '❤️', color: 'bg-pink-400', sides: 0 },
-  { name: 'Pentagon', emoji: '⬟', color: 'bg-purple-400', sides: 5 },
-  { name: 'Hexagon', emoji: '⬡', color: 'bg-green-400', sides: 6 },
+  { name: 'Circle', icon: Circle, color: 'bg-red-400', iconColor: 'text-red-700', sides: 0 },
+  { name: 'Square', icon: Square, color: 'bg-blue-400', iconColor: 'text-blue-700', sides: 4 },
+  { name: 'Triangle', icon: Triangle, color: 'bg-yellow-400', iconColor: 'text-yellow-700', sides: 3 },
+  { name: 'Star', icon: Star, color: 'bg-amber-400', iconColor: 'text-amber-700', sides: 5 },
+  { name: 'Diamond', icon: Diamond, color: 'bg-cyan-400', iconColor: 'text-cyan-700', sides: 4 },
+  { name: 'Heart', icon: Heart, color: 'bg-pink-400', iconColor: 'text-pink-700', sides: 0 },
+  { name: 'Pentagon', icon: Pentagon, color: 'bg-purple-400', iconColor: 'text-purple-700', sides: 5 },
+  { name: 'Hexagon', icon: Hexagon, color: 'bg-green-400', iconColor: 'text-green-700', sides: 6 },
 ];
 
 interface ShapeSortGameProps {
@@ -190,7 +190,7 @@ export function ShapeSortGame({ onClose, addStars, showToast, playSound, advance
                 transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
                 className={`w-24 h-24 md:w-32 md:h-32 ${shape.color} border-4 border-black rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
               >
-                <span className="text-5xl md:text-6xl">{shape.emoji}</span>
+                <shape.icon className={`w-12 h-12 md:w-16 md:h-16 ${shape.iconColor}`} />
               </motion.div>
             ))}
           </motion.div>
