@@ -1,9 +1,29 @@
 // --- Core App Types ---
 
-export interface Child {
+export interface ParentProfile {
+  id: string;
+  name: string;
+  pin: string;
+}
+
+export interface ParentAccount {
+  parents: ParentProfile[];
+  kids: KidProfile[];
+  createdAt: number;
+}
+
+export interface KidProfile {
+  id: string;
   name: string;
   age: number;
   avatarSeed: string;
+  interests: string[];
+  difficulty: Difficulty;
+  linkCode: string;
+  stars: number;
+  streak: number;
+  questProgress: number;
+  gameStats: GameStats;
 }
 
 export interface Reward {
@@ -20,6 +40,7 @@ export interface Task {
   reward: number;
   isChore: boolean;
   status: 'pending' | 'done' | 'approved';
+  kidId?: string;
   completedAt?: number;
 }
 
@@ -60,7 +81,7 @@ export interface GameData {
   questions: Question[];
 }
 
-export type AppView = 'landing' | 'onboarding' | 'kid' | 'parent';
+export type AppView = 'landing' | 'parent-setup' | 'kid-link' | 'kid' | 'parent';
 export type KidTab = 'home' | 'games' | 'chores' | 'stories' | 'store' | 'settings';
 export type SoundType = 'pop' | 'win' | 'lose' | 'click' | 'whoosh';
 export type Difficulty = 'easy' | 'medium' | 'hard';

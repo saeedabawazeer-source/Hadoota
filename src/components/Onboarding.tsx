@@ -1,44 +1,56 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Sparkles, Lock, Check, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Lock, Check, User, Heart, Gift, Copy, CheckCircle } from 'lucide-react';
+import type { KidProfile, Difficulty } from '../types';
 
-interface OnboardingProps {
-  onComplete: (data: { name: string; age: number; avatarSeed: string; pin: string }) => void;
+interface ParentOnboardingProps {
+  onComplete: (data: { parentName: string; pin: string; kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'> }) => void;
   onBack: () => void;
 }
 
 const AVATAR_SEEDS = ['Felix', 'Aneka', 'Jasper', 'Oliver', 'Mia', 'Leo', 'Zoe', 'Sam', 'Luna', 'Max', 'Nala', 'Koda'];
 const AGE_OPTIONS = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const INTEREST_OPTIONS = ['Math', 'Reading', 'Science', 'Art', 'Music', 'Sports', 'Animals', 'Space'];
 
-export function Onboarding({ onComplete, onBack }: OnboardingProps) {
+export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
   const [step, setStep] = useState(0);
-  const [name, setName] = useState('');
-  const [age, setAge] = useState(6);
-  const [avatarSeed, setAvatarSeed] = useState('Felix');
+  // Parent info
+  const [parentName, setParentName] = useState('');
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
   const [pinError, setPinError] = useState('');
+  // Kid info
+  const [kidName, setKidName] = useState('');
+  const [kidAge, setKidAge] = useState(6);
+  const [avatarSeed, setAvatarSeed] = useState('Felix');
+  const [interests, setInterests] = useState<string[]>([]);
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
 
   const steps = [
-    { title: "What's your name?", subtitle: "We'll use this to personalize everything" },
-    { title: "How old are you?", subtitle: "This helps us pick the right difficulty" },
-    { title: "Choose your hero!", subtitle: "Pick an avatar that looks like you" },
-    { title: "Parent PIN", subtitle: "Set a 4-digit PIN for parent controls" },
+    { title: "Welcome, Parent!", subtitle: "Let's set up your account first" },
+    { title: "Add Your Child", subtitle: "Tell us about your little learner" },
+    { title: "Pick Their Avatar", subtitle: "Choose a hero for your child" },
+    { title: "What Do They Love?", subtitle: "Select their interests" },
+    { title: "Set Difficulty", subtitle: "Choose the right challenge level" },
   ];
 
   const canAdvance = () => {
-    if (step === 0) return name.trim().length >= 1;
-    if (step === 1) return true;
+    if (step === 0) return parentName.trim().length >= 1 && pin.length === 4 && pin === pinConfirm;
+    if (step === 1) return kidName.trim().length >= 1;
     if (step === 2) return true;
-    if (step === 3) return pin.length === 4 && pin === pinConfirm;
+    if (step === 3) return true;
+    if (step === 4) return true;
     return false;
   };
 
   const handleNext = () => {
-    if (step === 3) {
-      if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return; }
-      if (pin !== pinConfirm) { setPinError('PINs do not match'); return; }
-      onComplete({ name: name.trim(), age, avatarSeed, pin });
+    if (step === 0 && pin !== pinConfirm) { setPinError('PINs do not match'); return; }
+    if (step === 4) {
+      onComplete({
+        parentName: parentName.trim(),
+        pin,
+        kid: { name: kidName.trim(), age: kidAge, avatarSeed, interests, difficulty },
+      });
       return;
     }
     setStep(s => s + 1);
@@ -47,6 +59,10 @@ export function Onboarding({ onComplete, onBack }: OnboardingProps) {
   const handleBack = () => {
     if (step === 0) { onBack(); return; }
     setStep(s => s - 1);
+  };
+
+  const toggleInterest = (interest: string) => {
+    setInterests(prev => prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]);
   };
 
   return (
@@ -61,7 +77,7 @@ export function Onboarding({ onComplete, onBack }: OnboardingProps) {
       </div>
 
       {/* Progress dots */}
-      <div className="flex gap-3 mb-8 md:mb-12 z-10 shrink-0">
+      <div className="flex gap-3 mb-6 md:mb-10 z-10 shrink-0">
         {steps.map((_, i) => (
           <motion.div
             key={i}
@@ -72,7 +88,7 @@ export function Onboarding({ onComplete, onBack }: OnboardingProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center z-10 w-full max-w-lg min-h-0">
+      <div className="flex-1 flex flex-col items-center justify-center z-10 w-full max-w-lg min-h-0 overflow-y-auto custom-scrollbar">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -85,145 +101,154 @@ export function Onboarding({ onComplete, onBack }: OnboardingProps) {
             <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-2 md:mb-3" style={{ textShadow: '2px 2px 0px black' }}>
               {steps[step].title}
             </h2>
-            <p className="text-lime-400 font-bold text-sm md:text-lg uppercase tracking-widest mb-8 md:mb-10">
+            <p className="text-lime-400 font-bold text-sm md:text-lg uppercase tracking-widest mb-6 md:mb-8">
               {steps[step].subtitle}
             </p>
 
-            {/* Step 0: Name */}
+            {/* Step 0: Parent Name + PIN */}
             {step === 0 && (
-              <div className="w-full">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
-                  placeholder="Type your name..."
-                  maxLength={20}
-                  autoFocus
-                  className="w-full bg-white border-4 border-black p-5 md:p-6 rounded-2xl text-2xl md:text-3xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 placeholder:text-gray-300"
-                  aria-label="Child's name"
-                />
+              <div className="w-full flex flex-col gap-4">
+                <div>
+                  <label className="text-white/80 font-bold text-sm uppercase tracking-widest mb-2 block text-left">Your Name</label>
+                  <input
+                    type="text"
+                    value={parentName}
+                    onChange={e => setParentName(e.target.value)}
+                    placeholder="e.g. Sarah, Ahmed..."
+                    maxLength={30}
+                    autoFocus
+                    className="w-full bg-white border-4 border-black p-4 md:p-5 rounded-2xl text-xl md:text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 placeholder:text-gray-300"
+                    aria-label="Parent name"
+                  />
+                </div>
+                <div className="bg-black/20 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 text-lime-400 mb-2">
+                    <Lock className="w-5 h-5" />
+                    <span className="font-bold text-sm uppercase tracking-widest">Set Your PIN</span>
+                  </div>
+                  <p className="text-white/70 font-bold text-xs mb-3">This PIN protects the parent dashboard. Don't share it with your child.</p>
+                  <div className="flex gap-3">
+                    <input
+                      type="password" inputMode="numeric" maxLength={4} value={pin}
+                      onChange={e => { setPin(e.target.value.replace(/\D/g, '')); setPinError(''); }}
+                      placeholder="PIN"
+                      className="flex-1 bg-white border-4 border-black p-3 rounded-2xl text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[0.5em]"
+                      aria-label="Enter PIN"
+                    />
+                    <input
+                      type="password" inputMode="numeric" maxLength={4} value={pinConfirm}
+                      onChange={e => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinError(''); }}
+                      placeholder="Confirm"
+                      className="flex-1 bg-white border-4 border-black p-3 rounded-2xl text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[0.5em]"
+                      aria-label="Confirm PIN"
+                    />
+                  </div>
+                  {pinError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-300 font-bold text-sm uppercase text-center mt-2">{pinError}</motion.p>}
+                </div>
               </div>
             )}
 
-            {/* Step 1: Age */}
+            {/* Step 1: Kid Name + Age */}
             {step === 1 && (
-              <div className="w-full grid grid-cols-5 gap-3 md:gap-4">
-                {AGE_OPTIONS.map(a => (
-                  <motion.button
-                    key={a}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setAge(a)}
-                    className={`aspect-square rounded-2xl border-4 border-black font-black text-2xl md:text-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors
-                      ${age === a ? 'bg-lime-400 text-black ring-4 ring-white' : 'bg-white text-black hover:bg-lime-100'}`}
-                    aria-label={`Age ${a}`}
-                  >
-                    {a}
-                  </motion.button>
-                ))}
+              <div className="w-full flex flex-col gap-5">
+                <div>
+                  <label className="text-white/80 font-bold text-sm uppercase tracking-widest mb-2 block text-left">Child's Name</label>
+                  <input
+                    type="text"
+                    value={kidName}
+                    onChange={e => setKidName(e.target.value)}
+                    placeholder="Type their name..."
+                    maxLength={20}
+                    autoFocus
+                    className="w-full bg-white border-4 border-black p-4 md:p-5 rounded-2xl text-xl md:text-2xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 placeholder:text-gray-300"
+                    aria-label="Child's name"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/80 font-bold text-sm uppercase tracking-widest mb-3 block text-left">Age</label>
+                  <div className="grid grid-cols-5 gap-2 md:gap-3">
+                    {AGE_OPTIONS.map(a => (
+                      <motion.button key={a} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setKidAge(a)}
+                        className={`aspect-square rounded-2xl border-4 border-black font-black text-xl md:text-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors
+                          ${kidAge === a ? 'bg-lime-400 text-black ring-4 ring-white' : 'bg-white text-black hover:bg-lime-100'}`}
+                        aria-label={`Age ${a}`}>
+                        {a}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Step 2: Avatar */}
             {step === 2 && (
-              <div className="w-full flex flex-col items-center gap-6">
-                <motion.div
-                  key={avatarSeed}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="w-36 h-36 md:w-48 md:h-48 bg-purple-300 border-4 border-black rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex items-center justify-center"
-                >
-                  <img
-                    src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${avatarSeed}&backgroundColor=transparent`}
-                    alt="Avatar"
-                    className="w-28 h-28 md:w-40 md:h-40"
-                  />
+              <div className="w-full flex flex-col items-center gap-5">
+                <motion.div key={avatarSeed} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  className="w-32 h-32 md:w-44 md:h-44 bg-purple-300 border-4 border-black rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex items-center justify-center">
+                  <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${avatarSeed}&backgroundColor=transparent`} alt="Avatar" className="w-24 h-24 md:w-36 md:h-36" />
                 </motion.div>
-
                 <div className="grid grid-cols-6 gap-2 md:gap-3 w-full max-w-sm">
                   {AVATAR_SEEDS.map(seed => (
-                    <motion.button
-                      key={seed}
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setAvatarSeed(seed)}
+                    <motion.button key={seed} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => setAvatarSeed(seed)}
                       className={`aspect-square rounded-xl border-3 md:border-4 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all
                         ${avatarSeed === seed ? 'ring-4 ring-lime-400 ring-offset-2 ring-offset-purple-600 bg-lime-100' : 'bg-purple-200 hover:bg-purple-100'}`}
-                      aria-label={`Avatar ${seed}`}
-                    >
-                      <img
-                        src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=transparent`}
-                        alt={seed}
-                        className="w-full h-full"
-                      />
+                      aria-label={`Avatar ${seed}`}>
+                      <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=transparent`} alt={seed} className="w-full h-full" />
                     </motion.button>
                   ))}
                 </div>
-
                 <p className="text-white/60 font-bold text-sm uppercase tracking-widest">{avatarSeed}</p>
               </div>
             )}
 
-            {/* Step 3: PIN */}
+            {/* Step 3: Interests */}
             {step === 3 && (
-              <div className="w-full flex flex-col gap-4 max-w-xs mx-auto">
-                <div className="bg-black/20 rounded-2xl p-4 mb-2">
-                  <div className="flex items-center gap-2 text-lime-400 mb-2">
-                    <Lock className="w-5 h-5" />
-                    <span className="font-bold text-sm uppercase tracking-widest">For parents only</span>
-                  </div>
-                  <p className="text-white/70 font-bold text-xs">This PIN protects the parent dashboard. Don't share it with your child.</p>
+              <div className="w-full">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  {INTEREST_OPTIONS.map(interest => (
+                    <motion.button key={interest} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                      onClick={() => toggleInterest(interest)}
+                      className={`p-4 md:p-5 rounded-2xl border-4 border-black font-black text-lg md:text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors flex items-center gap-3
+                        ${interests.includes(interest) ? 'bg-lime-400 text-black' : 'bg-white text-black hover:bg-lime-100'}`}>
+                      {interests.includes(interest) && <CheckCircle className="w-5 h-5 shrink-0" />}
+                      {interest}
+                    </motion.button>
+                  ))}
                 </div>
-
-                <div>
-                  <label className="text-white/80 font-bold text-sm uppercase tracking-widest mb-2 block text-left">Enter PIN</label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={4}
-                    value={pin}
-                    onChange={e => { setPin(e.target.value.replace(/\D/g, '')); setPinError(''); }}
-                    placeholder="• • • •"
-                    className="w-full bg-white border-4 border-black p-4 rounded-2xl text-3xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[1em] placeholder:tracking-[0.5em]"
-                    aria-label="Enter parent PIN"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-white/80 font-bold text-sm uppercase tracking-widest mb-2 block text-left">Confirm PIN</label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={4}
-                    value={pinConfirm}
-                    onChange={e => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinError(''); }}
-                    placeholder="• • • •"
-                    className="w-full bg-white border-4 border-black p-4 rounded-2xl text-3xl font-black text-center text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 tracking-[1em] placeholder:tracking-[0.5em]"
-                    aria-label="Confirm parent PIN"
-                  />
-                </div>
-
-                {pinError && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-300 font-bold text-sm uppercase text-center">
-                    {pinError}
-                  </motion.p>
-                )}
+                <p className="text-white/50 font-bold text-xs uppercase tracking-widest mt-4 text-center">
+                  {interests.length === 0 ? 'Select any that apply (optional)' : `${interests.length} selected`}
+                </p>
               </div>
             )}
+
+            {/* Step 4: Difficulty */}
+            {step === 4 && (
+              <div className="w-full flex flex-col gap-4">
+                {([
+                  { val: 'easy' as const, label: 'Easy', desc: 'Ages 3-5 · Simple counting, shapes, letters', color: 'bg-green-400' },
+                  { val: 'medium' as const, label: 'Medium', desc: 'Ages 6-8 · Addition, spelling, basic science', color: 'bg-yellow-400' },
+                  { val: 'hard' as const, label: 'Hard', desc: 'Ages 9-12 · Multiplication, geography, logic', color: 'bg-red-400' },
+                ]).map(d => (
+                  <motion.button key={d.val} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    onClick={() => setDifficulty(d.val)}
+                    className={`${d.color} border-4 border-black p-5 md:p-6 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-left transition-all
+                      ${difficulty === d.val ? 'ring-4 ring-white ring-offset-4 ring-offset-purple-600' : ''}`}>
+                    <h3 className="font-black text-2xl uppercase">{d.label}</h3>
+                    <p className="font-bold text-black/70 text-sm mt-1">{d.desc}</p>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Navigation */}
-      <div className="flex gap-4 w-full max-w-lg z-10 shrink-0 mt-6 md:mt-8">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleBack}
+      <div className="flex gap-4 w-full max-w-lg z-10 shrink-0 mt-4 md:mt-6">
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleBack}
           className="bg-white/20 border-4 border-white/40 text-white px-6 py-4 rounded-2xl font-black text-lg uppercase flex items-center gap-2 hover:bg-white/30 transition-colors"
-          aria-label="Go back"
-        >
+          aria-label="Go back">
           <ArrowLeft className="w-5 h-5" /> Back
         </motion.button>
 
@@ -234,10 +259,9 @@ export function Onboarding({ onComplete, onBack }: OnboardingProps) {
           disabled={!canAdvance()}
           className={`flex-1 border-4 border-black px-6 py-4 rounded-2xl font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 transition-all
             ${canAdvance() ? 'bg-lime-400 text-black hover:bg-lime-300' : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 shadow-none'}`}
-          aria-label={step === 3 ? 'Finish setup' : 'Next step'}
-        >
-          {step === 3 ? (
-            <>Let's Go! <Sparkles className="w-5 h-5" /></>
+          aria-label={step === 4 ? 'Finish setup' : 'Next step'}>
+          {step === 4 ? (
+            <>All Set! <Sparkles className="w-5 h-5" /></>
           ) : (
             <>Next <ArrowRight className="w-5 h-5" /></>
           )}

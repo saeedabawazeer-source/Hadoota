@@ -1,8 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, ArrowRight, Download, Smartphone, CheckCircle } from 'lucide-react';
+import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, ArrowRight, Download, Smartphone, CheckCircle, KeyRound, Users } from 'lucide-react';
 
-export function LandingPage({ onTryApp, setupDone }: { onTryApp: () => void, setupDone?: boolean }) {
+interface LandingPageProps {
+  onParentSetup: () => void;
+  onKidLink: () => void;
+  isParentSetup?: boolean;
+}
+
+export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: LandingPageProps) {
   return (
     <div className="h-[100dvh] w-full bg-orange-500 font-sans overflow-y-auto overflow-x-hidden selection:bg-lime-400 custom-scrollbar relative">
 
@@ -16,14 +22,14 @@ export function LandingPage({ onTryApp, setupDone }: { onTryApp: () => void, set
             <span className="font-black text-xl text-white uppercase tracking-tight" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
           </div>
           <div className="flex items-center gap-3">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onTryApp}
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
               className="bg-lime-400 border-2 border-black text-black px-4 py-2 rounded-full font-black text-sm uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors hidden sm:flex items-center gap-1.5 cursor-pointer">
-              {setupDone ? 'Early Access Login' : 'Try Web Demo'} <ArrowRight className="w-4 h-4" />
+              {isParentSetup ? 'Parent Login' : "I'm a Parent"} <ArrowRight className="w-4 h-4" />
             </motion.button>
-            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-              className="bg-black text-white px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 hover:bg-gray-800 transition-colors border-2 border-black">
-              <Download className="w-4 h-4" /> Download
-            </a>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink}
+              className="bg-white text-black px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 hover:bg-gray-100 transition-colors border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+              <KeyRound className="w-4 h-4" /> I'm a Kid
+            </motion.button>
           </div>
         </div>
       </nav>
@@ -68,27 +74,34 @@ export function LandingPage({ onTryApp, setupDone }: { onTryApp: () => void, set
           Fun educational games, AI-powered stories, and a reward system that makes kids aged 3-12 excited to learn every single day.
         </motion.p>
 
-        {/* Store Buttons */}
+        {/* Action Buttons */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
           className="relative z-10 flex flex-col sm:flex-row gap-4 items-center">
-          <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-            className="bg-black border-4 border-black text-white px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] hover:bg-gray-900 transition-colors flex items-center gap-3">
-            <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            App Store
-          </a>
-          <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
-            className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-3">
-            <svg viewBox="0 0 24 24" className="w-7 h-7 fill-black"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 010 1.38l-2.302 2.302L15.12 12.69l2.578-3.182zM5.864 2.658L16.8 8.99l-2.302 2.302L5.864 2.658z"/></svg>
-            Google Play
-          </a>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
+            className="bg-black border-4 border-black text-white px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] hover:bg-gray-900 transition-colors flex items-center gap-3 cursor-pointer">
+            <Users className="w-7 h-7" />
+            {isParentSetup ? 'Parent Login' : "I'm a Parent — Set Up"}
+          </motion.button>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink}
+            className="bg-lime-400 border-4 border-black text-black px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-3 cursor-pointer">
+            <KeyRound className="w-7 h-7" />
+            I'm a Kid — Enter Code
+          </motion.button>
         </motion.div>
 
-        {/* Web demo link */}
-        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onTryApp}
-          className="relative z-10 mt-6 text-white/70 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-2 cursor-pointer">
-          <Smartphone className="w-4 h-4" /> {setupDone ? 'Or play right now →' : 'Or try the free web demo →'}
-        </motion.button>
+        {/* App Store links */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+          className="relative z-10 mt-6 flex gap-4 items-center">
+          <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
+            className="text-white/60 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-1.5">
+            <Download className="w-4 h-4" /> App Store
+          </a>
+          <span className="text-white/30">|</span>
+          <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
+            className="text-white/60 hover:text-white font-bold text-sm uppercase tracking-widest underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors flex items-center gap-1.5">
+            <Download className="w-4 h-4" /> Google Play
+          </a>
+        </motion.div>
       </header>
 
       {/* App Preview / Mock */}
@@ -249,24 +262,20 @@ export function LandingPage({ onTryApp, setupDone }: { onTryApp: () => void, set
       {/* Final CTA */}
       <section className="px-6 py-16 md:py-24 text-center">
         <div className="max-w-2xl mx-auto bg-white border-4 md:border-[6px] border-black rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">Download Hadoota Today</h2>
-          <p className="text-lg md:text-xl font-bold text-gray-600 mb-8">Free to download. Start your child's learning adventure now.</p>
+          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">Get Started Now</h2>
+          <p className="text-lg md:text-xl font-bold text-gray-600 mb-8">Set up your family's learning adventure in under 2 minutes.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-              className="bg-black text-white px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] hover:bg-gray-900 transition-colors flex items-center justify-center gap-2 border-4 border-black">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-              App Store
-            </a>
-            <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
-              className="bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center justify-center gap-2 border-4 border-black">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-black"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 010 1.38l-2.302 2.302L15.12 12.69l2.578-3.182zM5.864 2.658L16.8 8.99l-2.302 2.302L5.864 2.658z"/></svg>
-              Google Play
-            </a>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
+              className="bg-black text-white px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] hover:bg-gray-900 transition-colors flex items-center justify-center gap-2 border-4 border-black cursor-pointer">
+              <Users className="w-6 h-6" />
+              {isParentSetup ? 'Parent Login' : "I'm a Parent"}
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink}
+              className="bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center justify-center gap-2 border-4 border-black cursor-pointer">
+              <KeyRound className="w-6 h-6" />
+              I'm a Kid
+            </motion.button>
           </div>
-          <button onClick={onTryApp}
-            className="mt-6 text-gray-500 hover:text-gray-700 font-bold text-sm uppercase tracking-widest underline underline-offset-4 transition-colors cursor-pointer">
-            {setupDone ? 'Or play right now' : 'Or try the free web demo'}
-          </button>
         </div>
       </section>
 

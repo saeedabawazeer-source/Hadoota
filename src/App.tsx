@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useStickyState } from './hooks/useStickyState';
 import { useSound } from './hooks/useSound';
+import { useParentStore } from './hooks/useParentStore';
 import { LandingPage } from './components/LandingPage';
 import { Onboarding } from './components/Onboarding';
+import { KidLinkEntry } from './components/KidLinkEntry';
 import { CarDashGame } from './components/CarDashGame';
 import { WordPopGame } from './components/WordPopGame';
 import { MemoryMatchGame } from './components/MemoryMatchGame';
@@ -16,82 +18,144 @@ import { StoryEngine, StoryCard } from './components/StoryEngine';
 import { QuizGame } from './components/QuizGame';
 import { ParentDashboard } from './components/ParentDashboard';
 import { mathQuestions, spellingQuestions, logicQuestions, scienceQuestions, geographyQuestions, memoryQuestions } from './data/questions';
-import type { Task, Reward, GameStats } from './types';
-
-const DEFAULT_REWARDS: Reward[] = [
-  { id: '1', title: 'Extra 30m Screen Time', cost: 500, icon: 'tv' },
-  { id: '2', title: 'Ice Cream Trip', cost: 1500, icon: 'ice-cream' },
-  { id: '3', title: 'New Toy ($10)', cost: 5000, icon: 'gift' },
-];
-const DEFAULT_STATS: GameStats = { gamesPlayed: 0, totalCorrect: 0, totalWrong: 0, totalStarsEarned: 0, subjectStats: {}, dailyActivity: [] };
+import type { Task, Reward, GameStats, AppView, KidProfile, ParentProfile } from './types';
 
 export default function App() {
-  // Onboarding state
-  const [setupDone, setSetupDone] = useStickyState(false, 'h_setup');
-  const [childName, setChildName] = useStickyState('', 'h_name');
-  const [childAge, setChildAge] = useStickyState(6, 'h_age');
-  const [avatarSeed, setAvatarSeed] = useStickyState('Felix', 'h_avatar');
-  const [parentPin, setParentPin] = useStickyState('1234', 'h_pin');
+  const store = useParentStore();
 
-  // App state
-  const [view, setView] = useState<'landing' | 'onboarding' | 'kid' | 'parent'>('landing');
-  const [stars, setStars] = useStickyState(0, 'h_stars');
-  const [rewards, setRewards] = useStickyState<Reward[]>(DEFAULT_REWARDS, 'h_rewards');
-  const [assignedTasks, setAssignedTasks] = useStickyState<Task[]>([], 'h_tasks');
-  const [streak, setStreak] = useStickyState(0, 'h_streak');
-  const [questProgress, setQuestProgress] = useStickyState(0, 'h_quest');
-  const [gameStats, setGameStats] = useStickyState<GameStats>(DEFAULT_STATS, 'h_stats');
-  const [soundEnabled, setSoundEnabled] = useStickyState(true, 'h_sound');
-  const [difficulty, setDifficulty] = useStickyState('easy', 'h_diff');
-
+  // View state (not persisted — always starts at landing)
+  const [view, setView] = useState<AppView>('landing');
   const [activeTab, setActiveTab] = useState('home');
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [toast, setToast] = useState('');
 
+  // The currently active kid profile (set when kid links via code or parent selects)
+  const [activeKid, setActiveKid] = useState<KidProfile | null>(null);
+  
+  // The currently active parent (set after PIN entry)
+  const [activeParent, setActiveParent] = useState<ParentProfile | null>(null);
+
+  const [soundEnabled, setSoundEnabled] = useStickyState(true, 'h_sound');
   const playSound = useSound(soundEnabled);
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
+
+  // Derive kid-specific values from activeKid
+  const childName = activeKid?.name || '';
+  const avatarSeed = activeKid?.avatarSeed || 'Felix';
+  const stars = activeKid?.stars || 0;
+  const streak = activeKid?.streak || 0;
+  const questProgress = activeKid?.questProgress || 0;
+  const difficulty = activeKid?.difficulty || 'easy';
+  const gameStats = activeKid?.gameStats || { gamesPlayed: 0, totalCorrect: 0, totalWrong: 0, totalStarsEarned: 0, subjectStats: {}, dailyActivity: [] };
+
+  // Kid-specific mutations that go through store
   const addStars = (amount: number) => {
-    setStars((p: number) => p + amount);
-    setGameStats((s: GameStats) => ({ ...s, totalStarsEarned: s.totalStarsEarned + amount }));
-  };
-  const recordAnswer = (correct: boolean) => {
-    setGameStats((s: GameStats) => ({
-      ...s,
-      totalCorrect: s.totalCorrect + (correct ? 1 : 0),
-      totalWrong: s.totalWrong + (correct ? 0 : 1),
-    }));
-  };
-  const recordGamePlayed = () => {
-    setGameStats((s: GameStats) => ({ ...s, gamesPlayed: s.gamesPlayed + 1 }));
+    if (!activeKid) return;
+    store.addStarsToKid(activeKid.id, amount);
+    // Update local ref
+    setActiveKid(prev => prev ? { ...prev, stars: prev.stars + amount } : prev);
   };
 
-  // Handle initial view if needed
-  useEffect(() => {
-    if (setupDone && view === 'onboarding') setView('kid');
-  }, [setupDone]);
+  const recordAnswer = (correct: boolean) => {
+    if (!activeKid) return;
+    store.recordAnswerForKid(activeKid.id, correct);
+  };
+
+  const advanceQuest = () => {
+    if (!activeKid) return;
+    store.advanceQuestForKid(activeKid.id);
+    setActiveKid(prev => prev ? { ...prev, questProgress: prev.questProgress + 1 } : prev);
+  };
+
+  const setAvatarSeed = (seed: string) => {
+    if (!activeKid) return;
+    store.updateKid(activeKid.id, { avatarSeed: seed });
+    setActiveKid(prev => prev ? { ...prev, avatarSeed: seed } : prev);
+  };
+
+  const setStars = (fn: (p: number) => number) => {
+    if (!activeKid) return;
+    const newStars = fn(activeKid.stars);
+    store.updateKid(activeKid.id, { stars: newStars });
+    setActiveKid(prev => prev ? { ...prev, stars: newStars } : prev);
+  };
+
+  // Tasks for the active kid
+  const assignedTasks = activeKid ? store.getTasksForKid(activeKid.id) : [];
+  const setAssignedTasks = (newTasks: Task[] | ((prev: Task[]) => Task[])) => {
+    // This is a compatibility shim — direct mutations go through store
+    if (typeof newTasks === 'function') {
+      const updated = newTasks(assignedTasks);
+      store.setTasks(prev => [...prev.filter(t => t.kidId !== activeKid?.id), ...updated]);
+    } else {
+      store.setTasks(prev => [...prev.filter(t => t.kidId !== activeKid?.id), ...newTasks]);
+    }
+  };
+
+  // --- ROUTING ---
 
   // Landing Page
   if (view === 'landing') {
-    return <LandingPage setupDone={setupDone} onTryApp={() => setView(setupDone ? 'kid' : 'onboarding')} />;
+    return (
+      <LandingPage
+        isParentSetup={store.isParentSetup}
+        onParentSetup={() => setView(store.isParentSetup ? 'parent' : 'parent-setup')}
+        onKidLink={() => setView('kid-link')}
+      />
+    );
   }
 
-  // Onboarding
-  if (!setupDone && view === 'onboarding') {
+  // Parent Onboarding
+  if (view === 'parent-setup') {
     return (
       <Onboarding
-        onComplete={({ name, age, avatarSeed: av, pin }) => {
-          setChildName(name); setChildAge(age); setAvatarSeed(av); setParentPin(pin);
-          setSetupDone(true); setView('kid');
+        onComplete={({ parentName, pin, kid }) => {
+          store.createParentAccount(parentName, pin);
+          // Small delay to ensure account is created before adding kid
+          setTimeout(() => {
+            const newKid = store.addKid(kid);
+            setActiveKid(newKid);
+            setView('parent');
+          }, 50);
         }}
         onBack={() => setView('landing')}
       />
     );
   }
 
-  const advanceQuest = () => {
-    setQuestProgress((p: number) => p + 1);
-    recordGamePlayed();
-  };
+  // Kid Link Entry
+  if (view === 'kid-link') {
+    return (
+      <KidLinkEntry
+        getKidByLinkCode={store.getKidByLinkCode}
+        onLink={(kid) => { setActiveKid(kid); store.setActiveKidId(kid.id); setView('kid'); }}
+        onBack={() => setView('landing')}
+      />
+    );
+  }
+
+  // Parent PIN check (when parent is already set up and clicks "Parent Login")
+  if (view === 'parent' && !activeParent && store.isParentSetup) {
+    return (
+      <div className="h-[100dvh] w-full bg-purple-600 font-sans flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <PinPad verifyPin={(p) => !!store.verifyPin(p)} onSuccess={(pin) => {
+            const parent = store.verifyPin(pin);
+            if (parent) setActiveParent(parent);
+            // Set first kid as active if exists
+            if (!activeKid && store.parentAccount!.kids.length > 0) {
+              setActiveKid(store.parentAccount!.kids[0]);
+            }
+          }} />
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            onClick={() => setView('landing')}
+            className="mt-6 w-full bg-white/20 border-4 border-white/40 text-white px-6 py-4 rounded-2xl font-black text-lg uppercase flex items-center justify-center gap-2 hover:bg-white/30 transition-colors cursor-pointer">
+            <ArrowLeft className="w-5 h-5" /> Back
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
 
   const gameModalProps = {
     addStars, showToast, playSound,
@@ -146,13 +210,14 @@ export default function App() {
               className="w-full h-full flex flex-col min-h-0">
               {view === 'kid' ? (
                 <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} avatarSeed={avatarSeed}
-                  stars={stars} setStars={setStars} rewards={rewards} streak={streak} questProgress={questProgress} setQuestProgress={setQuestProgress}
+                  stars={stars} setStars={setStars} rewards={store.rewards} streak={streak} questProgress={questProgress} setQuestProgress={() => advanceQuest()}
                   showToast={showToast} assignedTasks={assignedTasks} addStars={addStars} playSound={playSound} childName={childName} difficulty={difficulty}
                   setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled}
-                  setDifficulty={setDifficulty} setAvatarSeed={setAvatarSeed} />
+                  setDifficulty={(d: any) => { if (activeKid) { store.updateKid(activeKid.id, { difficulty: d }); setActiveKid(prev => prev ? { ...prev, difficulty: d } : prev); } }} setAvatarSeed={setAvatarSeed} />
               ) : (
-                <ParentDashboard rewards={rewards} setRewards={setRewards} assignedTasks={assignedTasks} setAssignedTasks={setAssignedTasks}
-                  gameStats={gameStats} childName={childName} />
+                <ParentDashboard rewards={store.rewards} setRewards={store.setRewards} assignedTasks={assignedTasks} setAssignedTasks={setAssignedTasks}
+                  gameStats={gameStats} childName={childName} activeKid={activeKid} parentAccount={store.parentAccount} activeParent={activeParent} addParent={store.addParent}
+                  onSelectKid={(kid) => setActiveKid(kid)} onBack={() => setView('landing')} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -183,7 +248,13 @@ export default function App() {
       <AnimatePresence>
         {activeModal && (
           <ModalWrap onClose={() => setActiveModal(null)} fullScreen={activeModal.startsWith('Game:') || activeModal.startsWith('Story:')}>
-            {activeModal === 'PIN' && <PinPad pin={parentPin} onSuccess={() => { setView('parent'); setActiveModal(null); showToast('Parent Mode Unlocked'); }} />}
+            {activeModal === 'PIN' && <PinPad verifyPin={(p) => !!store.verifyPin(p)} onSuccess={(pin) => { 
+                const parent = store.verifyPin(pin);
+                if (parent) setActiveParent(parent);
+                setView('parent'); 
+                setActiveModal(null); 
+                showToast('Parent Mode Unlocked'); 
+             }} />}
             {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} setAvatarSeed={setAvatarSeed} onClose={() => setActiveModal(null)} />}
             {activeModal === 'Game: Math Dash' && <CarDashGame onClose={() => setActiveModal(null)} {...gameModalProps} />}
             {activeModal === 'Game: Spelling' && <WordPopGame onClose={() => setActiveModal(null)} {...gameModalProps}
@@ -500,14 +571,17 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
 }
 
 // --- PIN Pad ---
-function PinPad({ pin, onSuccess }: { pin: string; onSuccess: () => void }) {
+function PinPad({ verifyPin, onSuccess }: { verifyPin: (pin: string) => boolean; onSuccess: (pin: string) => void }) {
   const [entry, setEntry] = useState('');
   const [shake, setShake] = useState(false);
   const handlePress = (num: string) => {
     const newPin = entry + num;
-    setEntry(newPin);
-    if (newPin === pin) onSuccess();
-    else if (newPin.length >= 4) { setShake(true); setTimeout(() => { setShake(false); setEntry(''); }, 500); }
+    if (newPin.length < 4) {
+      setEntry(newPin);
+    } else {
+      if (verifyPin(newPin)) onSuccess(newPin);
+      else { setEntry(newPin); setShake(true); setTimeout(() => { setShake(false); setEntry(''); }, 500); }
+    }
   };
   return (
     <div className="flex-1 flex flex-col items-center justify-center max-w-sm mx-auto w-full">
