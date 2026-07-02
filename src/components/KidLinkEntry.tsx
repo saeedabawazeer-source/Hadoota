@@ -1,27 +1,102 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, KeyRound, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Sparkles, KeyRound, AlertCircle, Loader2 } from 'lucide-react';
 import type { KidProfile } from '../types';
 
 interface KidLinkEntryProps {
   onLink: (kid: KidProfile) => void;
   onBack: () => void;
   getKidByLinkCode: (code: string) => KidProfile | undefined;
+  validatePairingCode?: (code: string) => Promise<{ familyId: string; kids: KidProfile[] } | null>;
 }
 
-export function KidLinkEntry({ onLink, onBack, getKidByLinkCode }: KidLinkEntryProps) {
+export function KidLinkEntry({ onLink, onBack, getKidByLinkCode, validatePairingCode }: KidLinkEntryProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [linkedKid, setLinkedKid] = useState<KidProfile | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [availableKids, setAvailableKids] = useState<KidProfile[]>([]);
+  const [showKidPicker, setShowKidPicker] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (code.length !== 5) { setError('Code must be 5 digits'); return; }
+
+    // Try Supabase validation first
+    if (validatePairingCode) {
+      setIsValidating(true);
+      setError('');
+      try {
+        const result = await validatePairingCode(code);
+        if (result && result.kids.length > 0) {
+          if (result.kids.length === 1) {
+            // Only one kid — auto-select
+            setLinkedKid(result.kids[0]);
+            setTimeout(() => onLink(result.kids[0]), 2500);
+          } else {
+            // Multiple kids — show picker
+            setAvailableKids(result.kids);
+            setShowKidPicker(true);
+          }
+          return;
+        } else {
+          setError('Invalid code. Ask your parent for the right one!');
+          return;
+        }
+      } catch {
+        setError('Something went wrong. Try again!');
+        return;
+      } finally {
+        setIsValidating(false);
+      }
+    }
+
+    // Fallback to local lookup
     const kid = getKidByLinkCode(code);
     if (!kid) { setError('Invalid code. Ask your parent for the right one!'); return; }
     setLinkedKid(kid);
-    // Short delay for the welcome animation, then link
     setTimeout(() => onLink(kid), 2500);
   };
+
+  const selectKid = (kid: KidProfile) => {
+    setLinkedKid(kid);
+    setShowKidPicker(false);
+    setTimeout(() => onLink(kid), 2500);
+  };
+
+  // Kid picker screen (when multiple kids in family)
+  if (showKidPicker) {
+    return (
+      <div className="h-[100dvh] w-full bg-purple-600 font-sans flex flex-col items-center justify-center p-6 overflow-hidden relative">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md flex flex-col items-center gap-6 z-10">
+          <h1 className="text-3xl md:text-5xl font-black text-white uppercase text-center" style={{ textShadow: '3px 3px 0px black' }}>
+            Who's Playing?
+          </h1>
+          <p className="text-lime-400 font-bold text-sm md:text-base uppercase tracking-widest text-center">
+            Tap your name to start!
+          </p>
+          <div className="flex flex-col gap-4 w-full">
+            {availableKids.map(kid => (
+              <motion.button key={kid.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={() => selectKid(kid)}
+                className="bg-white border-4 border-black p-4 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4 cursor-pointer hover:bg-lime-100 transition-colors">
+                <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${kid.avatarSeed}&backgroundColor=transparent`}
+                  alt={kid.name} className="w-16 h-16 rounded-2xl border-3 border-black bg-purple-200" />
+                <div className="text-left">
+                  <h3 className="font-black text-2xl uppercase">{kid.name}</h3>
+                  <p className="font-bold text-gray-500 text-sm">Age {kid.age} · {kid.stars} ⭐</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { setShowKidPicker(false); setAvailableKids([]); }}
+            className="bg-white/20 border-4 border-white/40 text-white px-6 py-3 rounded-2xl font-black text-lg uppercase flex items-center gap-2 hover:bg-white/30 transition-colors mt-4">
+            <ArrowLeft className="w-5 h-5" /> Back
+          </motion.button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (linkedKid) {
     return (
@@ -90,7 +165,8 @@ export function KidLinkEntry({ onLink, onBack, getKidByLinkCode }: KidLinkEntryP
             onKeyDown={e => e.key === 'Enter' && code.length === 5 && handleSubmit()}
             placeholder="• • • • •"
             autoFocus
-            className="w-full bg-white border-4 border-black p-5 md:p-6 rounded-2xl text-4xl md:text-5xl font-black text-center text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-purple-500 tracking-[0.7em] placeholder:tracking-[0.5em] placeholder:text-gray-300"
+            disabled={isValidating}
+            className="w-full bg-white border-4 border-black p-5 md:p-6 rounded-2xl text-4xl md:text-5xl font-black text-center text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-purple-500 tracking-[0.7em] placeholder:tracking-[0.5em] placeholder:text-gray-300 disabled:opacity-60"
             aria-label="Enter 5-digit link code"
           />
         </div>
@@ -114,19 +190,23 @@ export function KidLinkEntry({ onLink, onBack, getKidByLinkCode }: KidLinkEntryP
           </motion.button>
 
           <motion.button
-            whileHover={code.length === 5 ? { scale: 1.05 } : {}}
-            whileTap={code.length === 5 ? { scale: 0.95 } : {}}
+            whileHover={code.length === 5 && !isValidating ? { scale: 1.05 } : {}}
+            whileTap={code.length === 5 && !isValidating ? { scale: 0.95 } : {}}
             onClick={handleSubmit}
-            disabled={code.length !== 5}
+            disabled={code.length !== 5 || isValidating}
             className={`flex-1 border-4 border-black px-6 py-4 rounded-2xl font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 transition-all
-              ${code.length === 5 ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 shadow-none'}`}
+              ${code.length === 5 && !isValidating ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 shadow-none'}`}
             aria-label="Connect">
-            Let's Go! <Sparkles className="w-5 h-5" />
+            {isValidating ? (
+              <><Loader2 className="w-5 h-5 animate-spin" /> Checking...</>
+            ) : (
+              <>Let's Go! <Sparkles className="w-5 h-5" /></>
+            )}
           </motion.button>
         </div>
       </div>
       <p className="mt-6 text-black/40 font-bold text-xs max-w-[250px] text-center">
-        Note: Hadoota stores data locally. The parent must set up the account on THIS specific device first.
+        Your code connects you to your parent's account from any device.
       </p>
     </div>
   );

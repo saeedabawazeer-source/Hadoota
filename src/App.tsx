@@ -113,14 +113,15 @@ export default function App() {
   if (view === 'parent-setup') {
     return (
       <Onboarding
-        onComplete={({ parentName, kid }) => {
-          store.createParentAccount(parentName);
-          // Small delay to ensure account is created before adding kid
-          setTimeout(() => {
-            const newKid = store.addKid(kid);
+        onComplete={async ({ parentName, kid }) => {
+          await store.createParentAccount(parentName);
+          // createParentAccount is now async — wait for it to finish, then add kid
+          // Small delay to ensure state has settled
+          setTimeout(async () => {
+            const newKid = await store.addKid(kid);
             setActiveKid(newKid);
             setView('parent');
-          }, 50);
+          }, 100);
         }}
         onBack={() => setView('landing')}
       />
@@ -132,6 +133,7 @@ export default function App() {
     return (
       <KidLinkEntry
         getKidByLinkCode={store.getKidByLinkCode}
+        validatePairingCode={store.validatePairingCode}
         onLink={(kid) => { setActiveKid(kid); store.setActiveKidId(kid.id); setView('kid'); }}
         onBack={() => setView('landing')}
       />
