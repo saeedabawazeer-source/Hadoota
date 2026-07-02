@@ -226,6 +226,7 @@ export default function App() {
               ) : (
                 <ParentDashboard rewards={store.rewards} setRewards={store.setRewards} assignedTasks={assignedTasks} setAssignedTasks={setAssignedTasks}
                   gameStats={gameStats} childName={childName} activeKid={activeKid} parentAccount={store.parentAccount} activeParent={activeParent} addParent={store.addParent}
+                  addStarsToKid={store.addStarsToKid}
                   onSelectKid={(kid) => setActiveKid(kid)} onBack={() => setView('landing')} />
               )}
             </motion.div>
@@ -335,7 +336,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
   }
 
   if (activeTab === 'chores') {
-    const chores = (assignedTasks || []).filter((t: Task) => t.isChore && t.status === 'pending');
+    const chores = (assignedTasks || []).filter((t: Task) => t.isChore && (t.status === 'pending' || t.status === 'done'));
     return (
       <div className="w-full h-full flex flex-col gap-4 md:gap-6 min-h-0">
         <div className="shrink-0 bg-white border-4 border-black p-3 md:p-6 rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center flex justify-between items-center">
@@ -344,15 +345,24 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
         </div>
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 overflow-y-auto pr-2 pb-4 md:pb-0 content-start">
           {chores.map((chore: Task) => (
-            <div key={chore.id} className="bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-center gap-4">
-              <div className="w-20 h-20 bg-blue-100 rounded-full border-4 border-black flex items-center justify-center"><CheckCircle className="w-10 h-10 text-blue-500" /></div>
-              <h3 className="font-black text-2xl uppercase tracking-tighter">{chore.title}</h3>
-              <button onClick={() => {
-                setAssignedTasks((assignedTasks || []).map((t: Task) => t.id === chore.id ? { ...t, status: 'done' as const } : t));
-                showToast('Sent to parent for approval!');
-              }}
-                className="w-full py-4 rounded-2xl border-4 border-black font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 bg-lime-400 hover:bg-lime-500 active:translate-y-1 active:shadow-none text-black">
-                ✋ I Did It! (+{chore.reward})
+            <div key={chore.id} className={`bg-white border-4 border-black p-6 rounded-3xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-center gap-4 ${chore.status === 'done' ? 'opacity-70' : ''}`}>
+              <div className="w-20 h-20 bg-blue-100 rounded-full border-4 border-black flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-blue-500" />
+              </div>
+              <h3 className="font-black text-xl uppercase tracking-tighter">{chore.title}</h3>
+              <div className="flex-1" />
+              <button 
+                onClick={() => {
+                  if (chore.status === 'pending') {
+                    setAssignedTasks(assignedTasks.map((t: Task) => t.id === chore.id ? { ...t, status: 'done' } : t));
+                    showToast('Waiting for parent approval!');
+                    playSound('pop');
+                  }
+                }}
+                disabled={chore.status === 'done'}
+                className={`w-full py-3 rounded-2xl border-4 border-black font-black text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 transition-transform ${chore.status === 'done' ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none translate-y-1' : 'bg-lime-400 hover:bg-lime-500 text-black active:translate-y-1 active:shadow-none cursor-pointer'}`}>
+                {chore.status === 'done' ? 'Pending Approval' : 'I Did It!'}
+                <Star className={`w-5 h-5 ${chore.status === 'done' ? 'fill-gray-500 text-gray-500' : 'fill-black text-black'}`} />{chore.reward}
               </button>
             </div>
           ))}

@@ -14,11 +14,12 @@ interface ParentDashboardProps {
   parentAccount: ParentAccount | null;
   activeParent: ParentProfile | null;
   addParent: (name: string) => void;
+  addStarsToKid: (kidId: string, stars: number) => void;
   onSelectKid: (kid: KidProfile) => void;
   onBack: () => void;
 }
 
-export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks, gameStats, childName, activeKid, parentAccount, activeParent, addParent, onSelectKid, onBack }: ParentDashboardProps) {
+export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks, gameStats, childName, activeKid, parentAccount, activeParent, addParent, addStarsToKid, onSelectKid, onBack }: ParentDashboardProps) {
   const [tab, setTab] = useState<'overview' | 'rewards' | 'tasks' | 'kids'>('overview');
   const [newRewardTitle, setNewRewardTitle] = useState('');
   const [newRewardCost, setNewRewardCost] = useState('');
@@ -46,6 +47,10 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
   };
 
   const approveTask = (id: string) => {
+    const task = assignedTasks.find(t => t.id === id);
+    if (task && task.kidId) {
+      addStarsToKid(task.kidId, task.reward);
+    }
     setAssignedTasks(assignedTasks.map(t => t.id === id ? { ...t, status: 'approved' as const } : t));
   };
 
