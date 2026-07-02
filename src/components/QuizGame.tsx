@@ -4,6 +4,7 @@ import { Trophy, Star, Flame, PartyPopper, Frown, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Question } from '../types';
 import { getQuestionsByDifficulty } from '../data/questions';
+import { Mascot } from './Mascot';
 
 interface QuizGameProps {
   title: string;
@@ -15,9 +16,11 @@ interface QuizGameProps {
   showToast: (msg: string) => void;
   playSound: (type: 'pop' | 'win' | 'lose') => void;
   advanceQuest: () => void;
+  avatarSeed?: string;
+  characterColor?: number;
 }
 
-export function QuizGame({ title, icon, questions: allQuestions, difficulty, onClose, addStars, showToast, playSound, advanceQuest }: QuizGameProps) {
+export function QuizGame({ title, icon, questions: allQuestions, difficulty, onClose, addStars, showToast, playSound, advanceQuest, avatarSeed = 'Fin', characterColor = 0 }: QuizGameProps) {
   const [questions] = useState(() => getQuestionsByDifficulty(allQuestions, difficulty).slice(0, 8));
   const [step, setStep] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -25,12 +28,14 @@ export function QuizGame({ title, icon, questions: allQuestions, difficulty, onC
   const [showTutorial, setShowTutorial] = useState(true);
   const [answerState, setAnswerState] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [selectedOpt, setSelectedOpt] = useState<any>(null);
+  const [mascotEmotion, setMascotEmotion] = useState<'idle' | 'happy' | 'sad'>('idle');
 
   const handleAnswer = (opt: any) => {
     if (answerState !== 'idle') return;
     setSelectedOpt(opt);
     if (String(opt) === String(questions[step].a)) {
       setAnswerState('correct');
+      setMascotEmotion('happy');
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#A3E635', '#FFFFFF'] });
       const points = 10 * (streak + 1);
       addStars(points);
@@ -42,7 +47,7 @@ export function QuizGame({ title, icon, questions: allQuestions, difficulty, onC
         else { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); setStep(s => s + 1); }
       }, 1500);
     } else {
-      setAnswerState('wrong'); setStreak(0); setShake(true);
+      setAnswerState('wrong'); setStreak(0); setShake(true); setMascotEmotion('sad');
       setTimeout(() => { setShake(false); setAnswerState('idle'); setSelectedOpt(null); }, 800);
     }
   };
@@ -82,8 +87,10 @@ export function QuizGame({ title, icon, questions: allQuestions, difficulty, onC
 
   const q = questions[step];
   return (
-    <div className="flex-1 flex flex-col gap-4 md:gap-8 min-h-0">
-      <div className="flex justify-between items-center shrink-0">
+    <div className="flex-1 flex flex-col gap-4 md:gap-8 min-h-0 relative">
+      <Mascot seed={avatarSeed} color={characterColor} emotion={mascotEmotion} />
+      
+      <div className="flex justify-between items-center shrink-0 z-20">
         <h3 className="text-2xl md:text-4xl font-black text-white uppercase" style={{ textShadow: '2px 2px 0px black' }}>{title}</h3>
         {streak > 1 && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 md:gap-2 bg-black border-4 border-lime-400 px-3 py-1.5 md:px-4 md:py-2 rounded-xl md:rounded-2xl shadow-[2px_2px_0px_0px_rgba(163,230,53,1)]">

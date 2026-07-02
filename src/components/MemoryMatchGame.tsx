@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Star, Plane, Rocket, Star as StarIcon, Moon, Sun, Cloud, Heart, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Mascot } from './Mascot';
 
 const ICONS = [Plane, Rocket, StarIcon, Moon, Sun, Cloud];
 
-export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advanceQuest }: any) {
+export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advanceQuest, avatarSeed = 'Fin', characterColor = 0 }: any) {
   const [cards, setCards] = useState<any[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [mascotEmotion, setMascotEmotion] = useState<'idle' | 'happy' | 'sad'>('idle');
 
   useEffect(() => {
     // Initialize deck
@@ -33,6 +35,7 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
       
       if (match) {
         playSound('win');
+        setMascotEmotion('happy');
         setMatched(prev => [...prev, ...newFlipped]);
         setFlipped([]);
         
@@ -49,6 +52,7 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
           }, 500);
         }
       } else {
+        setMascotEmotion('sad');
         setTimeout(() => {
           setFlipped([]);
         }, 1000);
@@ -77,7 +81,9 @@ export function MemoryMatchGame({ onClose, addStars, showToast, playSound, advan
 
   return (
     <div className="w-full h-full flex flex-col bg-indigo-900 rounded-3xl overflow-hidden relative border-4 border-black p-4 md:p-8">
-      <div className="flex justify-between items-center mb-8 shrink-0">
+      <Mascot seed={avatarSeed} color={characterColor} emotion={mascotEmotion} />
+      
+      <div className="flex justify-between items-center mb-8 shrink-0 z-20">
         <h2 className="text-3xl md:text-5xl font-black text-white uppercase" style={{ textShadow: '2px 2px 0px black' }}>Memory Match</h2>
         <div className="bg-white border-4 border-black px-4 py-2 rounded-xl font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase">
           Moves: {moves}

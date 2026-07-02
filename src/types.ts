@@ -16,6 +16,7 @@ export interface KidProfile {
   name: string;
   age: number;
   avatarSeed: string;
+  characterColor?: number;
   interests: string[];
   difficulty: Difficulty;
   linkCode: string;

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Car, Heart, Trophy, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Mascot } from './Mascot';
 
-export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQuest }: any) {
+export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQuest, avatarSeed = 'Fin', characterColor = 0 }: any) {
   const [lane, setLane] = useState(1); // 0, 1, 2
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -12,6 +13,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
   const [blockY, setBlockY] = useState(0); // 0 to 100
   const [gameOver, setGameOver] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  const [mascotEmotion, setMascotEmotion] = useState<'idle' | 'happy' | 'sad'>('idle');
 
   const generateQuestion = () => {
     const isAdd = Math.random() > 0.5;
@@ -53,6 +55,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
       
       if (carAnswer === correct) {
         playSound('win');
+        setMascotEmotion('happy');
         setScore(s => s + 1);
         confetti({
           particleCount: 50,
@@ -63,6 +66,7 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
         generateQuestion();
       } else {
         playSound('wrong');
+        setMascotEmotion('sad');
         setIsShaking(true);
         setTimeout(() => setIsShaking(false), 500);
         setLives(l => {
@@ -117,6 +121,8 @@ export function CarDashGame({ onClose, addStars, showToast, playSound, advanceQu
       transition={{ duration: 0.4 }}
       className="w-full h-full flex flex-col bg-gray-900 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
     >
+      <Mascot seed={avatarSeed} color={characterColor} emotion={mascotEmotion} />
+      
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black/50 backdrop-blur-sm">
         <div className="flex gap-2">

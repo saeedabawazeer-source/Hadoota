@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Trophy, X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Mascot } from './Mascot';
 
-export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQuest, gameData }: any) {
+export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQuest, gameData, avatarSeed = 'Fin', characterColor = 0 }: any) {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [balloons, setBalloons] = useState<any[]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [shake, setShake] = useState(false);
+  const [mascotEmotion, setMascotEmotion] = useState<'idle' | 'happy' | 'sad'>('idle');
 
   const currentQuestion = gameData.questions[questionIndex % gameData.questions.length];
 
@@ -50,6 +52,7 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
     
     if (balloon.letter === correct) {
       playSound('win');
+      setMascotEmotion('happy');
       setScore(s => s + 1);
       
       // Confetti at click location
@@ -64,6 +67,7 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
       setTimeout(() => setQuestionIndex(i => i + 1), 500);
     } else {
       playSound('wrong');
+      setMascotEmotion('sad');
       setShake(true);
       setTimeout(() => setShake(false), 500);
       setLives(l => {
@@ -106,6 +110,8 @@ export function WordPopGame({ onClose, addStars, showToast, playSound, advanceQu
       transition={{ duration: 0.4 }}
       className="w-full h-full flex flex-col bg-sky-300 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
     >
+      <Mascot seed={avatarSeed} color={characterColor} emotion={mascotEmotion} />
+      
       {/* Background Clouds */}
       <motion.div animate={{ x: [-50, 50, -50] }} transition={{ repeat: Infinity, duration: 20, ease: "linear" }} className="absolute top-20 left-10 w-32 h-16 bg-white/80 rounded-full blur-sm"></motion.div>
       <motion.div animate={{ x: [50, -50, 50] }} transition={{ repeat: Infinity, duration: 25, ease: "linear" }} className="absolute top-40 right-20 w-40 h-20 bg-white/60 rounded-full blur-sm"></motion.div>

@@ -39,9 +39,9 @@ export default function App() {
   const playSound = useSound(soundEnabled);
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
-  // Derive kid-specific values from activeKid
   const childName = activeKid?.name || '';
   const avatarSeed = activeKid?.avatarSeed || 'Fin';
+  const characterColor = activeKid?.characterColor || 0;
   const stars = activeKid?.stars || 0;
   const streak = activeKid?.streak || 0;
   const questProgress = activeKid?.questProgress || 0;
@@ -217,7 +217,7 @@ export default function App() {
             <motion.div key={view + activeTab} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}
               className="w-full h-full flex flex-col min-h-0">
               {view === 'kid' ? (
-                <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} avatarSeed={avatarSeed}
+                <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} avatarSeed={avatarSeed} characterColor={characterColor}
                   stars={stars} setStars={setStars} rewards={store.rewards} streak={streak} questProgress={questProgress} setQuestProgress={() => advanceQuest()}
                   showToast={showToast} assignedTasks={assignedTasks} addStars={addStars} playSound={playSound} childName={childName} difficulty={difficulty}
                   setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled}
@@ -257,16 +257,23 @@ export default function App() {
       <AnimatePresence>
         {activeModal && (
           <ModalWrap onClose={() => setActiveModal(null)} fullScreen={activeModal.startsWith('Game:') || activeModal.startsWith('Story:')}>
-            {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} setAvatarSeed={setAvatarSeed} onClose={() => setActiveModal(null)} />}
-            {activeModal === 'Game: Math Dash' && <CarDashGame onClose={() => setActiveModal(null)} {...gameModalProps} />}
-            {activeModal === 'Game: Spelling' && <WordPopGame onClose={() => setActiveModal(null)} {...gameModalProps}
+            {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} characterColor={characterColor}
+              setAvatarSeed={(seed) => {
+                if (activeKid) store.updateKid(activeKid.id, { avatarSeed: seed });
+              }}
+              setCharacterColor={(color) => {
+                if (activeKid) store.updateKid(activeKid.id, { characterColor: color });
+              }}
+              onClose={() => setActiveModal(null)} />}
+            {activeModal === 'Game: Math Dash' && <CarDashGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
+            {activeModal === 'Game: Spelling' && <WordPopGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor}
               gameData={{ title: 'Word Ninja!', tutorial: 'Find the right answer!', questions: spellingQuestions.filter(q => q.difficulty === difficulty || difficulty === 'all').slice(0, 5).map(q => ({ q: q.q, visual: null, options: q.options, a: q.a })) }} />}
-            {activeModal === 'Game: Logic' && <MemoryMatchGame onClose={() => setActiveModal(null)} {...gameModalProps} />}
-            {activeModal === 'Game: Counting' && <CountingGame onClose={() => setActiveModal(null)} {...gameModalProps} difficulty={difficulty} />}
-            {activeModal === 'Game: Shapes' && <ShapeSortGame onClose={() => setActiveModal(null)} {...gameModalProps} difficulty={difficulty} />}
-            {activeModal === 'Game: Science' && <QuizGame title="Science Lab!" icon={<Lightbulb className="w-full h-full text-yellow-500" />} questions={scienceQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} />}
-            {activeModal === 'Game: Geography' && <QuizGame title="World Explorer!" icon={<Calculator className="w-full h-full text-blue-500" />} questions={geographyQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} />}
-            {activeModal === 'Game: Memory Quiz' && <QuizGame title="Memory Master!" icon={<Brain className="w-full h-full text-lime-600" />} questions={memoryQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} />}
+            {activeModal === 'Game: Logic' && <MemoryMatchGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
+            {activeModal === 'Game: Counting' && <CountingGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} difficulty={difficulty} />}
+            {activeModal === 'Game: Shapes' && <ShapeSortGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} difficulty={difficulty} />}
+            {activeModal === 'Game: Science' && <QuizGame title="Science Lab!" icon={<Lightbulb className="w-full h-full text-yellow-500" />} questions={scienceQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
+            {activeModal === 'Game: Geography' && <QuizGame title="World Explorer!" icon={<Calculator className="w-full h-full text-blue-500" />} questions={geographyQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
+            {activeModal === 'Game: Memory Quiz' && <QuizGame title="Memory Master!" icon={<Brain className="w-full h-full text-lime-600" />} questions={memoryQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
             {activeModal.startsWith('Story:') && <StoryEngine topic={activeModal.split(': ')[1]} onClose={() => setActiveModal(null)} kidName={childName} />}
           </ModalWrap>
         )}
@@ -299,7 +306,7 @@ function NavBtn({ icon, label, active, onClick }: { icon: React.ReactElement; la
 }
 
 // --- Kid Views ---
-function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed }: any) {
+function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, characterColor, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed }: any) {
   if (activeTab === 'store') {
     return (
       <div className="w-full h-full flex flex-col gap-4 md:gap-6 min-h-0">
@@ -454,7 +461,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
       <div className="shrink-0 flex items-center gap-3 md:gap-5 bg-white border-4 border-black p-3 md:p-5 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3 }} onClick={() => setActiveModal('Settings')}
           className="w-16 h-16 md:w-20 md:h-20 bg-purple-300 border-3 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl md:rounded-2xl flex items-center justify-center cursor-pointer shrink-0">
-          <img src={`/characters/Wormies - ${['Fin', 'Jae', 'Poh', 'Mol'].includes(avatarSeed) ? avatarSeed : 'Fin'}.svg`} alt="Avatar" className="w-14 h-14 md:w-18 md:h-18 object-cover bg-white rounded-full border-2 border-black" />
+          <img src={`/characters/Wormies - ${['Fin', 'Jae', 'Poh', 'Mol'].includes(avatarSeed) ? avatarSeed : 'Fin'}.svg`} alt="Avatar" style={{ filter: `hue-rotate(${characterColor}deg)` }} className="w-14 h-14 md:w-18 md:h-18 object-cover wormie-base" />
         </motion.div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl md:text-4xl font-black text-black uppercase tracking-tighter leading-none truncate">Hi, {childName || 'Friend'}!</h1>
@@ -583,23 +590,45 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
 }
 
 // --- Settings Panel ---
-function SettingsPanel({ avatarSeed, setAvatarSeed, onClose }: { avatarSeed: string; setAvatarSeed: (s: string) => void; onClose: () => void }) {
+function SettingsPanel({ avatarSeed, characterColor, setAvatarSeed, setCharacterColor, onClose }: { avatarSeed: string; characterColor: number; setAvatarSeed: (s: string) => void; setCharacterColor: (c: number) => void; onClose: () => void }) {
   const seeds = ['Fin', 'Jae', 'Poh', 'Mol'];
   const currentSeed = seeds.includes(avatarSeed) ? avatarSeed : 'Fin';
+  
+  const colors = [
+    { label: 'Original', hue: 0, bg: 'bg-white' },
+    { label: 'Neon', hue: 90, bg: 'bg-green-400' },
+    { label: 'Ocean', hue: 180, bg: 'bg-blue-400' },
+    { label: 'Berry', hue: 270, bg: 'bg-purple-400' },
+    { label: 'Sunset', hue: 320, bg: 'bg-pink-400' }
+  ];
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto">
-      <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-8 md:mb-10 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Customize Hero</h2>
-      <div className="flex-1 flex flex-col items-center justify-center min-h-0 w-full">
-        <div className="w-40 h-40 md:w-56 md:h-56 bg-purple-300 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-8 flex items-center justify-center shrink-0">
-          <img src={`/characters/Wormies - ${currentSeed}.svg`} alt="Avatar" className="w-32 h-32 md:w-48 md:h-48 object-cover bg-white rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
-        </div>
-        <div className="flex items-center justify-center gap-4 md:gap-8 mb-8 w-full shrink-0">
-          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) - 1 + seeds.length) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Previous avatar"><ArrowLeft className="w-6 h-6 text-black" /></button>
-          <span className="text-2xl md:text-4xl font-black text-white uppercase w-28 md:w-40 text-center" style={{ textShadow: '2px 2px 0px black' }}>{currentSeed}</span>
-          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) + 1) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Next avatar"><ArrowRight className="w-6 h-6 text-black" /></button>
+    <div className="flex-1 flex flex-col items-center w-full max-w-md mx-auto pt-6">
+      <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-6 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Style Hero</h2>
+      
+      <div className="w-32 h-32 md:w-48 md:h-48 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-6 flex items-center justify-center shrink-0" style={{ background: 'var(--lime-accent)' }}>
+        <img src={`/characters/Wormies - ${currentSeed}.svg`} alt="Avatar" className="w-24 h-24 md:w-40 md:h-40 object-cover wormie-stroke" style={{ filter: `hue-rotate(${characterColor}deg)` }} />
+      </div>
+      
+      <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 w-full shrink-0">
+        <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) - 1 + seeds.length) % seeds.length])} className="p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer"><ArrowLeft className="w-5 h-5 text-black" /></button>
+        <span className="text-xl md:text-3xl font-black text-white uppercase w-24 md:w-32 text-center" style={{ textShadow: '2px 2px 0px black' }}>{currentSeed}</span>
+        <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) + 1) % seeds.length])} className="p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer"><ArrowRight className="w-5 h-5 text-black" /></button>
+      </div>
+
+      <div className="bg-white border-4 border-black p-4 rounded-2xl w-full mb-6">
+        <h3 className="font-black text-center uppercase mb-3 text-sm">Choose a Color</h3>
+        <div className="flex justify-between">
+          {colors.map(c => (
+            <button key={c.label} onClick={() => setCharacterColor(c.hue)}
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform ${c.bg} ${characterColor === c.hue ? 'ring-4 ring-offset-2 ring-purple-500' : ''}`}
+              title={c.label}
+            />
+          ))}
         </div>
       </div>
-      <button onClick={onClose} className="shrink-0 w-full bg-lime-400 border-4 border-black text-black py-4 md:py-6 rounded-2xl font-black text-2xl md:text-3xl uppercase hover:bg-lime-500 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Save Changes</button>
+
+      <button onClick={onClose} className="shrink-0 w-full bg-lime-400 border-4 border-black text-black py-3 md:py-4 rounded-2xl font-black text-xl md:text-2xl uppercase hover:bg-lime-500 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer">Save Styles</button>
     </div>
   );
 }

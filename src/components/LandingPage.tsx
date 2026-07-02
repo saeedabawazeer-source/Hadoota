@@ -55,9 +55,9 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
         </motion.div>
 
         {/* Logo / Character */}
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1, y: [0, -15, 0] }} transition={{ scale: { type: 'spring', stiffness: 200, damping: 15 }, y: { repeat: Infinity, duration: 4, ease: "easeInOut" } }}
           className="relative z-10 mb-8 flex items-center justify-center">
-          <img src="/characters/Wormies - Party.svg" alt="Wormies Party" className="h-48 md:h-64 object-contain drop-shadow-[8px_8px_0px_rgba(0,0,0,1)]" />
+          <img src="/characters/Wormies - Party.svg" alt="Wormies Party" className="h-48 md:h-64 object-contain wormie-stroke" />
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
@@ -119,10 +119,10 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
               { bg: 'bg-purple-100', icon: '/characters/Wormies - Mol.svg', label: 'Memory Match' },
               { bg: 'bg-green-100', icon: '/characters/Wormies - Notes.svg', label: 'AI Stories' },
             ].map((item, i) => (
-              <div key={i} className={`${item.bg} p-6 md:p-10 flex flex-col items-center justify-center gap-3 ${i < 3 ? 'border-r-4 border-black' : ''} ${i < 2 ? 'md:border-r-4' : 'md:border-r-0'} border-b-4 md:border-b-0 border-black`}>
-                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
+              <motion.div key={i} whileHover={{ scale: 1.05, y: -10 }} className={`${item.bg} p-6 md:p-10 flex flex-col items-center justify-center gap-3 ${i < 3 ? 'border-r-4 border-black' : ''} ${i < 2 ? 'md:border-r-4' : 'md:border-r-0'} border-b-4 md:border-b-0 border-black cursor-pointer`}>
+                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain wormie-base" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 <span className="font-black uppercase text-sm md:text-base tracking-widest text-black/70">{item.label}</span>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -236,9 +236,9 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           style={{ textShadow: '3px 3px 0px black' }}>Why Hadoota Is Better</h2>
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           <div className="flex-1 bg-white/50 border-4 border-dashed border-gray-400 p-8 rounded-3xl opacity-70">
-            <div className="flex items-center justify-center w-24 h-24 mb-6 mx-auto">
-               <img src="/characters/Wormies - Staying Home.svg" alt="Boring App" className="w-full h-full object-contain opacity-50 grayscale" />
-            </div>
+            <motion.div animate={{ rotate: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="flex items-center justify-center w-32 h-32 mb-6 mx-auto">
+               <img src="/characters/Wormies - Staying Home.svg" alt="Boring App" className="w-full h-full object-contain opacity-50 grayscale wormie-stroke" />
+            </motion.div>
             <h3 className="font-black text-2xl uppercase text-center mb-6 text-gray-500">Other Apps</h3>
             <ul className="flex flex-col gap-4 font-bold text-gray-600">
               <li className="flex gap-2 items-start"><Shield className="w-5 h-5 text-gray-400 shrink-0" /> Boring multiple choice tests disguise as "games"</li>
@@ -248,7 +248,9 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
             </ul>
           </div>
           <div className="flex-1 bg-lime-400 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] scale-100 md:scale-110 z-10">
-            <div className="flex items-center justify-center w-16 h-16 bg-white border-4 border-black rounded-2xl mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-auto"><Sparkles className="w-8 h-8 text-orange-500" /></div>
+            <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }} className="flex items-center justify-center w-32 h-32 mb-6 mx-auto">
+               <img src="/characters/Wormies - Celebration.svg" alt="Hadoota App" className="w-full h-full object-contain wormie-stroke" />
+            </motion.div>
             <h3 className="font-black text-3xl uppercase text-center mb-6 text-black" style={{ textShadow: '1px 1px 0px white' }}>Hadoota</h3>
             <ul className="flex flex-col gap-4 font-black">
               <li className="flex gap-3 items-start"><CheckCircle className="w-6 h-6 text-purple-600 shrink-0" /> Fast-paced arcade/puzzle gameplay kids love</li>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Trophy, X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Mascot } from './Mascot';
 
 const EMOJIS_BY_DIFFICULTY: Record<string, string[]> = {
   easy: ['🍎', '🌟', '🐱', '🎈', '🌈'],
@@ -16,9 +17,11 @@ interface CountingGameProps {
   playSound: (type: 'pop' | 'win' | 'lose') => void;
   advanceQuest: () => void;
   difficulty?: string;
+  avatarSeed?: string;
+  characterColor?: number;
 }
 
-export function CountingGame({ onClose, addStars, showToast, playSound, advanceQuest, difficulty = 'easy' }: CountingGameProps) {
+export function CountingGame({ onClose, addStars, showToast, playSound, advanceQuest, difficulty = 'easy', avatarSeed = 'Fin', characterColor = 0 }: CountingGameProps) {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [round, setRound] = useState(0);
@@ -28,6 +31,7 @@ export function CountingGame({ onClose, addStars, showToast, playSound, advanceQ
   const [gameOver, setGameOver] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [mascotEmotion, setMascotEmotion] = useState<'idle' | 'happy' | 'sad'>('idle');
   const maxRounds = 10;
 
   const generateRound = useCallback(() => {
@@ -68,6 +72,7 @@ export function CountingGame({ onClose, addStars, showToast, playSound, advanceQ
 
     if (answer === targetCount) {
       playSound('win');
+      setMascotEmotion('happy');
       const pts = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 15 : 25;
       setScore(s => s + 1);
       addStars(pts);
@@ -84,6 +89,7 @@ export function CountingGame({ onClose, addStars, showToast, playSound, advanceQ
       }, 1200);
     } else {
       playSound('lose');
+      setMascotEmotion('sad');
       setLives(l => {
         if (l <= 1) {
           setTimeout(() => {
@@ -120,6 +126,8 @@ export function CountingGame({ onClose, addStars, showToast, playSound, advanceQ
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-b from-sky-300 to-sky-500 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <Mascot seed={avatarSeed} color={characterColor} emotion={mascotEmotion} />
+      
       {/* Header */}
       <div className="flex justify-between items-center p-4 shrink-0 z-20 bg-black/20 backdrop-blur-sm">
         <div className="flex gap-1.5">
