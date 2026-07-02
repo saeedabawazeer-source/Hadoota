@@ -41,7 +41,7 @@ export default function App() {
 
   // Derive kid-specific values from activeKid
   const childName = activeKid?.name || '';
-  const avatarSeed = activeKid?.avatarSeed || 'Felix';
+  const avatarSeed = activeKid?.avatarSeed || 'Fin';
   const stars = activeKid?.stars || 0;
   const streak = activeKid?.streak || 0;
   const questProgress = activeKid?.questProgress || 0;
@@ -454,7 +454,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
       <div className="shrink-0 flex items-center gap-3 md:gap-5 bg-white border-4 border-black p-3 md:p-5 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3 }} onClick={() => setActiveModal('Settings')}
           className="w-16 h-16 md:w-20 md:h-20 bg-purple-300 border-3 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl md:rounded-2xl flex items-center justify-center cursor-pointer shrink-0">
-          <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${avatarSeed}&backgroundColor=transparent`} alt="Avatar" className="w-14 h-14 md:w-18 md:h-18" />
+          <img src={`/characters/Wormies - ${['Fin', 'Jae', 'Poh', 'Mol'].includes(avatarSeed) ? avatarSeed : 'Fin'}.svg`} alt="Avatar" className="w-14 h-14 md:w-18 md:h-18 object-cover bg-white rounded-full border-2 border-black" />
         </motion.div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl md:text-4xl font-black text-black uppercase tracking-tighter leading-none truncate">Hi, {childName || 'Friend'}!</h1>
@@ -475,15 +475,15 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
         <h3 className="font-black text-base md:text-lg uppercase tracking-widest text-black mb-2">Play Now</h3>
         <div className="grid grid-cols-4 gap-2 md:gap-3">
           {[
-            { color: 'bg-purple-500', emoji: '🏎️', label: 'Math', modal: 'Game: Math Dash' },
-            { color: 'bg-sky-400', emoji: '🎈', label: 'Words', modal: 'Game: Spelling' },
-            { color: 'bg-amber-400', emoji: '🧠', label: 'Memory', modal: 'Game: Memory Quiz' },
-            { color: 'bg-violet-500', emoji: '🔬', label: 'Science', modal: 'Game: Science' },
+            { color: 'bg-purple-500', icon: '/characters/Wormies - Breakfast.svg', label: 'Math', modal: 'Game: Math Dash' },
+            { color: 'bg-sky-400', icon: '/characters/Wormies - Space.svg', label: 'Words', modal: 'Game: Spelling' },
+            { color: 'bg-amber-400', icon: '/characters/Wormies - Mol.svg', label: 'Memory', modal: 'Game: Memory Quiz' },
+            { color: 'bg-violet-500', icon: '/characters/Wormies - Potion.svg', label: 'Science', modal: 'Game: Science' },
           ].map(g => (
             <motion.button key={g.label} whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
               onClick={() => setActiveModal(g.modal)}
               className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex flex-col items-center gap-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <span className="text-2xl md:text-3xl">{g.emoji}</span>
+              <img src={g.icon} alt={g.label} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
               <span className="font-black text-[10px] md:text-xs uppercase tracking-wider text-white" style={{ textShadow: '1px 1px 0px black' }}>{g.label}</span>
             </motion.button>
           ))}
@@ -498,14 +498,14 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, stars, 
         </div>
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {[
-            { color: 'bg-lime-400', emoji: '🔢', label: 'Count', modal: 'Game: Counting' },
-            { color: 'bg-pink-400', emoji: '🔷', label: 'Shapes', modal: 'Game: Shapes' },
-            { color: 'bg-emerald-500', emoji: '🌍', label: 'Geo', modal: 'Game: Geography' },
+            { color: 'bg-lime-400', icon: '/characters/Wormies - Target.svg', label: 'Count', modal: 'Game: Counting' },
+            { color: 'bg-pink-400', icon: '/characters/Wormies - Magnet.svg', label: 'Shapes', modal: 'Game: Shapes' },
+            { color: 'bg-emerald-500', icon: '/characters/Wormies - Suny Day.svg', label: 'Geo', modal: 'Game: Geography' },
           ].map(g => (
             <motion.button key={g.label} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={() => setActiveModal(g.modal)}
               className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex items-center gap-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <span className="text-xl md:text-2xl">{g.emoji}</span>
+              <img src={g.icon} alt={g.label} className="w-6 h-6 md:w-8 md:h-8 object-contain" onError={(e) => { e.currentTarget.src = '/characters/Wormies - Mol.svg' }} />
               <span className="font-black text-xs md:text-sm uppercase tracking-wider text-black">{g.label}</span>
             </motion.button>
           ))}
@@ -584,18 +584,19 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
 
 // --- Settings Panel ---
 function SettingsPanel({ avatarSeed, setAvatarSeed, onClose }: { avatarSeed: string; setAvatarSeed: (s: string) => void; onClose: () => void }) {
-  const seeds = ['Felix', 'Aneka', 'Jasper', 'Oliver', 'Mia', 'Leo', 'Zoe', 'Sam', 'Luna', 'Max', 'Nala', 'Koda'];
+  const seeds = ['Fin', 'Jae', 'Poh', 'Mol'];
+  const currentSeed = seeds.includes(avatarSeed) ? avatarSeed : 'Fin';
   return (
     <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto">
       <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-8 md:mb-10 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Customize Hero</h2>
       <div className="flex-1 flex flex-col items-center justify-center min-h-0 w-full">
         <div className="w-40 h-40 md:w-56 md:h-56 bg-purple-300 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-8 flex items-center justify-center shrink-0">
-          <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${avatarSeed}&backgroundColor=transparent`} alt="Avatar" className="w-32 h-32 md:w-48 md:h-48" />
+          <img src={`/characters/Wormies - ${currentSeed}.svg`} alt="Avatar" className="w-32 h-32 md:w-48 md:h-48 object-cover bg-white rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
         </div>
         <div className="flex items-center justify-center gap-4 md:gap-8 mb-8 w-full shrink-0">
-          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(avatarSeed) - 1 + seeds.length) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Previous avatar"><ArrowLeft className="w-6 h-6 text-black" /></button>
-          <span className="text-2xl md:text-4xl font-black text-white uppercase w-28 md:w-40 text-center" style={{ textShadow: '2px 2px 0px black' }}>{avatarSeed}</span>
-          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(avatarSeed) + 1) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Next avatar"><ArrowRight className="w-6 h-6 text-black" /></button>
+          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) - 1 + seeds.length) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Previous avatar"><ArrowLeft className="w-6 h-6 text-black" /></button>
+          <span className="text-2xl md:text-4xl font-black text-white uppercase w-28 md:w-40 text-center" style={{ textShadow: '2px 2px 0px black' }}>{currentSeed}</span>
+          <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) + 1) % seeds.length])} className="p-4 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Next avatar"><ArrowRight className="w-6 h-6 text-black" /></button>
         </div>
       </div>
       <button onClick={onClose} className="shrink-0 w-full bg-lime-400 border-4 border-black text-black py-4 md:py-6 rounded-2xl font-black text-2xl md:text-3xl uppercase hover:bg-lime-500 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Save Changes</button>

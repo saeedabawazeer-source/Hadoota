@@ -78,9 +78,12 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
     <div className="w-full h-full flex flex-col gap-4 md:gap-6 min-h-0">
       {/* Header */}
       <div className="shrink-0 bg-white border-4 border-black p-4 md:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-2xl md:rounded-3xl flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-black uppercase">PARENT HUB</h2>
-          <p className="text-gray-500 font-bold text-sm">Welcome, {activeParent?.name || 'Parent'}</p>
+        <div className="flex items-center gap-4">
+          <img src="/characters/Wormies - UI.svg" className="w-12 h-12 md:w-16 md:h-16" alt="Parent Hub" />
+          <div>
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-black uppercase">PARENT HUB</h2>
+            <p className="text-gray-500 font-bold text-sm">Welcome, {activeParent?.name || 'Parent'}</p>
+          </div>
         </div>
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onBack}
           className="bg-purple-600 text-white border-4 border-black px-4 py-2 rounded-xl font-black text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 cursor-pointer">
@@ -128,8 +131,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                   <button key={k.id} onClick={() => onSelectKid(k)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl border-4 border-black font-bold cursor-pointer transition-colors
                       ${activeKid?.id === k.id ? 'bg-lime-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white hover:bg-lime-100'}`}>
-                    <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${k.avatarSeed}&backgroundColor=transparent`}
-                      alt={k.name} className="w-8 h-8 rounded-full border-2 border-black" />
+                    <img src={`/characters/Wormies - ${(k.id.charCodeAt(k.id.length-1) % 4 === 0) ? 'Fin' : (k.id.charCodeAt(k.id.length-1) % 4 === 1) ? 'Jae' : (k.id.charCodeAt(k.id.length-1) % 4 === 2) ? 'Poh' : 'Mol'}.svg`}
+                      alt={k.name} className="w-8 h-8 rounded-full border-2 border-black object-cover bg-purple-200" />
                     {k.name}
                   </button>
                 ))}
@@ -155,8 +158,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
             {/* Active Kid Info */}
             {activeKid && (
               <div className="bg-white border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
-                <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${activeKid.avatarSeed}&backgroundColor=transparent`}
-                  alt={activeKid.name} className="w-16 h-16 rounded-2xl border-4 border-black bg-purple-200" />
+                <img src={`/characters/Wormies - ${(activeKid.id.charCodeAt(activeKid.id.length-1) % 4 === 0) ? 'Fin' : (activeKid.id.charCodeAt(activeKid.id.length-1) % 4 === 1) ? 'Jae' : (activeKid.id.charCodeAt(activeKid.id.length-1) % 4 === 2) ? 'Poh' : 'Mol'}.svg`}
+                  alt={activeKid.name} className="w-16 h-16 rounded-2xl border-4 border-black bg-purple-200 object-cover" />
                 <div className="flex-1">
                   <h3 className="font-black text-xl uppercase">{activeKid.name}</h3>
                   <p className="font-bold text-gray-500 text-sm">Age {activeKid.age} · {activeKid.difficulty} mode · {activeKid.stars} ⭐</p>
@@ -214,8 +217,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
           <div className="flex flex-col gap-4">
             {kids.map(k => (
               <div key={k.id} className="bg-white border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
-                <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${k.avatarSeed}&backgroundColor=transparent`}
-                  alt={k.name} className="w-14 h-14 rounded-2xl border-4 border-black bg-purple-200" />
+                <img src={`/characters/Wormies - ${(k.id.charCodeAt(k.id.length-1) % 4 === 0) ? 'Fin' : (k.id.charCodeAt(k.id.length-1) % 4 === 1) ? 'Jae' : (k.id.charCodeAt(k.id.length-1) % 4 === 2) ? 'Poh' : 'Mol'}.svg`}
+                  alt={k.name} className="w-14 h-14 rounded-2xl border-4 border-black bg-purple-200 object-cover" />
                 <div className="flex-1">
                   <h3 className="font-black text-lg uppercase">{k.name}</h3>
                   <p className="font-bold text-gray-500 text-sm">Age {k.age} · {k.difficulty} · {k.stars} ⭐</p>
@@ -239,8 +242,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
               </div>
             ))}
             {kids.length === 0 && (
-              <div className="text-center py-12">
-                <Users className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <div className="text-center py-12 flex flex-col items-center">
+                <img src="/characters/Wormies - Staying Home.svg" alt="No kids" className="w-32 h-32 opacity-70 mb-4" />
                 <p className="font-bold text-gray-500">No kids added yet.</p>
               </div>
             )}
@@ -267,7 +270,12 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                   </div>
                 </div>
               ))}
-              {rewards.length === 0 && <p className="text-center text-gray-500 font-bold mt-4">No rewards set yet.</p>}
+              {rewards.length === 0 && (
+                <div className="text-center py-8 flex flex-col items-center">
+                  <img src="/characters/Wormies - Celebration.svg" alt="No rewards" className="w-24 h-24 opacity-60 mb-3" />
+                  <p className="text-gray-500 font-bold">No rewards set yet.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -300,7 +308,12 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                   <button onClick={() => removeTask(t.id)} className="bg-red-500 text-white border-2 border-black p-1.5 rounded-lg shrink-0 cursor-pointer" aria-label="Remove task"><X className="w-4 h-4" /></button>
                 </div>
               ))}
-              {assignedTasks.filter(t => t.status === 'pending').length === 0 && <p className="text-center text-gray-500 font-bold mt-4">No tasks assigned.</p>}
+              {assignedTasks.filter(t => t.status === 'pending').length === 0 && (
+                <div className="text-center py-8 flex flex-col items-center">
+                  <img src="/characters/Wormies - Chat.svg" alt="No tasks" className="w-24 h-24 opacity-60 mb-3" />
+                  <p className="text-gray-500 font-bold">No tasks assigned.</p>
+                </div>
+              )}
             </div>
           </div>
         )}

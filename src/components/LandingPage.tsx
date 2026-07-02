@@ -54,10 +54,10 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           <Gamepad2 className="w-7 h-7 md:w-9 md:h-9 text-black" />
         </motion.div>
 
-        {/* Logo */}
+        {/* Logo / Character */}
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-          className="relative z-10 bg-white border-4 md:border-[6px] border-black p-5 md:p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] mb-8">
-          <Sparkles className="w-14 h-14 md:w-20 md:h-20 text-orange-500" />
+          className="relative z-10 mb-8 flex items-center justify-center">
+          <img src="/characters/Wormies - Party.svg" alt="Wormies Party" className="h-48 md:h-64 object-contain drop-shadow-[8px_8px_0px_rgba(0,0,0,1)]" />
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
@@ -114,13 +114,13 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t-4 border-black">
             {[
-              { bg: 'bg-orange-100', emoji: '🎮', label: 'Math Dash' },
-              { bg: 'bg-sky-100', emoji: '🎈', label: 'Word Pop' },
-              { bg: 'bg-purple-100', emoji: '🧠', label: 'Memory Match' },
-              { bg: 'bg-green-100', emoji: '📖', label: 'AI Stories' },
+              { bg: 'bg-orange-100', icon: '/characters/Wormies - Breakfast.svg', label: 'Math Dash' },
+              { bg: 'bg-sky-100', icon: '/characters/Wormies - Space.svg', label: 'Word Pop' },
+              { bg: 'bg-purple-100', icon: '/characters/Wormies - Mol.svg', label: 'Memory Match' },
+              { bg: 'bg-green-100', icon: '/characters/Wormies - Notes.svg', label: 'AI Stories' },
             ].map((item, i) => (
               <div key={i} className={`${item.bg} p-6 md:p-10 flex flex-col items-center justify-center gap-3 ${i < 3 ? 'border-r-4 border-black' : ''} ${i < 2 ? 'md:border-r-4' : 'md:border-r-0'} border-b-4 md:border-b-0 border-black`}>
-                <span className="text-5xl md:text-7xl">{item.emoji}</span>
+                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 <span className="font-black uppercase text-sm md:text-base tracking-widest text-black/70">{item.label}</span>
               </div>
             ))}
@@ -186,13 +186,13 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
             </p>
             <ul className="flex flex-col gap-5">
               {[
-                { i: '📊', b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
-                { i: '🎁', b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
-                { i: '🧹', b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
-                { i: '🔒', b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
+                { i: <Zap className="w-8 h-8 text-black" />, b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
+                { i: <Star className="w-8 h-8 text-black" />, b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
+                { i: <CheckCircle className="w-8 h-8 text-black" />, b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
+                { i: <Shield className="w-8 h-8 text-black" />, b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-4 bg-black/20 p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <span className="text-3xl">{item.i}</span>
+                  <div className="bg-white p-2 border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">{item.i}</div>
                   <div>
                     <span className="font-black text-lg block uppercase">{item.b}</span>
                     <span className="font-bold text-white/80">{item.t}</span>
@@ -236,13 +236,15 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           style={{ textShadow: '3px 3px 0px black' }}>Why Hadoota Is Better</h2>
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           <div className="flex-1 bg-white/50 border-4 border-dashed border-gray-400 p-8 rounded-3xl opacity-70">
-            <div className="flex items-center justify-center w-16 h-16 bg-gray-200 border-4 border-gray-400 rounded-2xl mb-6 mx-auto"><span className="text-3xl">🥱</span></div>
+            <div className="flex items-center justify-center w-24 h-24 mb-6 mx-auto">
+               <img src="/characters/Wormies - Staying Home.svg" alt="Boring App" className="w-full h-full object-contain opacity-50 grayscale" />
+            </div>
             <h3 className="font-black text-2xl uppercase text-center mb-6 text-gray-500">Other Apps</h3>
             <ul className="flex flex-col gap-4 font-bold text-gray-600">
-              <li className="flex gap-2"><span>❌</span> Boring multiple choice tests disguise as "games"</li>
-              <li className="flex gap-2"><span>❌</span> Virtual coins that buy useless virtual stickers</li>
-              <li className="flex gap-2"><span>❌</span> Generic repetitive questions</li>
-              <li className="flex gap-2"><span>❌</span> Parents have no idea what the kid is learning</li>
+              <li className="flex gap-2 items-start"><Shield className="w-5 h-5 text-gray-400 shrink-0" /> Boring multiple choice tests disguise as "games"</li>
+              <li className="flex gap-2 items-start"><Shield className="w-5 h-5 text-gray-400 shrink-0" /> Virtual coins that buy useless virtual stickers</li>
+              <li className="flex gap-2 items-start"><Shield className="w-5 h-5 text-gray-400 shrink-0" /> Generic repetitive questions</li>
+              <li className="flex gap-2 items-start"><Shield className="w-5 h-5 text-gray-400 shrink-0" /> Parents have no idea what the kid is learning</li>
             </ul>
           </div>
           <div className="flex-1 bg-lime-400 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] scale-100 md:scale-110 z-10">
