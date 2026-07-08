@@ -31,7 +31,13 @@ export function Mascot({ seed, color, emotion = 'idle' }: MascotProps) {
     }
   }, [emotion]);
 
-  const currentSeed = ['Fin', 'Jae', 'Poh', 'Mol'].includes(seed) ? seed : 'Fin';
+  const seedToAnimal: Record<string, string> = {
+    Fin: 'penguin.png',
+    Jae: 'bear.png',
+    Poh: 'frog.png',
+    Mol: 'monkey.png'
+  };
+  const currentAnimal = seedToAnimal[seed] || 'penguin.png';
 
   return (
     <AnimatePresence>
@@ -44,10 +50,10 @@ export function Mascot({ seed, color, emotion = 'idle' }: MascotProps) {
           className="absolute bottom-4 left-4 z-50 pointer-events-none"
         >
           <img 
-            src={`/characters/Wormies - ${currentSeed}.svg`} 
+            src={`/characters/kenney/${currentAnimal}`} 
             alt="Mascot" 
-            className="w-24 h-24 md:w-32 md:h-32 object-contain wormie-stroke" 
-            style={{ filter: `hue-rotate(${color}deg)` }} 
+            className="w-24 h-24 md:w-32 md:h-32 object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform" 
+            style={{ filter: `hue-rotate(${color}deg) drop-shadow(4px 4px 0px rgba(0,0,0,1))` }} 
           />
         </motion.div>
       )}

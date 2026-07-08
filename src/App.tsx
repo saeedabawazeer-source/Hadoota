@@ -463,7 +463,7 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
       <div className="shrink-0 flex items-center gap-3 md:gap-5 bg-white border-4 border-black p-3 md:p-5 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3 }} onClick={() => setActiveModal('Settings')}
           className="w-16 h-16 md:w-20 md:h-20 bg-purple-300 border-3 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl md:rounded-2xl flex items-center justify-center cursor-pointer shrink-0">
-          <img src={`/characters/Wormies - ${['Fin', 'Jae', 'Poh', 'Mol'].includes(avatarSeed) ? avatarSeed : 'Fin'}.svg`} alt="Avatar" style={{ filter: `hue-rotate(${characterColor}deg)` }} className="w-14 h-14 md:w-18 md:h-18 object-cover wormie-base" />
+          <img src={`/characters/kenney/${{ Fin: 'penguin.png', Jae: 'bear.png', Poh: 'frog.png', Mol: 'monkey.png' }[avatarSeed as string] || 'penguin.png'}`} alt="Avatar" style={{ filter: `hue-rotate(${characterColor}deg) drop-shadow(2px 2px 0px rgba(0,0,0,1))` }} className="w-14 h-14 md:w-18 md:h-18 object-cover filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
         </motion.div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl md:text-4xl font-black text-black uppercase tracking-tighter leading-none truncate">Hi, {childName || 'Friend'}!</h1>
@@ -484,15 +484,15 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
         <h3 className="font-black text-base md:text-lg uppercase tracking-widest text-black mb-2">Play Now</h3>
         <div className="grid grid-cols-4 gap-2 md:gap-3">
           {[
-            { color: 'bg-purple-500', icon: '/characters/Wormies - Breakfast.svg', label: 'Math', modal: 'Game: Math Dash' },
-            { color: 'bg-sky-400', icon: '/characters/Wormies - Space.svg', label: 'Words', modal: 'Game: Spelling' },
-            { color: 'bg-amber-400', icon: '/characters/Wormies - Mol.svg', label: 'Memory', modal: 'Game: Memory Quiz' },
-            { color: 'bg-violet-500', icon: '/characters/Wormies - Potion.svg', label: 'Science', modal: 'Game: Science' },
+            { color: 'bg-purple-500', icon: '/characters/kenney/duck.png', label: 'Math', modal: 'Game: Math Dash' },
+            { color: 'bg-sky-400', icon: '/characters/kenney/monkey.png', label: 'Words', modal: 'Game: Spelling' },
+            { color: 'bg-amber-400', icon: '/characters/kenney/elephant.png', label: 'Memory', modal: 'Game: Memory Quiz' },
+            { color: 'bg-violet-500', icon: '/items/kenney/fireball.png', label: 'Science', modal: 'Game: Science' },
           ].map(g => (
             <motion.button key={g.label} whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
               onClick={() => setActiveModal(g.modal)}
               className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex flex-col items-center gap-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <img src={g.icon} alt={g.label} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
+              <img src={g.icon} alt={g.label} className="w-8 h-8 md:w-12 md:h-12 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
               <span className="font-black text-[10px] md:text-xs uppercase tracking-wider text-white" style={{ textShadow: '1px 1px 0px black' }}>{g.label}</span>
             </motion.button>
           ))}
@@ -507,14 +507,14 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
         </div>
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {[
-            { color: 'bg-lime-400', icon: '/characters/Wormies - Target.svg', label: 'Count', modal: 'Game: Counting' },
-            { color: 'bg-pink-400', icon: '/characters/Wormies - Magnet.svg', label: 'Shapes', modal: 'Game: Shapes' },
-            { color: 'bg-emerald-500', icon: '/characters/Wormies - Suny Day.svg', label: 'Geo', modal: 'Game: Geography' },
+            { color: 'bg-lime-400', icon: '/items/kenney/coinGold.png', label: 'Count', modal: 'Game: Counting' },
+            { color: 'bg-pink-400', icon: '/items/kenney/gemRed.png', label: 'Shapes', modal: 'Game: Shapes' },
+            { color: 'bg-emerald-500', icon: '/items/kenney/flagGreen.png', label: 'Geo', modal: 'Game: Geography' },
           ].map(g => (
             <motion.button key={g.label} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={() => setActiveModal(g.modal)}
               className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex items-center gap-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <img src={g.icon} alt={g.label} className="w-6 h-6 md:w-8 md:h-8 object-contain" onError={(e) => { e.currentTarget.src = '/characters/Wormies - Mol.svg' }} />
+              <img src={g.icon} alt={g.label} className="w-6 h-6 md:w-8 md:h-8 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" onError={(e) => { e.currentTarget.src = '/characters/kenney/elephant.png' }} />
               <span className="font-black text-xs md:text-sm uppercase tracking-wider text-black">{g.label}</span>
             </motion.button>
           ))}
@@ -609,7 +609,7 @@ function SettingsPanel({ avatarSeed, characterColor, setAvatarSeed, setCharacter
       <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-6 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Style Hero</h2>
       
       <div className="w-32 h-32 md:w-48 md:h-48 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-6 flex items-center justify-center shrink-0" style={{ background: 'var(--lime-accent)' }}>
-        <img src={`/characters/Wormies - ${currentSeed}.svg`} alt="Avatar" className="w-24 h-24 md:w-40 md:h-40 object-cover wormie-stroke" style={{ filter: `hue-rotate(${characterColor}deg)` }} />
+        <img src={`/characters/kenney/${{ Fin: 'penguin.png', Jae: 'bear.png', Poh: 'frog.png', Mol: 'monkey.png' }[currentSeed as string] || 'penguin.png'}`} alt="Avatar" className="w-24 h-24 md:w-40 md:h-40 object-cover filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform" style={{ filter: `hue-rotate(${characterColor}deg) drop-shadow(4px 4px 0px rgba(0,0,0,1))` }} />
       </div>
       
       <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 w-full shrink-0">

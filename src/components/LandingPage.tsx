@@ -18,7 +18,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           
           {/* Top Left Cutout / Logo Tab */}
           <div className="absolute top-0 left-0 bg-orange-500 md:bg-white border-b-4 border-r-4 border-black rounded-br-[1.5rem] md:rounded-br-[2rem] px-4 py-3 md:px-6 md:py-4 flex items-center gap-2 md:gap-3 z-30">
-            <img src="/characters/Wormies - Party.svg" alt="Hadoota" className="w-8 h-8 md:w-10 md:h-10 object-contain wormie-stroke" />
+            <img src="/characters/kenney/penguin.png" alt="Hadoota" className="w-8 h-8 md:w-10 md:h-10 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
             <span className="font-black text-xl md:text-3xl uppercase tracking-tighter text-white md:text-black" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
           </div>
 
@@ -35,7 +35,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
              <div className="absolute right-8 top-4 flex items-center gap-3 pointer-events-auto">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
                   className="bg-lime-400 border-2 border-black text-black px-5 py-2.5 rounded-full font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-2 cursor-pointer">
-                  <Users className="w-4 h-4" /> Parent Login
+                  <img src="/items/kenney/star.png" className="w-5 h-5 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" /> Parent Login
                 </motion.button>
              </div>
           </nav>
@@ -49,7 +49,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
 
           {/* Center Mascot (The "Product") */}
           <motion.div initial={{ scale: 0, y: 50 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="relative z-20 mt-16 md:mt-8">
-            <img src="/characters/Wormies - Spring.svg" alt="Hadoota Mascot" className="h-[45vh] md:h-[65vh] object-contain wormie-stroke" />
+            <motion.img animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} src="/characters/kenney/bear.png" alt="Hadoota Mascot" className="h-[45vh] md:h-[65vh] object-contain filter drop-shadow-[8px_8px_0px_rgba(0,0,0,1)]" />
           </motion.div>
 
           {/* Bottom Controls / Info */}
@@ -62,7 +62,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
               </p>
               <div className="flex gap-3">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink} className="bg-yellow-400 border-2 border-black px-6 py-3 rounded-full font-black text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow-300 transition-colors flex items-center gap-2 cursor-pointer">
-                  <KeyRound className="w-4 h-4" /> Start Playing
+                  <img src="/items/kenney/keyRed.png" className="w-6 h-6 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" /> Start Playing
                 </motion.button>
               </div>
             </div>
@@ -91,13 +91,13 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t-4 border-black">
             {[
-              { bg: 'bg-orange-100', icon: '/characters/Wormies - Breakfast.svg', label: 'Math Dash' },
-              { bg: 'bg-sky-100', icon: '/characters/Wormies - Space.svg', label: 'Word Pop' },
-              { bg: 'bg-purple-100', icon: '/characters/Wormies - Mol.svg', label: 'Memory Match' },
-              { bg: 'bg-green-100', icon: '/characters/Wormies - Notes.svg', label: 'AI Stories' },
+              { bg: 'bg-orange-100', icon: '/characters/kenney/duck.png', label: 'Math Dash' },
+              { bg: 'bg-sky-100', icon: '/characters/kenney/monkey.png', label: 'Word Pop' },
+              { bg: 'bg-purple-100', icon: '/characters/kenney/elephant.png', label: 'Memory Match' },
+              { bg: 'bg-green-100', icon: '/characters/kenney/frog.png', label: 'AI Stories' },
             ].map((item, i) => (
               <motion.div key={i} whileHover={{ scale: 1.05, y: -10 }} className={`${item.bg} p-6 md:p-10 flex flex-col items-center justify-center gap-3 ${i < 3 ? 'border-r-4 border-black' : ''} ${i < 2 ? 'md:border-r-4' : 'md:border-r-0'} border-b-4 md:border-b-0 border-black cursor-pointer`}>
-                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain wormie-base" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 <span className="font-black uppercase text-sm md:text-base tracking-widest text-black/70">{item.label}</span>
               </motion.div>
             ))}
@@ -163,10 +163,10 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
             </p>
             <ul className="flex flex-col gap-5">
               {[
-                { i: <Zap className="w-8 h-8 text-black" />, b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
-                { i: <Star className="w-8 h-8 text-black" />, b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
-                { i: <CheckCircle className="w-8 h-8 text-black" />, b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
-                { i: <Shield className="w-8 h-8 text-black" />, b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
+                { i: <img src="/items/kenney/gemBlue.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
+                { i: <img src="/items/kenney/star.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
+                { i: <img src="/items/kenney/buttonGreen.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
+                { i: <img src="/items/kenney/keyRed.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-4 bg-black/20 p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   <div className="bg-white p-2 border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">{item.i}</div>
@@ -214,7 +214,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           <div className="flex-1 bg-white/50 border-4 border-dashed border-gray-400 p-8 rounded-3xl opacity-70">
             <motion.div animate={{ rotate: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="flex items-center justify-center w-32 h-32 mb-6 mx-auto">
-               <img src="/characters/Wormies - Staying Home.svg" alt="Boring App" className="w-full h-full object-contain opacity-50 grayscale wormie-stroke" />
+               <img src="/characters/kenney/panda.png" alt="Boring App" className="w-full h-full object-contain opacity-50 filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] grayscale" />
             </motion.div>
             <h3 className="font-black text-2xl uppercase text-center mb-6 text-gray-500">Other Apps</h3>
             <ul className="flex flex-col gap-4 font-bold text-gray-600">
@@ -226,7 +226,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           </div>
           <div className="flex-1 bg-lime-400 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] scale-100 md:scale-110 z-10">
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }} className="flex items-center justify-center w-32 h-32 mb-6 mx-auto">
-               <img src="/characters/Wormies - Celebration.svg" alt="Hadoota App" className="w-full h-full object-contain wormie-stroke" />
+               <img src="/characters/kenney/zebra.png" alt="Hadoota App" className="w-full h-full object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" />
             </motion.div>
             <h3 className="font-black text-3xl uppercase text-center mb-6 text-black" style={{ textShadow: '1px 1px 0px white' }}>Hadoota</h3>
             <ul className="flex flex-col gap-4 font-black">
