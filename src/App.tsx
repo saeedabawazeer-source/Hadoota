@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Sparkles, Star, Lock, Unlock, Home, Gamepad2, CheckCircle, Store, Settings, User, Volume2, ArrowLeft, ArrowRight, X, Flame, Car, Rocket, Brain, Wand2, Calculator, Lightbulb, Shapes, Hash } from 'lucide-react';
+import { BookOpen, Sparkles, Star, Lock, Unlock, Home, Gamepad2, CheckCircle, Store, Settings, User, Volume2, ArrowLeft, ArrowRight, X, Flame, Car, Rocket, Brain, Wand2, Calculator, Lightbulb, Shapes, Hash, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useStickyState } from './hooks/useStickyState';
 import { useSound } from './hooks/useSound';
 import { useParentStore } from './hooks/useParentStore';
+import { useChatStore } from './hooks/useChatStore';
 import { LandingPage } from './components/LandingPage';
 import { Onboarding } from './components/Onboarding';
 import { KidLinkEntry } from './components/KidLinkEntry';
@@ -17,11 +18,13 @@ import { ShapeSortGame } from './components/ShapeSortGame';
 import { StoryEngine, StoryCard } from './components/StoryEngine';
 import { QuizGame } from './components/QuizGame';
 import { ParentDashboard } from './components/ParentDashboard';
+import { FamilyChatPanel } from './components/FamilyChatPanel';
 import { mathQuestions, spellingQuestions, logicQuestions, scienceQuestions, geographyQuestions, memoryQuestions } from './data/questions';
 import type { Task, Reward, GameStats, AppView, KidProfile, ParentProfile } from './types';
 
 export default function App() {
   const store = useParentStore();
+  const chatStore = useChatStore(store.familyId);
 
   // View state (not persisted — always starts at landing)
   const [view, setView] = useState<AppView>('landing');
@@ -196,6 +199,7 @@ export default function App() {
             <NavBtn icon={<Home />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
             <NavBtn icon={<Gamepad2 />} label="Games" active={activeTab === 'games'} onClick={() => setActiveTab('games')} />
             <NavBtn icon={<CheckCircle />} label="Chores" active={activeTab === 'chores'} onClick={() => setActiveTab('chores')} />
+            <NavBtn icon={<MessageCircle />} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
             <NavBtn icon={<BookOpen />} label="Stories" active={activeTab === 'stories'} onClick={() => setActiveTab('stories')} />
             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { playSound('pop'); setActiveTab('store'); }}
               className={`bg-lime-400 border-4 border-black p-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-auto my-4 ${activeTab === 'store' ? 'ring-4 ring-white' : ''}`} aria-label="Reward Store">
@@ -223,12 +227,12 @@ export default function App() {
                 <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} avatarSeed={avatarSeed} characterColor={characterColor}
                   stars={stars} setStars={setStars} rewards={store.rewards} streak={streak} questProgress={questProgress} setQuestProgress={() => advanceQuest()}
                   showToast={showToast} assignedTasks={assignedTasks} addStars={addStars} playSound={playSound} childName={childName} difficulty={difficulty}
-                  setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled}
+                  setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled} chatStore={chatStore} activeKid={activeKid} parentAccount={store.parentAccount}
                   setDifficulty={(d: any) => { if (activeKid) { store.updateKid(activeKid.id, { difficulty: d }); setActiveKid(prev => prev ? { ...prev, difficulty: d } : prev); } }} setAvatarSeed={setAvatarSeed} />
               ) : (
                 <ParentDashboard rewards={store.rewards} setRewards={store.setRewards} assignedTasks={assignedTasks} setAssignedTasks={setAssignedTasks}
                   gameStats={gameStats} childName={childName} activeKid={activeKid} parentAccount={store.parentAccount} activeParent={activeParent} addParent={store.addParent}
-                  addStarsToKid={store.addStarsToKid}
+                  addStarsToKid={store.addStarsToKid} chatStore={chatStore}
                   onSelectKid={(kid) => setActiveKid(kid)} onBack={() => setView('landing')} />
               )}
             </motion.div>
@@ -251,7 +255,7 @@ export default function App() {
           </div>
           <div className="flex-1 flex justify-around items-center pr-2 pl-10">
             <NavBtn icon={<CheckCircle />} label="Chores" active={activeTab === 'chores'} onClick={() => setActiveTab('chores')} />
-            <NavBtn icon={<BookOpen />} label="Stories" active={activeTab === 'stories'} onClick={() => setActiveTab('stories')} />
+            <NavBtn icon={<MessageCircle />} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
           </div>
         </nav>
       )}
@@ -309,7 +313,7 @@ function NavBtn({ icon, label, active, onClick }: { icon: React.ReactElement; la
 }
 
 // --- Kid Views ---
-function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, characterColor, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed }: any) {
+function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, characterColor, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed, chatStore, activeKid, parentAccount }: any) {
   if (activeTab === 'store') {
     return (
       <div className="w-full h-full flex flex-col gap-4 md:gap-6 min-h-0">
@@ -339,6 +343,37 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
               <Store className="w-24 h-24 mb-4 opacity-50" /><p className="font-black text-2xl uppercase">No rewards yet!</p>
             </div>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === 'chat' && activeKid) {
+    // Build family members list from parentAccount
+    const familyMembers: { id: string; name: string; type: 'parent' | 'child' }[] = [];
+    if (parentAccount) {
+      for (const p of parentAccount.parents) {
+        familyMembers.push({ id: p.id, name: p.name, type: 'parent' });
+      }
+      for (const k of parentAccount.kids) {
+        familyMembers.push({ id: k.id, name: k.name, type: 'child' });
+      }
+    }
+    return (
+      <div className="w-full h-full flex flex-col gap-3 min-h-0">
+        <div className="shrink-0 bg-white border-4 border-black p-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center">
+          <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter text-black">MESSAGES</h2>
+          <div className="bg-lime-400 border-3 border-black p-2 rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"><MessageCircle className="w-5 h-5 text-black" /></div>
+        </div>
+        <div className="flex-1 min-h-0">
+          <FamilyChatPanel
+            chatStore={chatStore}
+            currentUserId={activeKid.id}
+            currentUserName={activeKid.name}
+            currentUserType="child"
+            familyMembers={familyMembers}
+            compact
+          />
         </div>
       </div>
     );

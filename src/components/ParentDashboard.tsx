@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Gift, Star, X, CheckCircle, Target, TrendingUp, Check, Users, Copy, ArrowLeft, Plus, KeyRound } from 'lucide-react';
 import type { Task, Reward, GameStats, KidProfile, ParentAccount, ParentProfile } from '../types';
+import { useChatStore } from '../hooks/useChatStore';
+import { FamilyChatPanel } from './FamilyChatPanel';
 
 interface ParentDashboardProps {
   rewards: Reward[];
@@ -17,10 +19,11 @@ interface ParentDashboardProps {
   addStarsToKid: (kidId: string, stars: number) => void;
   onSelectKid: (kid: KidProfile) => void;
   onBack: () => void;
+  chatStore: ReturnType<typeof useChatStore>;
 }
 
-export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks, gameStats, childName, activeKid, parentAccount, activeParent, addParent, addStarsToKid, onSelectKid, onBack }: ParentDashboardProps) {
-  const [tab, setTab] = useState<'overview' | 'rewards' | 'tasks' | 'kids'>('overview');
+export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssignedTasks, gameStats, childName, activeKid, parentAccount, activeParent, addParent, addStarsToKid, onSelectKid, onBack, chatStore }: ParentDashboardProps) {
+  const [tab, setTab] = useState<'overview' | 'rewards' | 'tasks' | 'kids' | 'chat'>('overview');
   const [newRewardTitle, setNewRewardTitle] = useState('');
   const [newRewardCost, setNewRewardCost] = useState('');
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -70,6 +73,7 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
   const tabs = [
     { id: 'overview' as const, label: 'Overview' },
     { id: 'kids' as const, label: `Kids (${kids.length})` },
+    { id: 'chat' as const, label: 'Family Chat' },
     { id: 'rewards' as const, label: 'Rewards' },
     { id: 'tasks' as const, label: 'Chores' },
   ];
@@ -121,7 +125,7 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
       )}
 
       {/* Tab Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pb-4 md:pb-6">
+      <div className={`flex-1 min-h-0 ${tab === 'chat' ? 'flex flex-col' : 'overflow-y-auto custom-scrollbar pb-4 md:pb-6'}`}>
         {tab === 'overview' && (
           <div className="flex flex-col gap-4">
             {/* Kid Selector */}
@@ -315,6 +319,21 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {tab === 'chat' && activeParent && (
+          <div className="flex-1 min-h-0 flex flex-col">
+            <FamilyChatPanel
+              chatStore={chatStore}
+              currentUserId={activeParent.id}
+              currentUserName={activeParent.name}
+              currentUserType="parent"
+              familyMembers={[
+                ...(parentAccount?.parents || []).map((p: ParentProfile) => ({ id: p.id, name: p.name, type: 'parent' as const })),
+                ...(parentAccount?.kids || []).map((k: KidProfile) => ({ id: k.id, name: k.name, type: 'child' as const })),
+              ]}
+            />
           </div>
         )}
       </div>

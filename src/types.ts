@@ -44,6 +44,18 @@ export interface Task {
   completedAt?: number;
 }
 
+export interface Message {
+  id: string;
+  familyId: string;
+  senderId: string;
+  senderName: string;
+  senderType: 'parent' | 'child';
+  recipientId: string | null; // null = group chat, set = DM
+  content: string;
+  type: 'text' | 'image' | 'audio';
+  createdAt: number;
+}
+
 export interface GameStats {
   gamesPlayed: number;
   totalCorrect: number;
@@ -82,6 +94,6 @@ export interface GameData {
 }
 
 export type AppView = 'landing' | 'parent-setup' | 'kid-link' | 'kid' | 'parent';
-export type KidTab = 'home' | 'games' | 'chores' | 'stories' | 'store' | 'settings';
+export type KidTab = 'home' | 'games' | 'chores' | 'stories' | 'store' | 'settings' | 'chat';
 export type SoundType = 'pop' | 'win' | 'lose' | 'click' | 'whoosh';
 export type Difficulty = 'easy' | 'medium' | 'hard';
