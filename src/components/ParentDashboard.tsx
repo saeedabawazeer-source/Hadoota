@@ -121,7 +121,7 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
       )}
 
       {/* Tab Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pb-4 md:pb-6">
         {tab === 'overview' && (
           <div className="flex flex-col gap-4">
             {/* Kid Selector */}

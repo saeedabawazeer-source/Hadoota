@@ -151,20 +151,21 @@ export default function App() {
     }
 
     return (
-      <div className="h-[100dvh] w-full bg-purple-600 font-sans flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white border-4 border-black p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
-          <h2 className="text-3xl font-black uppercase mb-6 text-black">Who's Managing?</h2>
-          <div className="flex flex-col gap-4">
+      <div className="h-[100dvh] w-full bg-purple-600 font-sans flex flex-col items-center justify-center p-4 md:p-6"
+           style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))', paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+        <div className="w-full max-w-md bg-white border-4 border-black p-6 md:p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-full">
+          <h2 className="text-3xl font-black uppercase mb-6 text-black text-center shrink-0">Who's Managing?</h2>
+          <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2 min-h-0">
             {store.parentAccount!.parents.map(p => (
               <motion.button key={p.id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => {
                 setActiveParent(p);
                 if (!activeKid && store.parentAccount!.kids.length > 0) setActiveKid(store.parentAccount!.kids[0]);
-              }} className="bg-lime-400 border-4 border-black p-4 rounded-2xl font-black text-2xl uppercase hover:bg-lime-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+              }} className="bg-lime-400 border-4 border-black p-4 rounded-2xl font-black text-xl md:text-2xl uppercase hover:bg-lime-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer shrink-0">
                 {p.name}
               </motion.button>
             ))}
           </div>
-          <button onClick={() => setView('landing')} className="mt-8 bg-gray-200 border-4 border-black p-3 rounded-xl font-bold uppercase hover:bg-gray-300 flex items-center justify-center gap-2 w-full cursor-pointer transition-colors">
+          <button onClick={() => setView('landing')} className="mt-6 shrink-0 bg-gray-200 border-4 border-black p-3 rounded-xl font-bold uppercase hover:bg-gray-300 flex items-center justify-center gap-2 w-full cursor-pointer transition-colors">
             <ArrowLeft className="w-5 h-5" /> Back
           </button>
         </div>
@@ -577,7 +578,8 @@ function GameCard({ color, title, iconImg, onClick, white, lime }: { color: stri
 function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNode; onClose: () => void; fullScreen: boolean }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-50 flex items-center justify-center ${fullScreen ? 'bg-purple-600' : 'bg-black/90 backdrop-blur-sm p-4 md:p-8'}`} role="dialog" aria-modal="true">
+      className={`fixed inset-0 z-50 flex items-center justify-center ${fullScreen ? 'bg-purple-600' : 'bg-black/90 backdrop-blur-sm p-4 md:p-8'}`} role="dialog" aria-modal="true"
+      style={fullScreen ? { paddingTop: 'max(0px, env(safe-area-inset-top))', paddingBottom: 'max(0px, env(safe-area-inset-bottom))' } : {}}>
       <motion.div initial={{ scale: fullScreen ? 1 : 0.9 }} animate={{ scale: 1 }} exit={{ scale: fullScreen ? 1 : 0.9 }}
         className={`w-full h-full relative flex flex-col ${fullScreen ? 'bg-purple-600' : 'bg-purple-600 max-w-4xl rounded-3xl md:rounded-[2rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden'}`}>
         {!fullScreen && (
