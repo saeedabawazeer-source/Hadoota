@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Wand2, ArrowLeft, ArrowRight, Star, Loader2, PlayCircle, X } from 'lucide-react';
 import { GoogleGenAI, Modality, Type } from '@google/genai';
+import { GAME_HOSTS } from '../data/gameHosts';
+import { HostBadge } from './HostBadge';
 
 export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClose: () => void; kidName: string }) {
   const [prompt, setPrompt] = useState(topic === 'Magic' ? '' : topic);
@@ -119,6 +121,7 @@ export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClos
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-6 md:gap-8 max-w-xl mx-auto w-full">
           <Wand2 className="w-20 h-20 md:w-28 md:h-28 text-lime-400 mx-auto shrink-0" />
           <h2 className="text-4xl md:text-6xl font-black text-white uppercase shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Magic Story</h2>
+          <HostBadge seed={GAME_HOSTS.Stories} />
           <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="What is it about?"
             className="w-full bg-white border-4 border-black p-4 md:p-6 rounded-2xl md:rounded-3xl text-xl md:text-3xl font-black text-black text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-4 focus:ring-lime-400 shrink-0"
             aria-label="Story topic" />
@@ -136,8 +139,11 @@ export function StoryEngine({ topic, onClose, kidName }: { topic: string; onClos
       )}
       {pages.length > 0 && !loadingState && (
         <motion.div key={currentPage} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0">
-          <div className="flex justify-between items-center shrink-0">
-            <span className="bg-white text-black font-black px-4 py-2 rounded-xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-widest">Page {currentPage + 1}/{pages.length}</span>
+          <div className="flex justify-between items-center shrink-0 gap-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-white text-black font-black px-4 py-2 rounded-xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-widest whitespace-nowrap">Page {currentPage + 1}/{pages.length}</span>
+              <HostBadge seed={GAME_HOSTS.Stories} />
+            </div>
             <button onClick={() => { setPages([]); setPrompt(''); }} className="bg-white text-black font-black px-4 py-2 rounded-xl border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase hover:bg-red-400 transition-colors">Close Book</button>
           </div>
           <div className="w-full flex-1 bg-black border-4 border-black rounded-2xl md:rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative flex items-center justify-center min-h-0">

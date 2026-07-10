@@ -16,6 +16,10 @@ export default defineConfig(({mode}) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
+      dedupe: ['three', '@react-three/fiber'],
+    },
+    optimizeDeps: {
+      include: ['three'],
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

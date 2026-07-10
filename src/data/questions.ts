@@ -173,6 +173,9 @@ export const scienceQuestions: Question[] = [
   { q: "At what temp does water boil (°C)?", options: [50, 100, 200], a: 100, difficulty: 'hard' },
   { q: "Which planet is closest to the Sun?", options: ['Venus', 'Mercury', 'Earth'], a: 'Mercury', difficulty: 'hard' },
   { q: "What element do plants produce?", options: ['Oxygen', 'Carbon', 'Nitrogen'], a: 'Oxygen', difficulty: 'hard' },
+  { q: "Which planet has the most moons?", options: ['Earth', 'Saturn', 'Mercury'], a: 'Saturn', difficulty: 'hard' },
+  { q: "What is the smallest bone in the human body?", options: ['Femur', 'Stapes', 'Rib'], a: 'Stapes', difficulty: 'hard' },
+  { q: "Which gas makes up most of Earth's air?", options: ['Oxygen', 'Nitrogen', 'Carbon Dioxide'], a: 'Nitrogen', difficulty: 'hard' },
 ];
 
 // --- GEOGRAPHY QUESTIONS ---
@@ -187,6 +190,11 @@ export const geographyQuestions: Question[] = [
   { q: "Deserts are very…", options: ['Wet', 'Dry', 'Cold'], a: 'Dry', difficulty: 'easy' },
   { q: "What shows countries? ️", options: ['Clock', 'Map', 'Book'], a: 'Map', difficulty: 'easy' },
   { q: "What is the tallest mountain?", options: ['K2', 'Everest', 'Kilimanjaro'], a: 'Everest', difficulty: 'easy' },
+  { q: "How many oceans does Earth have?", options: [4, 5, 6], a: 5, difficulty: 'easy' },
+  { q: "Which of these is a country, not a city?", options: ['Canada', 'Paris', 'Everest'], a: 'Canada', difficulty: 'easy' },
+  { q: "What is a valley?", options: ['Low land between hills', 'A tall mountain', 'An ocean'], a: 'Low land between hills', difficulty: 'easy' },
+  { q: "Which is colder?", options: ['The Poles', 'The Equator', 'The Beach'], a: 'The Poles', difficulty: 'easy' },
+  { q: "What tool do sailors use to find direction?", options: ['Compass', 'Telescope', 'Clock'], a: 'Compass', difficulty: 'easy' },
   { q: "What is the longest river?", options: ['Amazon', 'Nile', 'Thames'], a: 'Nile', difficulty: 'medium' },
   { q: "Which country has the most people?", options: ['USA', 'India', 'Russia'], a: 'India', difficulty: 'medium' },
   { q: "What is the capital of France?", options: ['London', 'Paris', 'Berlin'], a: 'Paris', difficulty: 'medium' },
@@ -197,11 +205,21 @@ export const geographyQuestions: Question[] = [
   { q: "The Amazon is in which continent?", options: ['Asia', 'Africa', 'S. America'], a: 'S. America', difficulty: 'medium' },
   { q: "Where are the Pyramids? ️", options: ['Mexico', 'Egypt', 'India'], a: 'Egypt', difficulty: 'medium' },
   { q: "What country has kangaroos? ", options: ['Brazil', 'Australia', 'Canada'], a: 'Australia', difficulty: 'medium' },
+  { q: "What is a group of islands called?", options: ['Peninsula', 'Archipelago', 'Continent'], a: 'Archipelago', difficulty: 'medium' },
+  { q: "What is the capital of the USA?", options: ['New York', 'Washington D.C.', 'Los Angeles'], a: 'Washington D.C.', difficulty: 'medium' },
+  { q: "Which sea is so salty that you float easily?", options: ['Dead Sea', 'Red Sea', 'Black Sea'], a: 'Dead Sea', difficulty: 'medium' },
+  { q: "Land surrounded by water on 3 sides is a…", options: ['Island', 'Peninsula', 'Isthmus'], a: 'Peninsula', difficulty: 'medium' },
+  { q: "Which country is home to the Great Wall?", options: ['Japan', 'China', 'India'], a: 'China', difficulty: 'medium' },
   { q: "What is the smallest country?", options: ['Monaco', 'Vatican', 'Malta'], a: 'Vatican', difficulty: 'hard' },
   { q: "What is the capital of Japan?", options: ['Beijing', 'Seoul', 'Tokyo'], a: 'Tokyo', difficulty: 'hard' },
   { q: "What is the deepest ocean trench?", options: ['Tonga', 'Mariana', 'Java'], a: 'Mariana', difficulty: 'hard' },
   { q: "What line divides N & S hemispheres?", options: ['Equator', 'Meridian', 'Tropic'], a: 'Equator', difficulty: 'hard' },
   { q: "What country is both in Europe & Asia?", options: ['Russia', 'Turkey', 'Both'], a: 'Both', difficulty: 'hard' },
+  { q: "What line marks 0° longitude?", options: ['Equator', 'Prime Meridian', 'Tropic of Cancer'], a: 'Prime Meridian', difficulty: 'hard' },
+  { q: "What is the largest hot desert?", options: ['Gobi', 'Sahara', 'Kalahari'], a: 'Sahara', difficulty: 'hard' },
+  { q: "What is the capital of Australia?", options: ['Sydney', 'Melbourne', 'Canberra'], a: 'Canberra', difficulty: 'hard' },
+  { q: "Which country has the most time zones?", options: ['Russia', 'USA', 'France'], a: 'France', difficulty: 'hard' },
+  { q: "What is the driest place on Earth?", options: ['Sahara Desert', 'Atacama Desert', 'Gobi Desert'], a: 'Atacama Desert', difficulty: 'hard' },
 ];
 
 // --- MEMORY / TRIVIA QUESTIONS ---

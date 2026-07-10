@@ -1,738 +1,196 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
-import type { ParentAccount, KidProfile, Reward, Task } from '../types';
+import type { ParentAccount, KidProfile, Reward, Task, ParentProfile, FamilyMember } from '../types';
+
+// ---------------------------------------------------------------------------
+// Local-first store. The app works fully offline (single device / browser):
+// parents create an account, generate a kid pairing code, add kids, and kids
+// link with that code — all persisted to localStorage. No backend required.
+// (If a Supabase backend is later configured, this can be swapped back out.)
+// ---------------------------------------------------------------------------
+
+const DB_KEY = 'h_local_db_v1';
 
 const DEFAULT_REWARDS: Reward[] = [
-  { id: '1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'gamepad' },
-  { id: '2', title: 'Choose Movie Night', cost: 100, icon: 'film' },
-  { id: '3', title: 'Stay Up Late (1hr)', cost: 150, icon: 'moon' },
+  { id: 'r1', title: 'Extra Screen Time (30m)', cost: 50, icon: 'gamepad' },
+  { id: 'r2', title: 'Choose Movie Night', cost: 100, icon: 'film' },
+  { id: 'r3', title: 'Stay Up Late (1hr)', cost: 150, icon: 'moon' },
 ];
 
-// Helpers for localStorage persistence of device identity
-function getStoredFamilyId(): string | null {
-  return localStorage.getItem('h_family_id');
+interface LocalDB {
+  family: { id: string; name: string; code: string; createdAt: number } | null;
+  parents: ParentProfile[];
+  kids: KidProfile[];
+  rewards: Reward[];
+  tasks: Task[];
+  members: FamilyMember[];
 }
-function setStoredFamilyId(id: string) {
-  localStorage.setItem('h_family_id', id);
+
+const emptyStats = () => ({ gamesPlayed: 0, totalCorrect: 0, totalWrong: 0, totalStarsEarned: 0, subjectStats: {}, dailyActivity: [] });
+const uid = () => (crypto?.randomUUID ? crypto.randomUUID() : 'id-' + Math.random().toString(36).slice(2) + Date.now());
+const genCode = () => {
+  // 5-digit numeric code (matches the kid link-entry screen)
+  let c = '';
+  for (let i = 0; i < 5; i++) c += Math.floor(Math.random() * 10);
+  return c;
+};
+
+function loadDB(): LocalDB {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) { const db = JSON.parse(raw); db.members = db.members || []; return db; }
+  } catch { /* ignore */ }
+  return { family: null, parents: [], kids: [], rewards: DEFAULT_REWARDS, tasks: [], members: [] };
 }
-function getDeviceRole(): 'parent' | 'child' | null {
-  return localStorage.getItem('h_device_role') as 'parent' | 'child' | null;
-}
-function setDeviceRole(role: 'parent' | 'child') {
-  localStorage.setItem('h_device_role', role);
+function saveDB(db: LocalDB) {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch { /* ignore */ }
 }
 
 export function useParentStore() {
-  const [parentAccount, setParentAccount] = useState<ParentAccount | null>(null);
-  const [rewards, setRewardsState] = useState<Reward[]>(DEFAULT_REWARDS);
-  const [tasks, setTasksState] = useState<Task[]>([]);
+  const [db, setDb] = useState<LocalDB>(() => loadDB());
   const [activeKidId, setActiveKidId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [familyId, setFamilyId] = useState<string | null>(getStoredFamilyId());
-  const [pairingCode, setPairingCode] = useState<string | null>(localStorage.getItem('h_pairing_code'));
 
-  // ------------------------------------------------------------------
-  // LOAD: fetch all data from Supabase for the stored family_id
-  // ------------------------------------------------------------------
-  useEffect(() => {
-    const storedFamilyId = getStoredFamilyId();
-    if (!storedFamilyId) {
-      setIsLoaded(true);
-      return;
-    }
+  useEffect(() => { setIsLoaded(true); }, []);
+  // Persist on every change
+  useEffect(() => { saveDB(db); }, [db]);
 
-    (async () => {
-      try {
-        // Fetch family
-        const { data: family } = await supabase
-          .from('families')
-          .select('*')
-          .eq('id', storedFamilyId)
-          .single();
+  const parentAccount: ParentAccount | null = db.family
+    ? { parents: db.parents.length ? db.parents : [{ id: 'parent-1', name: 'Parent' }], kids: db.kids, createdAt: db.family.createdAt }
+    : null;
+  const isParentSetup = db.family !== null;
+  const pairingCode = db.family?.code ?? null;
+  const familyId = db.family?.id ?? null;
 
-        if (!family) {
-          // Family doesn't exist anymore — clear local state
-          localStorage.removeItem('h_family_id');
-          setIsLoaded(true);
-          return;
-        }
-
-        // Fetch pairing code
-        const { data: codeRow } = await supabase
-          .from('pairing_codes')
-          .select('code')
-          .eq('family_id', storedFamilyId)
-          .eq('is_active', true)
-          .limit(1)
-          .single();
-        if (codeRow) setPairingCode(codeRow.code);
-
-        // Fetch children
-        const { data: children } = await supabase
-          .from('children')
-          .select('*')
-          .eq('family_id', storedFamilyId);
-
-        // Fetch rewards
-        const { data: rewardsData } = await supabase
-          .from('rewards')
-          .select('*')
-          .eq('family_id', storedFamilyId)
-          .eq('is_active', true);
-
-        // Fetch tasks
-        const { data: tasksData } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('family_id', storedFamilyId);
-
-        // Fetch game sessions to build stats per kid
-        const { data: gameSessions } = await supabase
-          .from('game_sessions')
-          .select('*')
-          .in('child_id', (children || []).map(c => c.id));
-
-        // Build KidProfile objects from DB rows
-        const kidProfiles: KidProfile[] = (children || []).map(c => {
-          const kidSessions = (gameSessions || []).filter(g => g.child_id === c.id);
-          const totalCorrect = kidSessions.reduce((sum, s) => sum + (s.correct_answers || 0), 0);
-          const totalWrong = kidSessions.reduce((sum, s) => sum + (s.wrong_answers || 0), 0);
-          const totalStarsEarned = kidSessions.reduce((sum, s) => sum + (s.stars_earned || 0), 0);
-
-          return {
-            id: c.id,
-            name: c.name,
-            age: c.age,
-            avatarSeed: c.avatar_seed,
-            interests: c.interests || [],
-            difficulty: c.difficulty,
-            linkCode: '', // will be populated below
-            stars: c.stars,
-            streak: c.streak,
-            questProgress: c.quest_progress,
-            gameStats: {
-              gamesPlayed: kidSessions.length,
-              totalCorrect,
-              totalWrong,
-              totalStarsEarned,
-              subjectStats: {},
-              dailyActivity: [],
-            },
-          };
-        });
-
-        // Set link codes — all kids in the same family share the family pairing code
-        kidProfiles.forEach(k => { k.linkCode = codeRow?.code || ''; });
-
-        const account: ParentAccount = {
-          parents: [{ id: 'parent-1', name: 'Parent' }], // placeholder — we store parent name locally
-          kids: kidProfiles,
-          createdAt: new Date(family.created_at).getTime(),
-        };
-
-        // Restore parent name from localStorage if available
-        const storedParentName = localStorage.getItem('h_parent_name');
-        if (storedParentName) {
-          account.parents = [{ id: 'parent-1', name: storedParentName }];
-        }
-
-        // Restore additional parents
-        const storedParents = localStorage.getItem('h_extra_parents');
-        if (storedParents) {
-          try {
-            const extra = JSON.parse(storedParents);
-            account.parents = [account.parents[0], ...extra];
-          } catch { /* ignore */ }
-        }
-
-        setParentAccount(account);
-        setFamilyId(storedFamilyId);
-
-        // Map rewards from DB format
-        if (rewardsData && rewardsData.length > 0) {
-          setRewardsState(rewardsData.map(r => ({
-            id: r.id,
-            title: r.title,
-            cost: r.cost,
-            icon: r.icon || 'star',
-          })));
-        }
-
-        // Map tasks from DB format
-        if (tasksData) {
-          setTasksState(tasksData.map(t => ({
-            id: t.id,
-            title: t.title,
-            type: t.type,
-            reward: t.reward_stars,
-            isChore: t.is_chore,
-            status: t.status as 'pending' | 'done' | 'approved',
-            kidId: t.child_id,
-            completedAt: t.completed_at ? new Date(t.completed_at).getTime() : undefined,
-          })));
-        }
-      } catch (err) {
-        console.error('[Hadoota] Failed to load from Supabase:', err);
-      } finally {
-        setIsLoaded(true);
-      }
-    })();
+  // ---- Parent account ----
+  const createParentAccount = useCallback(async (name: string): Promise<string | null> => {
+    const family = { id: uid(), name, code: genCode(), createdAt: Date.now() };
+    setDb(prev => ({ ...prev, family, parents: [{ id: 'parent-1', name }], rewards: prev.rewards.length ? prev.rewards : DEFAULT_REWARDS }));
+    return family.id;
   }, []);
 
-  const isParentSetup = parentAccount !== null;
+  const addParent = useCallback((name: string) => {
+    setDb(prev => ({ ...prev, parents: [...prev.parents, { id: uid(), name }] }));
+  }, []);
 
-  // ------------------------------------------------------------------
-  // PARENT ACCOUNT
-  // ------------------------------------------------------------------
-  const createParentAccount = async (name: string): Promise<string | null> => {
-    try {
-      // Call the RPC to create family + pairing code
-      const { data, error } = await supabase.rpc('create_family_with_code', {
-        pin_hash: 'demo', // no real PIN hash for now
-      });
-
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error('No data returned from create_family_with_code');
-
-      const { family_id: newFamilyId, pairing_code: newCode } = data[0];
-
-      // Store in localStorage
-      setStoredFamilyId(newFamilyId);
-      setDeviceRole('parent');
-      localStorage.setItem('h_parent_name', name);
-
-      // Seed default rewards into DB for this family
-      const rewardInserts = DEFAULT_REWARDS.map(r => ({
-        family_id: newFamilyId,
-        title: r.title,
-        cost: r.cost,
-        icon: r.icon,
-      }));
-      const { data: insertedRewards } = await supabase
-        .from('rewards')
-        .insert(rewardInserts)
-        .select();
-
-      const newAccount: ParentAccount = {
-        parents: [{ id: 'parent-1', name }],
-        kids: [],
-        createdAt: Date.now(),
-      };
-
-      setParentAccount(newAccount);
-      setFamilyId(newFamilyId);
-      setPairingCode(newCode);
-      localStorage.setItem('h_pairing_code', newCode);
-
-      if (insertedRewards) {
-        setRewardsState(insertedRewards.map(r => ({
-          id: r.id,
-          title: r.title,
-          cost: r.cost,
-          icon: r.icon || 'star',
-        })));
-      }
-
-      return newFamilyId;
-    } catch (err) {
-      console.error('[Hadoota] Failed to create parent account:', err);
-      return null;
-    }
-  };
-
-  const addParent = (name: string) => {
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      const newParent = { id: Date.now().toString(), name };
-      const newAccount = { ...prev, parents: [...prev.parents, newParent] };
-      // Persist extra parents locally (they don't go to DB)
-      const extras = newAccount.parents.slice(1);
-      localStorage.setItem('h_extra_parents', JSON.stringify(extras));
-      return newAccount;
-    });
-  };
-
-  // ------------------------------------------------------------------
-  // KID PROFILES
-  // ------------------------------------------------------------------
-  const addKid = async (kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'>): Promise<KidProfile> => {
-    const currentFamilyId = familyId || getStoredFamilyId();
-    if (!currentFamilyId) throw new Error('No family ID — run createParentAccount first');
-
-    const { data, error } = await supabase
-      .from('children')
-      .insert({
-        family_id: currentFamilyId,
-        name: kid.name,
-        age: kid.age,
-        avatar_seed: kid.avatarSeed,
-        interests: kid.interests || [],
-        difficulty: kid.difficulty || 'easy',
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
+  // ---- Kids ----
+  const addKid = useCallback(async (kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'>): Promise<KidProfile> => {
     const newKid: KidProfile = {
-      id: data.id,
-      name: data.name,
-      age: data.age,
-      avatarSeed: data.avatar_seed,
-      interests: data.interests || [],
-      difficulty: data.difficulty,
-      linkCode: pairingCode || localStorage.getItem('h_pairing_code') || '',
-      stars: 0,
-      streak: 0,
-      questProgress: 0,
-      gameStats: { gamesPlayed: 0, totalStarsEarned: 0, totalCorrect: 0, totalWrong: 0, subjectStats: {}, dailyActivity: [] },
+      id: uid(), name: kid.name, age: kid.age, avatarSeed: kid.avatarSeed,
+      interests: kid.interests || [], difficulty: kid.difficulty || 'easy',
+      linkCode: '', stars: 0, streak: 0, questProgress: 0, gameStats: emptyStats(),
     };
-
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return { ...prev, kids: [...prev.kids, newKid] };
+    setDb(prev => {
+      newKid.linkCode = prev.family?.code || '';
+      const hasMe = prev.members.some(m => m.role === 'Me');
+      const members = hasMe ? prev.members : [...prev.members, { id: uid(), name: newKid.name, role: 'Me', seed: newKid.avatarSeed }];
+      return { ...prev, kids: [...prev.kids, newKid], members };
     });
-
     return newKid;
-  };
+  }, []);
 
-  const updateKid = async (id: string, updates: Partial<KidProfile>) => {
-    // Map frontend field names to DB column names
-    const dbUpdates: Record<string, any> = {};
-    if (updates.name !== undefined) dbUpdates.name = updates.name;
-    if (updates.age !== undefined) dbUpdates.age = updates.age;
-    if (updates.avatarSeed !== undefined) dbUpdates.avatar_seed = updates.avatarSeed;
-    if (updates.interests !== undefined) dbUpdates.interests = updates.interests;
-    if (updates.difficulty !== undefined) dbUpdates.difficulty = updates.difficulty;
-    if (updates.stars !== undefined) dbUpdates.stars = updates.stars;
-    if (updates.streak !== undefined) dbUpdates.streak = updates.streak;
-    if (updates.questProgress !== undefined) dbUpdates.quest_progress = updates.questProgress;
+  // ---- Family members (shown on the home island) ----
+  const addMember = useCallback((m: Omit<FamilyMember, 'id'>) => {
+    setDb(prev => ({ ...prev, members: [...prev.members, { ...m, id: uid() }] }));
+  }, []);
+  const updateMember = useCallback((id: string, updates: Partial<FamilyMember>) => {
+    setDb(prev => ({ ...prev, members: prev.members.map(m => m.id === id ? { ...m, ...updates } : m) }));
+  }, []);
+  const removeMember = useCallback((id: string) => {
+    setDb(prev => ({ ...prev, members: prev.members.filter(m => m.id !== id) }));
+  }, []);
 
-    if (Object.keys(dbUpdates).length > 0) {
-      await supabase.from('children').update(dbUpdates).eq('id', id);
+  const updateKid = useCallback(async (id: string, updates: Partial<KidProfile>) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.map(k => k.id === id ? { ...k, ...updates } : k) }));
+  }, []);
+
+  const removeKid = useCallback(async (id: string) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.filter(k => k.id !== id) }));
+  }, []);
+
+  const getKidByLinkCode = useCallback((code: string): KidProfile | undefined => {
+    return db.kids.find(k => k.linkCode?.toUpperCase() === code.toUpperCase());
+  }, [db.kids]);
+
+  const getKidById = useCallback((id: string): KidProfile | undefined => db.kids.find(k => k.id === id), [db.kids]);
+
+  const regenerateLinkCode = useCallback(async (_kidId: string): Promise<string> => {
+    const code = genCode();
+    setDb(prev => prev.family
+      ? { ...prev, family: { ...prev.family, code }, kids: prev.kids.map(k => ({ ...k, linkCode: code })) }
+      : prev);
+    return code;
+  }, []);
+
+  // ---- Pairing (kid device) ----
+  const validatePairingCode = useCallback(async (code: string): Promise<{ familyId: string; kids: KidProfile[] } | null> => {
+    const fresh = loadDB(); // read latest (covers other tabs on same browser)
+    if (fresh.family && fresh.family.code.toUpperCase() === code.toUpperCase() && fresh.kids.length > 0) {
+      setDb(fresh);
+      return { familyId: fresh.family.id, kids: fresh.kids };
     }
+    return null;
+  }, []);
 
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return { ...prev, kids: prev.kids.map(k => k.id === id ? { ...k, ...updates } : k) };
+  // ---- Stats & progress ----
+  const addStarsToKid = useCallback(async (kidId: string, amount: number) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.map(k => k.id === kidId
+      ? { ...k, stars: k.stars + amount, gameStats: { ...k.gameStats, totalStarsEarned: k.gameStats.totalStarsEarned + amount } }
+      : k) }));
+  }, []);
+
+  const recordAnswerForKid = useCallback(async (kidId: string, isCorrect: boolean) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.map(k => k.id === kidId
+      ? { ...k, gameStats: { ...k.gameStats, totalCorrect: k.gameStats.totalCorrect + (isCorrect ? 1 : 0), totalWrong: k.gameStats.totalWrong + (isCorrect ? 0 : 1) } }
+      : k) }));
+  }, []);
+
+  const recordGamePlayedForKid = useCallback(async (kidId: string) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.map(k => k.id === kidId
+      ? { ...k, gameStats: { ...k.gameStats, gamesPlayed: k.gameStats.gamesPlayed + 1 } } : k) }));
+  }, []);
+
+  const advanceQuestForKid = useCallback(async (kidId: string, amount: number = 25) => {
+    setDb(prev => ({ ...prev, kids: prev.kids.map(k => {
+      if (k.id !== kidId) return k;
+      const np = k.questProgress + amount;
+      const streakBump = np >= 100 ? k.streak + 1 : k.streak;
+      return { ...k, questProgress: np >= 100 ? 0 : np, streak: streakBump, gameStats: { ...k.gameStats, gamesPlayed: k.gameStats.gamesPlayed + 1 } };
+    }) }));
+  }, []);
+
+  // ---- Tasks ----
+  const getTasksForKid = useCallback((kidId: string) => db.tasks.filter(t => t.kidId === kidId), [db.tasks]);
+
+  const setTasks = useCallback((updater: Task[] | ((prev: Task[]) => Task[])) => {
+    setDb(prev => ({ ...prev, tasks: typeof updater === 'function' ? (updater as any)(prev.tasks) : updater }));
+  }, []);
+
+  const addTask = useCallback(async (task: Omit<Task, 'id' | 'status'>) => {
+    setDb(prev => ({ ...prev, tasks: [...prev.tasks, { ...task, id: uid(), status: 'pending' as const }] }));
+  }, []);
+
+  const markTaskDone = useCallback(async (taskId: string) => {
+    setDb(prev => ({ ...prev, tasks: prev.tasks.map(t => t.id === taskId ? { ...t, status: 'done' as const, completedAt: Date.now() } : t) }));
+  }, []);
+
+  const approveTask = useCallback(async (taskId: string) => {
+    setDb(prev => {
+      const task = prev.tasks.find(t => t.id === taskId);
+      const kids = task?.kidId ? prev.kids.map(k => k.id === task.kidId ? { ...k, stars: k.stars + (task.reward || 0) } : k) : prev.kids;
+      return { ...prev, kids, tasks: prev.tasks.map(t => t.id === taskId ? { ...t, status: 'approved' as const } : t) };
     });
-  };
+  }, []);
 
-  const removeKid = async (id: string) => {
-    await supabase.from('children').delete().eq('id', id);
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return { ...prev, kids: prev.kids.filter(k => k.id !== id) };
-    });
-  };
+  const removeTask = useCallback(async (taskId: string) => {
+    setDb(prev => ({ ...prev, tasks: prev.tasks.filter(t => t.id !== taskId) }));
+  }, []);
 
-  const getKidByLinkCode = (code: string): KidProfile | undefined => {
-    // This is now used for local lookup after Supabase validation
-    return parentAccount?.kids.find(k => k.linkCode === code);
-  };
+  // ---- Rewards ----
+  const setRewards = useCallback((newRewards: Reward[]) => {
+    setDb(prev => ({ ...prev, rewards: newRewards }));
+  }, []);
 
-  const getKidById = (id: string): KidProfile | undefined => {
-    return parentAccount?.kids.find(k => k.id === id);
-  };
-
-  const regenerateLinkCode = async (kidId: string): Promise<string> => {
-    const currentFamilyId = familyId || getStoredFamilyId();
-    if (!currentFamilyId) return '';
-
-    // Deactivate old codes
-    await supabase
-      .from('pairing_codes')
-      .update({ is_active: false })
-      .eq('family_id', currentFamilyId);
-
-    // Generate new code via the DB function
-    const { data: newCode } = await supabase.rpc('generate_pairing_code');
-
-    if (newCode) {
-      await supabase.from('pairing_codes').insert({
-        family_id: currentFamilyId,
-        code: newCode,
-      });
-      setPairingCode(newCode);
-
-      // Update all kid linkCodes in local state
-      setParentAccount(prev => {
-        if (!prev) return prev;
-        return { ...prev, kids: prev.kids.map(k => ({ ...k, linkCode: newCode })) };
-      });
-
-      return newCode;
-    }
-    return '';
-  };
-
-  // ------------------------------------------------------------------
-  // VALIDATE PAIRING CODE (for child device)
-  // ------------------------------------------------------------------
-  const validatePairingCode = async (code: string): Promise<{ familyId: string; kids: KidProfile[] } | null> => {
-    try {
-      const { data: validatedFamilyId, error } = await supabase.rpc('validate_pairing_code', {
-        input_code: code,
-      });
-
-      if (error || !validatedFamilyId) return null;
-
-      // Fetch children for this family
-      const { data: children } = await supabase
-        .from('children')
-        .select('*')
-        .eq('family_id', validatedFamilyId);
-
-      if (!children || children.length === 0) return null;
-
-      // Fetch game sessions for stats
-      const { data: gameSessions } = await supabase
-        .from('game_sessions')
-        .select('*')
-        .in('child_id', children.map(c => c.id));
-
-      const kidProfiles: KidProfile[] = children.map(c => {
-        const kidSessions = (gameSessions || []).filter(g => g.child_id === c.id);
-        return {
-          id: c.id,
-          name: c.name,
-          age: c.age,
-          avatarSeed: c.avatar_seed,
-          interests: c.interests || [],
-          difficulty: c.difficulty,
-          linkCode: code,
-          stars: c.stars,
-          streak: c.streak,
-          questProgress: c.quest_progress,
-          gameStats: {
-            gamesPlayed: kidSessions.length,
-            totalCorrect: kidSessions.reduce((sum, s) => sum + (s.correct_answers || 0), 0),
-            totalWrong: kidSessions.reduce((sum, s) => sum + (s.wrong_answers || 0), 0),
-            totalStarsEarned: kidSessions.reduce((sum, s) => sum + (s.stars_earned || 0), 0),
-            subjectStats: {},
-            dailyActivity: [],
-          },
-        };
-      });
-
-      // Store family_id for this child device
-      setStoredFamilyId(validatedFamilyId);
-      setDeviceRole('child');
-      setFamilyId(validatedFamilyId);
-
-      // Also load rewards and tasks
-      const { data: rewardsData } = await supabase
-        .from('rewards')
-        .select('*')
-        .eq('family_id', validatedFamilyId)
-        .eq('is_active', true);
-
-      const { data: tasksData } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('family_id', validatedFamilyId);
-
-      // Build a parent account object for the child device
-      const account: ParentAccount = {
-        parents: [{ id: 'parent-1', name: 'Parent' }],
-        kids: kidProfiles,
-        createdAt: Date.now(),
-      };
-      setParentAccount(account);
-
-      if (rewardsData && rewardsData.length > 0) {
-        setRewardsState(rewardsData.map(r => ({
-          id: r.id, title: r.title, cost: r.cost, icon: r.icon || 'star',
-        })));
-      }
-
-      if (tasksData) {
-        setTasksState(tasksData.map(t => ({
-          id: t.id, title: t.title, type: t.type, reward: t.reward_stars,
-          isChore: t.is_chore, status: t.status as 'pending' | 'done' | 'approved',
-          kidId: t.child_id,
-          completedAt: t.completed_at ? new Date(t.completed_at).getTime() : undefined,
-        })));
-      }
-
-      return { familyId: validatedFamilyId, kids: kidProfiles };
-    } catch (err) {
-      console.error('[Hadoota] Pairing code validation failed:', err);
-      return null;
-    }
-  };
-
-  // ------------------------------------------------------------------
-  // GAME STATS & PROGRESS
-  // ------------------------------------------------------------------
-  const addStarsToKid = async (kidId: string, amount: number) => {
-    // Update in Supabase
-    const kid = parentAccount?.kids.find(k => k.id === kidId);
-    if (kid) {
-      await supabase
-        .from('children')
-        .update({ stars: kid.stars + amount })
-        .eq('id', kidId);
-    }
-
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        kids: prev.kids.map(k => {
-          if (k.id === kidId) {
-            return {
-              ...k,
-              stars: k.stars + amount,
-              gameStats: { ...k.gameStats, totalStarsEarned: k.gameStats.totalStarsEarned + amount },
-            };
-          }
-          return k;
-        }),
-      };
-    });
-  };
-
-  const recordAnswerForKid = async (kidId: string, isCorrect: boolean) => {
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        kids: prev.kids.map(k => {
-          if (k.id === kidId) {
-            return {
-              ...k,
-              gameStats: {
-                ...k.gameStats,
-                totalCorrect: isCorrect ? k.gameStats.totalCorrect + 1 : k.gameStats.totalCorrect,
-                totalWrong: !isCorrect ? k.gameStats.totalWrong + 1 : k.gameStats.totalWrong,
-              },
-            };
-          }
-          return k;
-        }),
-      };
-    });
-  };
-
-  const recordGamePlayedForKid = async (kidId: string) => {
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        kids: prev.kids.map(k => {
-          if (k.id === kidId) {
-            return {
-              ...k,
-              gameStats: { ...k.gameStats, gamesPlayed: k.gameStats.gamesPlayed + 1 },
-            };
-          }
-          return k;
-        }),
-      };
-    });
-  };
-
-  const advanceQuestForKid = async (kidId: string, amount: number = 25) => {
-    const kid = parentAccount?.kids.find(k => k.id === kidId);
-    if (kid) {
-      const newProgress = kid.questProgress + amount >= 100 ? 0 : kid.questProgress + amount;
-      await supabase.from('children').update({ quest_progress: newProgress }).eq('id', kidId);
-    }
-
-    setParentAccount(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        kids: prev.kids.map(k => {
-          if (k.id === kidId) {
-            const newProgress = k.questProgress + amount;
-            return { ...k, questProgress: newProgress >= 100 ? 0 : newProgress };
-          }
-          return k;
-        }),
-      };
-    });
-    recordGamePlayedForKid(kidId);
-  };
-
-  // ------------------------------------------------------------------
-  // TASKS (chores)
-  // ------------------------------------------------------------------
-  const getTasksForKid = (kidId: string) => tasks.filter(t => t.kidId === kidId);
-
-  const addTask = async (task: Omit<Task, 'id' | 'status'>) => {
-    const currentFamilyId = familyId || getStoredFamilyId();
-    if (!currentFamilyId) return;
-
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert({
-        family_id: currentFamilyId,
-        child_id: task.kidId || null,
-        title: task.title,
-        type: task.type,
-        reward_stars: task.reward,
-        is_chore: task.isChore,
-      })
-      .select()
-      .single();
-
-    if (data) {
-      const newTask: Task = {
-        id: data.id,
-        title: data.title,
-        type: data.type,
-        reward: data.reward_stars,
-        isChore: data.is_chore,
-        status: 'pending',
-        kidId: data.child_id,
-      };
-      setTasksState(prev => [...prev, newTask]);
-    }
-  };
-
-  const markTaskDone = async (taskId: string) => {
-    await supabase
-      .from('tasks')
-      .update({ status: 'done', completed_at: new Date().toISOString() })
-      .eq('id', taskId);
-    setTasksState(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done' as const } : t));
-  };
-
-  const approveTask = async (taskId: string) => {
-    // Use the RPC that also pays out stars (fixes the chore approval bug!)
-    await supabase.rpc('approve_task_and_pay', { task_id: taskId });
-
-    // Update local state
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.kidId) {
-      // Refresh kid's star count from DB
-      const { data: updatedKid } = await supabase
-        .from('children')
-        .select('stars')
-        .eq('id', task.kidId)
-        .single();
-
-      if (updatedKid) {
-        setParentAccount(prev => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            kids: prev.kids.map(k => k.id === task.kidId ? { ...k, stars: updatedKid.stars } : k),
-          };
-        });
-      }
-    }
-    setTasksState(prev => prev.map(t => t.id === taskId ? { ...t, status: 'approved' as const } : t));
-  };
-
-  const removeTask = async (taskId: string) => {
-    await supabase.from('tasks').delete().eq('id', taskId);
-    setTasksState(prev => prev.filter(t => t.id !== taskId));
-  };
-
-  // ------------------------------------------------------------------
-  // REWARDS
-  // ------------------------------------------------------------------
-  const setRewards = async (newRewards: Reward[]) => {
-    const currentFamilyId = familyId || getStoredFamilyId();
-    setRewardsState(newRewards);
-
-    if (!currentFamilyId) return;
-
-    // Find added rewards (no UUID id) and removed rewards
-    const currentIds = new Set(rewards.map(r => r.id));
-    const newIds = new Set(newRewards.map(r => r.id));
-
-    // Remove deleted rewards
-    for (const r of rewards) {
-      if (!newIds.has(r.id)) {
-        await supabase.from('rewards').update({ is_active: false }).eq('id', r.id);
-      }
-    }
-
-    // Add new rewards
-    for (const r of newRewards) {
-      if (!currentIds.has(r.id)) {
-        const { data } = await supabase
-          .from('rewards')
-          .insert({
-            family_id: currentFamilyId,
-            title: r.title,
-            cost: r.cost,
-            icon: r.icon || 'gift',
-          })
-          .select()
-          .single();
-
-        if (data) {
-          // Update the local state with the real DB id
-          setRewardsState(prev => prev.map(existing =>
-            existing.id === r.id ? { ...existing, id: data.id } : existing
-          ));
-        }
-      }
-    }
-  };
-
-  // ------------------------------------------------------------------
-  // REFRESH (for child device to pull latest data)
-  // ------------------------------------------------------------------
-  const refreshData = async () => {
-    const currentFamilyId = familyId || getStoredFamilyId();
-    if (!currentFamilyId) return;
-
-    // Refresh tasks
-    const { data: tasksData } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('family_id', currentFamilyId);
-
-    if (tasksData) {
-      setTasksState(tasksData.map(t => ({
-        id: t.id, title: t.title, type: t.type, reward: t.reward_stars,
-        isChore: t.is_chore, status: t.status as 'pending' | 'done' | 'approved',
-        kidId: t.child_id,
-        completedAt: t.completed_at ? new Date(t.completed_at).getTime() : undefined,
-      })));
-    }
-
-    // Refresh children
-    const { data: children } = await supabase
-      .from('children')
-      .select('*')
-      .eq('family_id', currentFamilyId);
-
-    if (children) {
-      setParentAccount(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          kids: prev.kids.map(k => {
-            const updated = children.find(c => c.id === k.id);
-            if (updated) {
-              return { ...k, stars: updated.stars, streak: updated.streak, questProgress: updated.quest_progress };
-            }
-            return k;
-          }),
-        };
-      });
-    }
-
-    // Refresh rewards
-    const { data: rewardsData } = await supabase
-      .from('rewards')
-      .select('*')
-      .eq('family_id', currentFamilyId)
-      .eq('is_active', true);
-
-    if (rewardsData) {
-      setRewardsState(rewardsData.map(r => ({
-        id: r.id, title: r.title, cost: r.cost, icon: r.icon || 'star',
-      })));
-    }
-  };
+  const refreshData = useCallback(async () => { setDb(loadDB()); }, []);
 
   return {
     isLoaded,
@@ -740,10 +198,10 @@ export function useParentStore() {
     createParentAccount, addParent,
     addKid, updateKid, removeKid, getKidByLinkCode, getKidById, regenerateLinkCode,
     addStarsToKid, recordAnswerForKid, recordGamePlayedForKid, advanceQuestForKid,
-    rewards, setRewards,
-    tasks, setTasks: setTasksState, getTasksForKid, addTask, markTaskDone, approveTask, removeTask,
+    rewards: db.rewards, setRewards,
+    tasks: db.tasks, setTasks, getTasksForKid, addTask, markTaskDone, approveTask, removeTask,
     activeKidId, setActiveKidId,
-    // New Supabase-specific exports
+    members: db.members, addMember, updateMember, removeMember,
     familyId, pairingCode, validatePairingCode, refreshData,
   };
 }

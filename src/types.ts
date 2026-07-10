@@ -5,6 +5,17 @@ export interface ParentProfile {
   name: string;
 }
 
+import type { AvatarConfig } from './avatar/avatar';
+
+// A member of the family shown on the home island (kid, mom, dad, sibling...)
+export interface FamilyMember {
+  id: string;
+  name: string;
+  role: string;   // e.g. 'Me', 'Mom', 'Dad', 'Brother', 'Sister'
+  seed: string;   // 3D body character id from the roster
+  avatarConfig?: AvatarConfig; // customizable block-face
+}
+
 export interface ParentAccount {
   parents: ParentProfile[];
   kids: KidProfile[];
@@ -17,6 +28,8 @@ export interface KidProfile {
   age: number;
   avatarSeed: string;
   characterColor?: number;
+  complexion?: string;
+  avatarConfig?: AvatarConfig;
   interests: string[];
   difficulty: Difficulty;
   linkCode: string;
@@ -42,6 +55,18 @@ export interface Task {
   status: 'pending' | 'done' | 'approved';
   kidId?: string;
   completedAt?: number;
+}
+
+export interface Message {
+  id: string;
+  familyId: string;
+  senderId: string;
+  senderName: string;
+  senderType: 'parent' | 'child';
+  recipientId: string | null; // null = group chat, set = DM
+  content: string;
+  type: 'text' | 'image' | 'audio';
+  createdAt: number;
 }
 
 export interface GameStats {
@@ -82,6 +107,6 @@ export interface GameData {
 }
 
 export type AppView = 'landing' | 'parent-setup' | 'kid-link' | 'kid' | 'parent';
-export type KidTab = 'home' | 'games' | 'chores' | 'stories' | 'store' | 'settings';
+export type KidTab = 'home' | 'games' | 'chores' | 'stories' | 'store' | 'settings' | 'chat';
 export type SoundType = 'pop' | 'win' | 'lose' | 'click' | 'whoosh';
 export type Difficulty = 'easy' | 'medium' | 'hard';
