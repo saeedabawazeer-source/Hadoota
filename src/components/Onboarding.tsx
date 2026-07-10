@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Sparkles, Lock, Check, User, Heart, Gift, Copy, CheckCircle } from 'lucide-react';
 import type { KidProfile, Difficulty } from '../types';
+import { CHARACTERS, characterFor, AVATAR_SEEDS } from '../data/characters';
 
 interface ParentOnboardingProps {
   onComplete: (data: { parentName: string; kid: Omit<KidProfile, 'id' | 'linkCode' | 'stars' | 'streak' | 'questProgress' | 'gameStats'> }) => void;
   onBack: () => void;
 }
-
-const AVATAR_SEEDS = ['Felix', 'Aneka', 'Jasper', 'Oliver', 'Mia', 'Leo', 'Zoe', 'Sam', 'Luna', 'Max', 'Nala', 'Koda'];
 const AGE_OPTIONS = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INTEREST_OPTIONS = ['Math', 'Reading', 'Science', 'Art', 'Music', 'Sports', 'Animals', 'Space'];
 
@@ -19,7 +18,7 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
   // Kid info
   const [kidName, setKidName] = useState('');
   const [kidAge, setKidAge] = useState(6);
-  const [avatarSeed, setAvatarSeed] = useState('Felix');
+  const [avatarSeed, setAvatarSeed] = useState(CHARACTERS[0].id);
   const [interests, setInterests] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
 
@@ -157,19 +156,20 @@ export function Onboarding({ onComplete, onBack }: ParentOnboardingProps) {
               <div className="w-full flex flex-col items-center gap-5">
                 <motion.div key={avatarSeed} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                   className="w-32 h-32 md:w-44 md:h-44 bg-purple-300 border-4 border-black rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex items-center justify-center">
-                  <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${avatarSeed}&backgroundColor=transparent`} alt="Avatar" className="w-24 h-24 md:w-36 md:h-36" />
+                  <img src={characterFor(avatarSeed).poster} alt="Avatar" className="w-24 h-24 md:w-36 md:h-36 object-contain" />
                 </motion.div>
-                <div className="grid grid-cols-6 gap-2 md:gap-3 w-full max-w-sm">
+                <div className="grid grid-cols-4 gap-2 md:gap-3 w-full max-w-sm">
                   {AVATAR_SEEDS.map(seed => (
                     <motion.button key={seed} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => setAvatarSeed(seed)}
-                      className={`aspect-square rounded-xl border-3 md:border-4 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all
-                        ${avatarSeed === seed ? 'ring-4 ring-lime-400 ring-offset-2 ring-offset-purple-600 bg-lime-100' : 'bg-purple-200 hover:bg-purple-100'}`}
-                      aria-label={`Avatar ${seed}`}>
-                      <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=transparent`} alt={seed} className="w-full h-full" />
+                      className={`aspect-square rounded-xl border-3 md:border-4 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center
+                        ${avatarSeed === seed ? 'ring-4 ring-lime-400 ring-offset-2 ring-offset-purple-600' : 'hover:brightness-105'}`}
+                      style={{ background: characterFor(seed).accent }}
+                      aria-label={`Avatar ${characterFor(seed).name}`}>
+                      <img src={characterFor(seed).poster} alt={seed} className="w-full h-full object-contain p-1" />
                     </motion.button>
                   ))}
                 </div>
-                <p className="text-white/60 font-bold text-sm uppercase tracking-widest">{avatarSeed}</p>
+                <p className="text-white font-black text-base uppercase tracking-widest">{characterFor(avatarSeed).name} · {characterFor(avatarSeed).role}</p>
               </div>
             )}
 
