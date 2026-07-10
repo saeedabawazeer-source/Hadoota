@@ -23,10 +23,3 @@ export const COMPLEXIONS: Complexion[] = [
 export function complexionFor(id: string | undefined): Complexion {
   return COMPLEXIONS.find((c) => c.id === id) ?? COMPLEXIONS[0];
 }
-
-// The picker only offers 3 tones going forward. The rest of COMPLEXIONS is
-// kept so kids who already picked Porcelain/Medium/Deep/Rich before this
-// change still render correctly — they just can't pick those tones again.
-export const SELECTABLE_COMPLEXIONS: Complexion[] = COMPLEXIONS.filter((c) =>
-  ['light', 'tan', 'rich'].includes(c.id)
-);

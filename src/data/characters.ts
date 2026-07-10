@@ -104,10 +104,6 @@ export const CREW_BANNER = '/characters/mini/crew-banner.png';
 
 export const AVATAR_SEEDS = CHARACTERS.map((c) => c.id);
 
-// Playable avatars are heroes only — animals are cast as game/story hosts
-// instead (see data/gameHosts.ts), not as a kid's own identity.
-export const HERO_SEEDS = HEROES.map((c) => c.id);
-
 export function characterFor(seed: string | undefined): Character {
   return CHARACTERS.find((c) => c.id === seed) ?? CHARACTERS[0];
 }

@@ -7,7 +7,6 @@ import confetti from 'canvas-confetti';
 import { characterFor } from '../data/characters';
 import { GAME_CONFIGS } from '../data/games3d';
 import type { Round } from '../data/games3d';
-import { HostBadge } from './HostBadge';
 
 /* ---------------- tunables (easy to adjust from a screenshot) ---------------- */
 const LANES = [-2.4, 0, 2.4];
@@ -310,11 +309,8 @@ export function MathDrive3D({ onClose, addStars, showToast, playSound, advanceQu
     <div className="w-full h-full flex flex-col bg-sky-300 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       {/* HUD: hearts + score row */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex gap-1.5 bg-black/40 rounded-full px-3 py-2">
-            {[0, 1, 2].map(i => <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />)}
-          </div>
-          <HostBadge seed={config.host} />
+        <div className="flex gap-1.5 bg-black/40 rounded-full px-3 py-2">
+          {[0, 1, 2].map(i => <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />)}
         </div>
         <div className="flex items-center gap-2">
           <div className="bg-lime-400 border-4 border-black rounded-full px-5 py-1.5 font-black text-3xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">{score}</div>

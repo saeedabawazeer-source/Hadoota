@@ -2,14 +2,13 @@ import React, { useRef, useState, useEffect, Suspense, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, useAnimations, Html, Float } from '@react-three/drei';
 import * as THREE from 'three';
-import { Heart, Trophy, X, Scissors } from 'lucide-react';
+import { Heart, Trophy, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { characterFor } from '../data/characters';
 import { complexionFor } from '../data/complexions';
-import { GAME_CONFIGS, escalate } from '../data/games3d';
+import { GAME_CONFIGS } from '../data/games3d';
 import type { Round } from '../data/games3d';
 import { MathDrive3D } from './MathDrive3D';
-import { HostBadge } from './HostBadge';
 
 /* =====================================================================
    Shared bits used by every "pick-the-answer" mechanic.
@@ -68,8 +67,8 @@ function SceneChar({ seed, complexion, reaction, pos = [0, 0, 1], facing = 0, he
 }
 
 interface SceneProps {
-  round: Round; avatarSeed: string; complexion?: string; hostSeed?: string;
-  reaction: 'idle' | 'yes' | 'no'; picked: number | null; locked: boolean; removedIdx?: number | null;
+  round: Round; avatarSeed: string; complexion?: string;
+  reaction: 'idle' | 'yes' | 'no'; picked: number | null; locked: boolean;
   onPick: (i: number) => void;
 }
 
@@ -150,13 +149,13 @@ function GardenScene({ round, avatarSeed, complexion, reaction, picked, locked, 
    A game-show podium. Three big buzzer buttons rise in front of the
    host character; tap one. Correct lights green + lifts, wrong dims red.
    ===================================================================== */
-function Podium({ i, label, picked, correctIdx, locked, removed, onPick }: {
-  i: number; label: string; picked: number | null; correctIdx: number; locked: boolean; removed?: boolean; onPick: (i: number) => void;
+function Podium({ i, label, picked, correctIdx, locked, onPick }: {
+  i: number; label: string; picked: number | null; correctIdx: number; locked: boolean; onPick: (i: number) => void;
 }) {
   const g = useRef<THREE.Group>(null);
   const revealRight = locked && i === correctIdx;
   const revealWrong = locked && picked === i && i !== correctIdx;
-  const color = removed ? '#4b4b57' : revealRight ? '#22c55e' : revealWrong ? '#ef4444' : POD_COLORS[i];
+  const color = revealRight ? '#22c55e' : revealWrong ? '#ef4444' : POD_COLORS[i];
   useFrame(() => {
     if (!g.current) return;
     const target = revealRight ? 0.55 : 0;                 // correct podium lifts
@@ -164,21 +163,21 @@ function Podium({ i, label, picked, correctIdx, locked, removed, onPick }: {
   });
   return (
     <group ref={g} position={[LANE_X[i], 0, 1.6]}
-      onClick={(e) => { e.stopPropagation(); if (!locked && !removed) onPick(i); }}
-      onPointerOver={() => { if (!locked && !removed) document.body.style.cursor = 'pointer'; }}
+      onClick={(e) => { e.stopPropagation(); if (!locked) onPick(i); }}
+      onPointerOver={() => { if (!locked) document.body.style.cursor = 'pointer'; }}
       onPointerOut={() => { document.body.style.cursor = 'auto'; }}>
       {/* stand */}
       <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[1.9, 1.1, 1.0]} /><meshStandardMaterial color="#3a2f4a" /></mesh>
       {/* button top */}
-      <mesh position={[0, 1.35, 0.05]} castShadow><boxGeometry args={[1.7, 0.55, 0.9]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={removed ? 0.05 : 0.5} /></mesh>
+      <mesh position={[0, 1.35, 0.05]} castShadow><boxGeometry args={[1.7, 0.55, 0.9]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} /></mesh>
       <Html position={[0, 1.4, 0.55]} center distanceFactor={11} pointerEvents="none">
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: 22, lineHeight: 1.05, color: removed ? 'rgba(255,255,255,0.35)' : '#fff', textShadow: '2px 2px 0 #000', textAlign: 'center', width: 130, wordBreak: 'break-word' }}>{removed ? '✕' : label}</div>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: 22, lineHeight: 1.05, color: '#fff', textShadow: '2px 2px 0 #000', textAlign: 'center', width: 130, wordBreak: 'break-word' }}>{label}</div>
       </Html>
     </group>
   );
 }
 
-function StageScene({ round, avatarSeed, complexion, hostSeed, reaction, picked, locked, removedIdx, onPick }: SceneProps) {
+function StageScene({ round, avatarSeed, complexion, reaction, picked, locked, onPick }: SceneProps) {
   return (
     <Canvas shadows dpr={[1, 1.6]} camera={{ position: [0, 3.8, 8], fov: 42 }} className="flex-1">
       <color attach="background" args={["#2a1650"]} />
@@ -194,52 +193,40 @@ function StageScene({ round, avatarSeed, complexion, hostSeed, reaction, picked,
           <ringGeometry args={[3.4, 3.7, 48]} /><meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.4} />
         </mesh>
         {round.answers.map((a, i) => (
-          <Podium key={i} i={i} label={a} picked={picked} correctIdx={round.correct} locked={locked} removed={removedIdx === i} onPick={onPick} />
+          <Podium key={i} i={i} label={a} picked={picked} correctIdx={round.correct} locked={locked} onPick={onPick} />
         ))}
-        {/* The subject's animal host runs the show; falls back to the kid's own avatar if a subject has none. */}
-        <SceneChar seed={hostSeed || avatarSeed} complexion={complexion} reaction={reaction} pos={[0, 0, -2.4]} facing={0} height={2.0} />
+        <SceneChar seed={avatarSeed} complexion={complexion} reaction={reaction} pos={[0, 0, -2.4]} facing={0} height={2.0} />
       </Suspense>
     </Canvas>
   );
 }
-
-const GARDEN_GAMES = new Set(['Counting', 'Shapes', 'Memory Quiz', 'Spelling']);
-// Bank-fed trivia subjects — these get the "millionaire" treatment: a
-// difficulty ladder that climbs with a streak, plus a one-time 50:50 lifeline.
-const STAGE_GAMES = new Set(['Science', 'Geography']);
-const TIER_LABEL: Record<string, string> = { easy: '🌱 Rookie', medium: '⭐ Explorer', hard: '🏆 Champion' };
 
 /* =====================================================================
    GAME SHELL — HUD, scoring, round loop, game-over. Mechanic-agnostic.
    ===================================================================== */
 function GameShell({ onClose, addStars, showToast, playSound, advanceQuest, avatarSeed, complexion, gameKey, difficulty, Scene }: any) {
   const config = GAME_CONFIGS[gameKey] || GAME_CONFIGS['Counting'];
-  const isTrivia = STAGE_GAMES.has(gameKey);
-  const [round, setRound] = useState<Round>(() => config.makeRound(difficulty, 0));
+  const [round, setRound] = useState<Round>(() => config.makeRound(difficulty));
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [streak, setStreak] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   const [reaction, setReaction] = useState<'idle' | 'yes' | 'no'>('idle');
-  const [removedIdx, setRemovedIdx] = useState<number | null>(null);
-  const [usedFiftyFifty, setUsedFiftyFifty] = useState(false);
   const lockRef = useRef(false);
   const scoreRef = useRef(0);
   const livesRef = useRef(3);
-  const streakRef = useRef(0);
 
-  const next = (nextStreak = streakRef.current) => {
-    setPicked(null); setReaction('idle'); setRemovedIdx(null); lockRef.current = false;
-    setRound(config.makeRound(difficulty, nextStreak));
+  const next = () => {
+    setPicked(null); setReaction('idle'); lockRef.current = false;
+    setRound(config.makeRound(difficulty));
   };
 
   // When the game (config) or difficulty changes, start a fresh matching round.
   useEffect(() => {
-    scoreRef.current = 0; livesRef.current = 3; streakRef.current = 0;
-    setScore(0); setLives(3); setStreak(0); setGameOver(false);
-    setPicked(null); setReaction('idle'); setRemovedIdx(null); setUsedFiftyFifty(false); lockRef.current = false;
-    setRound(config.makeRound(difficulty, 0));
+    scoreRef.current = 0; livesRef.current = 3;
+    setScore(0); setLives(3); setGameOver(false);
+    setPicked(null); setReaction('idle'); lockRef.current = false;
+    setRound(config.makeRound(difficulty));
   }, [config, difficulty]);
 
   const onPick = (i: number) => {
@@ -248,65 +235,36 @@ function GameShell({ onClose, addStars, showToast, playSound, advanceQuest, avat
     setPicked(i);
     const correct = i === round.correct;
     if (correct) {
-      scoreRef.current += 1; setScore(scoreRef.current);
-      streakRef.current += 1; setStreak(streakRef.current);
-      setReaction('yes'); playSound('win');
+      scoreRef.current += 1; setScore(scoreRef.current); setReaction('yes'); playSound('win');
       confetti({ particleCount: 130, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors: ['#a3e635', '#f97316', '#9333ea', '#fde047', '#ffffff'] });
-      setTimeout(() => next(streakRef.current), 1100);
+      setTimeout(next, 1100);
     } else {
-      livesRef.current -= 1; setLives(livesRef.current);
-      streakRef.current = 0; setStreak(0);
-      setReaction('no'); playSound('lose');
+      livesRef.current -= 1; setLives(livesRef.current); setReaction('no'); playSound('lose');
       if (livesRef.current <= 0) {
         addStars(scoreRef.current * 10);
         if (scoreRef.current > 0) showToast(`Earned ${scoreRef.current * 10} Stars!`);
         setTimeout(() => setGameOver(true), 900);
         return;
       }
-      setTimeout(() => next(0), 1100);
+      setTimeout(next, 1100);
     }
   };
 
-  const useFiftyFifty = () => {
-    if (usedFiftyFifty || lockRef.current || gameOver) return;
-    const wrongIdx = round.answers.map((_, i) => i).filter((i) => i !== round.correct);
-    const drop = wrongIdx[Math.floor(Math.random() * wrongIdx.length)];
-    setRemovedIdx(drop); setUsedFiftyFifty(true);
-  };
-
   const restart = () => {
-    scoreRef.current = 0; livesRef.current = 3; streakRef.current = 0;
-    setScore(0); setLives(3); setStreak(0); setUsedFiftyFifty(false);
-    setGameOver(false); next(0);
+    scoreRef.current = 0; livesRef.current = 3; setScore(0); setLives(3);
+    setGameOver(false); next();
   };
-
-  const tier = isTrivia ? TIER_LABEL[escalate(difficulty, streak)] : null;
 
   return (
     <div className="w-full h-full flex flex-col bg-sky-300 rounded-3xl overflow-hidden relative border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       {/* HUD (pass-through except the actual badges) */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-30 pointer-events-none">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex gap-1.5 bg-black/40 rounded-full px-3 py-2 pointer-events-auto">
-            {[0, 1, 2].map(i => <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />)}
-          </div>
-          <HostBadge seed={config.host} />
+        <div className="flex gap-1.5 bg-black/40 rounded-full px-3 py-2 pointer-events-auto">
+          {[0, 1, 2].map(i => <Heart key={i} className={`w-8 h-8 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />)}
         </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <div className="flex items-center gap-2 pointer-events-auto">
-            <div className="bg-lime-400 border-4 border-black rounded-full px-5 py-1.5 font-black text-3xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">{score}</div>
-            <button onClick={onClose} className="bg-white rounded-full p-2 border-2 border-black"><X className="w-7 h-7 text-black" /></button>
-          </div>
-          {isTrivia && (
-            <div className="flex items-center gap-2 pointer-events-auto">
-              {tier && <span className="bg-black/40 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-full whitespace-nowrap">{tier}</span>}
-              <button onClick={useFiftyFifty} disabled={usedFiftyFifty}
-                title="50:50 — remove one wrong answer"
-                className={`flex items-center gap-1 border-2 border-black rounded-full px-3 py-1.5 font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${usedFiftyFifty ? 'bg-gray-400 text-gray-600 opacity-60' : 'bg-yellow-300 text-black hover:bg-yellow-200'}`}>
-                <Scissors className="w-3.5 h-3.5" /> 50:50
-              </button>
-            </div>
-          )}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <div className="bg-lime-400 border-4 border-black rounded-full px-5 py-1.5 font-black text-3xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">{score}</div>
+          <button onClick={onClose} className="bg-white rounded-full p-2 border-2 border-black"><X className="w-7 h-7 text-black" /></button>
         </div>
       </div>
 
@@ -319,11 +277,11 @@ function GameShell({ onClose, addStars, showToast, playSound, advanceQuest, avat
         </div>
       </div>
 
-      <Scene round={round} avatarSeed={avatarSeed} complexion={complexion} hostSeed={config.host} reaction={reaction} picked={picked} locked={lockRef.current} removedIdx={removedIdx} onPick={onPick} />
+      <Scene round={round} avatarSeed={avatarSeed} complexion={complexion} reaction={reaction} picked={picked} locked={lockRef.current} onPick={onPick} />
 
       {/* invisible answer columns — guarantees a tap always registers (balloons/podiums are the visual) */}
       <div className="absolute inset-x-0 bottom-0 top-[46%] flex z-20">
-        {[0, 1, 2].map(i => <button key={i} aria-label={`Answer ${i + 1}`} onClick={() => onPick(i)} disabled={removedIdx === i} className="flex-1" />)}
+        {[0, 1, 2].map(i => <button key={i} aria-label={`Answer ${i + 1}`} onClick={() => onPick(i)} className="flex-1" />)}
       </div>
 
       <div className="absolute bottom-4 left-0 right-0 text-center z-30 pointer-events-none">
@@ -349,6 +307,9 @@ function GameShell({ onClose, addStars, showToast, playSound, advanceQuest, avat
 /* =====================================================================
    ROUTER — maps each game to a genuinely different mechanic.
    ===================================================================== */
+const GARDEN_GAMES = new Set(['Counting', 'Shapes', 'Memory Quiz', 'Spelling']);
+const STAGE_GAMES = new Set(['Science', 'Geography']);
+
 export function GameRouter(props: any) {
   const key = props.gameKey;
   if (GARDEN_GAMES.has(key)) return <GameShell {...props} Scene={GardenScene} />;

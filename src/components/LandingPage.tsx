@@ -4,7 +4,6 @@ import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, 
 import { CHARACTERS } from '../data/characters';
 import { MiniViewer } from './MiniViewer';
 import { MiniModel } from './MiniModel';
-import { FaceIcon } from './FaceIcon';
 
 interface LandingPageProps {
   onParentSetup: () => void;
@@ -22,9 +21,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           
           {/* Top Left Cutout / Logo Tab */}
           <div className="absolute top-0 left-0 bg-orange-500 md:bg-white border-b-4 border-r-4 border-black rounded-br-[1.5rem] md:rounded-br-[2rem] px-4 py-3 md:px-6 md:py-4 flex items-center gap-2 md:gap-3 z-30">
-            <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl overflow-hidden shrink-0 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-              <FaceIcon seed={CHARACTERS[0].id} alt="Hadoota" className="w-full h-full object-cover" />
-            </div>
+            <img src={CHARACTERS[0].poster} alt="Hadoota" className="w-9 h-9 md:w-12 md:h-12 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" style={{ imageRendering: 'auto' }} />
             <span className="font-black text-xl md:text-3xl uppercase tracking-tighter text-white md:text-black" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
           </div>
 

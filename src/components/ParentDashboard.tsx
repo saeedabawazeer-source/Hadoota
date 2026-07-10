@@ -4,7 +4,9 @@ import { Gift, Star, X, CheckCircle, Target, TrendingUp, Check, Users, Copy, Arr
 import type { Task, Reward, GameStats, KidProfile, ParentAccount, ParentProfile } from '../types';
 import { useChatStore } from '../hooks/useChatStore';
 import { FamilyChatPanel } from './FamilyChatPanel';
-import { FaceIcon } from './FaceIcon';
+import { CHARACTERS } from '../data/characters';
+
+const kidAvatar = (id: string) => CHARACTERS[id.charCodeAt(id.length - 1) % CHARACTERS.length].poster;
 
 interface ParentDashboardProps {
   rewards: Reward[];
@@ -136,9 +138,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
                   <button key={k.id} onClick={() => onSelectKid(k)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl border-4 border-black font-bold cursor-pointer transition-colors
                       ${activeKid?.id === k.id ? 'bg-lime-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white hover:bg-lime-100'}`}>
-                    <div className="w-8 h-8 rounded-full border-2 border-black overflow-hidden bg-purple-200">
-                      <FaceIcon seed={k.avatarSeed} complexion={k.complexion} alt={k.name} className="w-full h-full object-cover" />
-                    </div>
+                    <img src={kidAvatar(k.id)}
+                      alt={k.name} className="w-8 h-8 rounded-full border-2 border-black object-cover bg-purple-200" />
                     {k.name}
                   </button>
                 ))}
@@ -164,9 +165,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
             {/* Active Kid Info */}
             {activeKid && (
               <div className="bg-white border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl border-4 border-black overflow-hidden bg-purple-200">
-                  <FaceIcon seed={activeKid.avatarSeed} complexion={activeKid.complexion} alt={activeKid.name} className="w-full h-full object-cover" />
-                </div>
+                <img src={kidAvatar(activeKid.id)}
+                  alt={activeKid.name} className="w-16 h-16 rounded-2xl border-4 border-black bg-purple-200 object-cover" />
                 <div className="flex-1">
                   <h3 className="font-black text-xl uppercase">{activeKid.name}</h3>
                   <p className="font-bold text-gray-500 text-sm">Age {activeKid.age} · {activeKid.difficulty} mode · {activeKid.stars} ⭐</p>
@@ -224,9 +224,8 @@ export function ParentDashboard({ rewards, setRewards, assignedTasks, setAssigne
           <div className="flex flex-col gap-4">
             {kids.map(k => (
               <div key={k.id} className="bg-white border-4 border-black p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl border-4 border-black overflow-hidden bg-purple-200">
-                  <FaceIcon seed={k.avatarSeed} complexion={k.complexion} alt={k.name} className="w-full h-full object-cover" />
-                </div>
+                <img src={kidAvatar(k.id)}
+                  alt={k.name} className="w-14 h-14 rounded-2xl border-4 border-black bg-purple-200 object-cover" />
                 <div className="flex-1">
                   <h3 className="font-black text-lg uppercase">{k.name}</h3>
                   <p className="font-bold text-gray-500 text-sm">Age {k.age} · {k.difficulty} · {k.stars} ⭐</p>

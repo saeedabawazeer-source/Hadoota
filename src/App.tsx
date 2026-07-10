@@ -24,8 +24,8 @@ import { CharacterCreator } from './components/CharacterCreator';
 import { AvatarFace } from './avatar/AvatarFace';
 import { DEFAULT_AVATAR } from './avatar/avatar';
 import { mathQuestions, spellingQuestions, logicQuestions, scienceQuestions, geographyQuestions, memoryQuestions } from './data/questions';
-import { characterFor, HERO_CHARACTERS } from './data/characters';
-import { SELECTABLE_COMPLEXIONS } from './data/complexions';
+import { CHARACTERS, characterSrc, AVATAR_SEEDS, characterFor, HERO_CHARACTERS, PET_CHARACTERS } from './data/characters';
+import { COMPLEXIONS } from './data/complexions';
 import { FaceIcon } from './components/FaceIcon';
 import { GAME_CONFIGS } from './data/games3d';
 import { MiniViewer } from './components/MiniViewer';
@@ -245,7 +245,7 @@ export default function App() {
                   familyName={store.parentAccount?.parents?.[0]?.name || childName || 'Our'}
                   members={store.members} avatarConfig={activeKid?.avatarConfig}
                   saveAvatarConfig={(cfg: any) => { if (activeKid) { store.updateKid(activeKid.id, { avatarConfig: cfg }); setActiveKid(prev => prev ? { ...prev, avatarConfig: cfg } : prev); } }}
-                  parentSeeds={HERO_CHARACTERS.filter(c => c.id !== avatarSeed).slice(0, Math.max(1, (store.parentAccount?.parents?.length || 1))).map(c => c.id)}
+                  parentSeeds={CHARACTERS.filter(c => c.id !== avatarSeed).slice(0, Math.max(1, (store.parentAccount?.parents?.length || 1))).map(c => c.id)}
                   stars={stars} setStars={setStars} rewards={store.rewards} streak={streak} questProgress={questProgress} setQuestProgress={() => advanceQuest()}
                   showToast={showToast} assignedTasks={assignedTasks} addStars={addStars} playSound={playSound} childName={childName} difficulty={difficulty}
                   setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled} chatStore={chatStore} activeKid={activeKid} parentAccount={store.parentAccount}
@@ -589,15 +589,25 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
 
 // --- Settings Panel ---
 function SettingsPanel({ avatarSeed, complexion, setAvatarSeed, setComplexion, onClose }: { avatarSeed: string; complexion: string; setAvatarSeed: (s: string) => void; setComplexion: (c: string) => void; onClose: () => void }) {
-  // Playable avatars are heroes only — animals host games/stories instead
-  // (see data/gameHosts.ts), so there's no hero/animal toggle here anymore.
-  const roster = HERO_CHARACTERS;
+  const [tab, setTab] = useState<'hero' | 'pet'>(characterFor(avatarSeed).kind);
+  const roster = (tab === 'hero' ? HERO_CHARACTERS : PET_CHARACTERS);
   const current = characterFor(avatarSeed);
   const currentSeed = current.id;
+  const isHero = current.kind === 'hero';
 
   return (
     <div className="flex-1 flex flex-col items-center w-full max-w-md mx-auto pt-4 overflow-y-auto pb-4">
       <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-3 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Make Your Buddy</h2>
+
+      {/* Hero / Animal toggle */}
+      <div className="flex gap-2 mb-4 shrink-0">
+        {(['hero', 'pet'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-5 py-2 rounded-full border-4 border-black font-black uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${tab === t ? 'bg-purple-600 text-white' : 'bg-white text-black'}`}>
+            {t === 'hero' ? 'Heroes' : 'Animals'}
+          </button>
+        ))}
+      </div>
 
       <div className="w-40 h-40 md:w-52 md:h-52 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-3 shrink-0" style={{ background: current.accent }}>
         <MiniViewer seed={currentSeed} animation="idle" complexion={complexion} />
@@ -609,17 +619,19 @@ function SettingsPanel({ avatarSeed, complexion, setAvatarSeed, setComplexion, o
         <p className="font-bold text-xs text-white/90 mt-1">{current.blurb}</p>
       </div>
 
-      {/* Skin tone */}
-      <div className="bg-white border-4 border-black p-3 rounded-2xl w-full mb-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-        <h3 className="font-black text-center uppercase mb-2 text-sm">Skin Tone</h3>
-        <div className="flex justify-center flex-wrap gap-2.5">
-          {SELECTABLE_COMPLEXIONS.map(cx => (
-            <button key={cx.id} onClick={() => setComplexion(cx.id)} title={cx.label}
-              className={`w-9 h-9 md:w-10 md:h-10 rounded-full border-4 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform ${complexion === cx.id ? 'ring-4 ring-offset-1 ring-lime-500' : ''}`}
-              style={{ background: cx.swatch }} />
-          ))}
+      {/* Complexion — heroes only */}
+      {isHero && (
+        <div className="bg-white border-4 border-black p-3 rounded-2xl w-full mb-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <h3 className="font-black text-center uppercase mb-2 text-sm">Skin Tone</h3>
+          <div className="flex justify-center flex-wrap gap-2.5">
+            {COMPLEXIONS.map(cx => (
+              <button key={cx.id} onClick={() => setComplexion(cx.id)} title={cx.label}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full border-4 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform ${complexion === cx.id ? 'ring-4 ring-offset-1 ring-lime-500' : ''}`}
+                style={{ background: cx.swatch }} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Pick a style — thumbnail grid */}
       <div className="bg-white border-4 border-black p-3 rounded-2xl w-full mb-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">

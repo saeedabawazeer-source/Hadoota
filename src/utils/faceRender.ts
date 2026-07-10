@@ -58,48 +58,15 @@ export function getFace(modelUrl: string, headFrac: number, complexionUrl?: stri
     const dl = new THREE.DirectionalLight(0xffffff, 2.0); dl.position.set(1, 2, 4); scene.add(dl);
     scene.add(model);
 
-    // Prefer framing on the actual head geometry (named "head"/"head-mesh" in
-    // the Kenney rig) so raised arms/hands or off-pose poses never throw the
-    // crop off — this measures just the head, not a fraction of whole-body
-    // height, which broke down whenever a pose raised the total bounding box.
-    let headBox: THREE.Box3 | null = null;
-    model.traverse((o: any) => {
-      if (o.isMesh && /head/i.test(o.name)) {
-        const b = new THREE.Box3().setFromObject(o);
-        headBox = headBox ? headBox.union(b) : b;
-      }
-    });
-
-    let center: THREE.Vector3;
-    let frameH: number;
-    if (headBox) {
-      const hsz = new THREE.Vector3(); headBox.getSize(hsz);
-      center = headBox.getCenter(new THREE.Vector3());
-      frameH = Math.max(hsz.x, hsz.y, hsz.z) * 1.35;
-
-      // Hide everything that isn't the head itself. A tight crop centered on
-      // the head still renders whatever geometry happens to sit in that
-      // region — on a body-mesh that includes arms, a hand-near-face pose
-      // (waving, holding glasses, etc.) shows up right next to/over the face.
-      // Isolating the head mesh guarantees only the face ever renders, no
-      // matter what the rest of the body is doing.
-      model.traverse((o: any) => {
-        if (o.isMesh && !/head/i.test(o.name)) o.visible = false;
-      });
-    } else {
-      // Fallback for models with no dedicated head mesh (e.g. pets): estimate
-      // the head as the top headFrac of the whole-body bounding box.
-      const box = new THREE.Box3().setFromObject(model);
-      const sz = new THREE.Vector3(); box.getSize(sz);
-      const headH = sz.y * headFrac;
-      center = new THREE.Vector3((box.min.x + box.max.x) / 2, box.max.y - headH / 2, (box.min.z + box.max.z) / 2);
-      frameH = headH * 1.5;
-    }
-
-    const fov = 30;
-    const dist = (frameH / 2) / Math.tan((fov * Math.PI) / 360);
+    const box = new THREE.Box3().setFromObject(model);
+    const sz = new THREE.Vector3(); box.getSize(sz);
+    const headH = sz.y * headFrac;
+    const cyy = box.max.y - headH / 2;
+    const cx = (box.min.x + box.max.x) / 2, cz = (box.min.z + box.max.z) / 2;
+    const fov = 30, frameH = headH * 1.5;
+    const dist = (frameH / 2) / Math.tan((fov * Math.PI) / 360) + Math.max(sz.x, sz.z);
     const cam = new THREE.PerspectiveCamera(fov, 1, 0.01, 100);
-    cam.position.set(center.x, center.y, center.z + dist); cam.lookAt(center.x, center.y, center.z);
+    cam.position.set(cx, cyy, cz + dist); cam.lookAt(cx, cyy, cz);
 
     const r = getRenderer();
     r.render(scene, cam);

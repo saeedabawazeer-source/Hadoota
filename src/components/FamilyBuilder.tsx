@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Check } from 'lucide-react';
-import { HERO_CHARACTERS, characterFor } from '../data/characters';
+import { CHARACTERS, characterFor } from '../data/characters';
 import type { FamilyMember } from '../types';
-import { FaceIcon } from './FaceIcon';
 
 const ROLES = ['Me', 'Mom', 'Dad', 'Brother', 'Sister', 'Grandma', 'Grandpa', 'Baby'];
 
@@ -17,9 +16,9 @@ export function FamilyBuilder({ members, addMember, updateMember, removeMember, 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [role, setRole] = useState('Mom');
-  const [seed, setSeed] = useState(HERO_CHARACTERS[1].id);
+  const [seed, setSeed] = useState(CHARACTERS[1].id);
 
-  const reset = () => { setEditingId(null); setName(''); setRole('Mom'); setSeed(HERO_CHARACTERS[1].id); };
+  const reset = () => { setEditingId(null); setName(''); setRole('Mom'); setSeed(CHARACTERS[1].id); };
   const startEdit = (m: FamilyMember) => { setEditingId(m.id); setName(m.name); setRole(m.role); setSeed(m.seed); };
   const save = () => {
     const n = name.trim() || role;
@@ -39,9 +38,7 @@ export function FamilyBuilder({ members, addMember, updateMember, removeMember, 
             className={`relative bg-white border-4 border-black rounded-2xl p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center ${editingId === m.id ? 'ring-4 ring-lime-400' : ''}`}>
             <span onClick={(e) => { e.stopPropagation(); removeMember(m.id); if (editingId === m.id) reset(); }}
               className="absolute -top-2 -right-2 bg-red-500 text-white border-2 border-black rounded-full w-6 h-6 flex items-center justify-center text-xs font-black z-10">✕</span>
-            <div className="w-14 h-14 rounded-[10px] overflow-hidden" style={{ background: characterFor(m.seed).accent }}>
-              <FaceIcon seed={m.seed} alt={m.name} className="w-full h-full object-cover" />
-            </div>
+            <img src={characterFor(m.seed).poster} alt={m.name} className="w-14 h-14 object-contain" style={{ background: characterFor(m.seed).accent, borderRadius: 10 }} />
             <span className="font-black text-sm uppercase truncate w-full text-center mt-1">{m.name}</span>
             <span className="font-bold text-[10px] uppercase text-gray-500">{m.role}</span>
           </motion.button>
@@ -61,11 +58,11 @@ export function FamilyBuilder({ members, addMember, updateMember, removeMember, 
           ))}
         </div>
         <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mb-4">
-          {HERO_CHARACTERS.map((c) => (
+          {CHARACTERS.map((c) => (
             <button key={c.id} onClick={() => setSeed(c.id)}
               className={`aspect-square rounded-xl border-4 border-black flex items-center justify-center ${seed === c.id ? 'ring-4 ring-lime-400' : ''}`}
               style={{ background: c.accent }}>
-              <FaceIcon seed={c.id} alt={c.name} className="w-full h-full object-cover" />
+              <img src={c.poster} alt={c.name} className="w-full h-full object-contain p-0.5" />
             </button>
           ))}
         </div>
