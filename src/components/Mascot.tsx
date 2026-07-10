@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { characterFor } from '../data/characters';
 
 interface MascotProps {
   seed: string;
@@ -31,29 +32,28 @@ export function Mascot({ seed, color, emotion = 'idle' }: MascotProps) {
     }
   }, [emotion]);
 
-  const seedToAnimal: Record<string, string> = {
-    Fin: 'penguin.png',
-    Jae: 'bear.png',
-    Poh: 'frog.png',
-    Mol: 'monkey.png'
-  };
-  const currentAnimal = seedToAnimal[seed] || 'penguin.png';
+  const character = characterFor(seed);
+  const src = character.poster;
 
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div 
-          initial={{ x: -200, rotate: -20 }}
-          animate={{ x: 0, rotate: 0 }}
-          exit={{ x: -200, rotate: -20 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        <motion.div
+          initial={{ x: -220, rotate: -20 }}
+          animate={emotion === 'sad'
+            ? { x: 0, rotate: [0, -6, 6, -6, 0] }
+            : { x: 0, rotate: 0, y: [0, -10, 0] }}
+          exit={{ x: -220, rotate: -20 }}
+          transition={emotion === 'sad'
+            ? { x: { type: 'spring', stiffness: 200, damping: 15 }, rotate: { duration: 0.4 } }
+            : { x: { type: 'spring', stiffness: 200, damping: 15 }, y: { repeat: Infinity, duration: 0.9, ease: 'easeInOut' } }}
           className="absolute bottom-4 left-4 z-50 pointer-events-none"
         >
-          <img 
-            src={`/characters/kenney/${currentAnimal}`} 
-            alt="Mascot" 
-            className="w-24 h-24 md:w-32 md:h-32 object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform" 
-            style={{ filter: `hue-rotate(${color}deg) drop-shadow(4px 4px 0px rgba(0,0,0,1))` }} 
+          <img
+            src={src}
+            alt="Mascot"
+            className="w-28 h-28 md:w-40 md:h-40 object-contain"
+            style={{ filter: `hue-rotate(${color}deg) drop-shadow(5px 6px 0px rgba(0,0,0,0.9))` }}
           />
         </motion.div>
       )}

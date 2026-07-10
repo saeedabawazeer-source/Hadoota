@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, BookOpen, Gamepad2, Trophy, Star, Shield, Heart, Zap, Brain, ArrowRight, Download, Smartphone, CheckCircle, KeyRound, Users } from 'lucide-react';
+import { CHARACTERS } from '../data/characters';
+import { MiniViewer } from './MiniViewer';
+import { MiniModel } from './MiniModel';
 
 interface LandingPageProps {
   onParentSetup: () => void;
@@ -18,7 +21,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           
           {/* Top Left Cutout / Logo Tab */}
           <div className="absolute top-0 left-0 bg-orange-500 md:bg-white border-b-4 border-r-4 border-black rounded-br-[1.5rem] md:rounded-br-[2rem] px-4 py-3 md:px-6 md:py-4 flex items-center gap-2 md:gap-3 z-30">
-            <img src="/characters/kenney/penguin.png" alt="Hadoota" className="w-8 h-8 md:w-10 md:h-10 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
+            <img src={CHARACTERS[0].poster} alt="Hadoota" className="w-9 h-9 md:w-12 md:h-12 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" style={{ imageRendering: 'auto' }} />
             <span className="font-black text-xl md:text-3xl uppercase tracking-tighter text-white md:text-black" style={{ textShadow: '1px 1px 0px black' }}>Hadoota</span>
           </div>
 
@@ -35,7 +38,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
              <div className="absolute right-8 top-4 flex items-center gap-3 pointer-events-auto">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onParentSetup}
                   className="bg-lime-400 border-2 border-black text-black px-5 py-2.5 rounded-full font-black text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-300 transition-colors flex items-center gap-2 cursor-pointer">
-                  <img src="/items/kenney/star.png" className="w-5 h-5 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" /> Parent Login
+                  Parent Login
                 </motion.button>
              </div>
           </nav>
@@ -47,9 +50,9 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
              </span>
           </div>
 
-          {/* Center Mascot (The "Product") */}
-          <motion.div initial={{ scale: 0, y: 50 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="relative z-20 mt-16 md:mt-8">
-            <motion.img animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} src="/characters/kenney/bear.png" alt="Hadoota Mascot" className="h-[45vh] md:h-[65vh] object-contain filter drop-shadow-[8px_8px_0px_rgba(0,0,0,1)]" />
+          {/* Center Mascot (live 3D Mini hero) */}
+          <motion.div initial={{ scale: 0, y: 50 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="relative z-20 mt-16 md:mt-8 h-[42vh] md:h-[60vh] aspect-square">
+            <MiniViewer seed={CHARACTERS[0].id} animation="emote-yes" />
           </motion.div>
 
           {/* Bottom Controls / Info */}
@@ -62,7 +65,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
               </p>
               <div className="flex gap-3">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onKidLink} className="bg-yellow-400 border-2 border-black px-6 py-3 rounded-full font-black text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow-300 transition-colors flex items-center gap-2 cursor-pointer">
-                  <img src="/items/kenney/keyRed.png" className="w-6 h-6 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" /> Start Playing
+                  Start Playing
                 </motion.button>
               </div>
             </div>
@@ -81,27 +84,39 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
         </div>
       </header>
 
-      {/* App Preview / Mock */}
-      <section className="px-6 py-10 md:py-16 max-w-5xl mx-auto">
-        <div className="bg-white border-4 md:border-[6px] border-black rounded-[2rem] md:rounded-[3rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-          <div className="bg-purple-600 p-6 md:p-10 text-center">
-            <h3 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter" style={{ textShadow: '2px 2px 0px black' }}>
-              A Sneak Peek Inside
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t-4 border-black">
-            {[
-              { bg: 'bg-orange-100', icon: '/characters/kenney/duck.png', label: 'Math Dash' },
-              { bg: 'bg-sky-100', icon: '/characters/kenney/monkey.png', label: 'Word Pop' },
-              { bg: 'bg-purple-100', icon: '/characters/kenney/elephant.png', label: 'Memory Match' },
-              { bg: 'bg-green-100', icon: '/characters/kenney/frog.png', label: 'AI Stories' },
-            ].map((item, i) => (
-              <motion.div key={i} whileHover={{ scale: 1.05, y: -10 }} className={`${item.bg} p-6 md:p-10 flex flex-col items-center justify-center gap-3 ${i < 3 ? 'border-r-4 border-black' : ''} ${i < 2 ? 'md:border-r-4' : 'md:border-r-0'} border-b-4 md:border-b-0 border-black cursor-pointer`}>
-                <img src={item.icon} alt={item.label} className="h-16 md:h-24 object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                <span className="font-black uppercase text-sm md:text-base tracking-widest text-black/70">{item.label}</span>
-              </motion.div>
-            ))}
-          </div>
+      {/* One Little World — features shown through mini-3D elements */}
+      <section className="px-6 py-14 md:py-20 max-w-6xl mx-auto">
+        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center mb-3"
+          style={{ textShadow: '3px 3px 0px black' }}>
+          One Little World
+        </motion.h2>
+        <p className="text-center text-black/70 font-bold text-base md:text-xl mb-10 md:mb-14 max-w-xl mx-auto">
+          Every game, story and reward lives in the same tiny 3D town — drag any model to explore it.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {[
+            { model: '/mini-world/cars/sedan-sports.glb', title: 'Drive & Learn', bg: 'bg-orange-400',
+              blurb: 'Kids steer through math and spelling behind the wheel of their own mini car.' },
+            { model: '/mini-world/arcade/arcade-machine.glb', title: 'The Play Zone', bg: 'bg-lime-400',
+              blurb: 'Arcade-style mini games for every subject, from counting to science.' },
+            { model: '/mini-world/city/building-type-a.glb', title: 'Story Town', bg: 'bg-sky-400',
+              blurb: 'A living little town where AI spins a new adventure every day.' },
+            { model: '/mini-world/market/shelf-boxes.glb', title: 'Reward Store', bg: 'bg-fuchsia-400',
+              blurb: 'Earn stars in games, then spend them on real rewards you set.' },
+          ].map((f) => (
+            <motion.div key={f.title} whileHover={{ y: -6 }}
+              className="bg-white border-4 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col">
+              <div className={`${f.bg} h-56 md:h-64 relative border-b-4 border-black`}>
+                <MiniModel src={f.model} />
+              </div>
+              <div className="p-5 md:p-6">
+                <h3 className="font-black uppercase text-2xl tracking-tighter">{f.title}</h3>
+                <p className="font-bold text-sm md:text-base text-gray-600 mt-1.5 leading-snug">{f.blurb}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -117,12 +132,12 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {[
-            { icon: <Gamepad2 className="w-10 h-10 text-black" />, color: 'bg-purple-500', title: '8+ Mini-Games', desc: 'Math Dash, Word Jump, Memory Match, Counting, Shapes, Science Quizzes — all designed to teach through play.' },
-            { icon: <BookOpen className="w-10 h-10 text-black" />, color: 'bg-blue-400', title: 'AI Story Engine', desc: 'Create personalized storybooks with AI illustrations and voice narration. Every story is unique and kid-safe.' },
-            { icon: <Trophy className="w-10 h-10 text-black" />, color: 'bg-amber-400', title: 'Star Rewards', desc: 'Kids earn stars playing games and redeem them for real rewards set by parents. True motivation that works.' },
-            { icon: <Shield className="w-10 h-10 text-black" />, color: 'bg-lime-400', title: 'Parent Dashboard', desc: 'PIN-protected parent area with real progress stats, accuracy tracking, and full reward management.' },
-            { icon: <Zap className="w-10 h-10 text-black" />, color: 'bg-red-400', title: '3 Difficulty Levels', desc: 'Easy, Medium, and Hard modes that adjust content complexity — grows with your child from age 3 to 12.' },
-            { icon: <Heart className="w-10 h-10 text-black" />, color: 'bg-pink-400', title: 'Chore System', desc: 'Assign real-world chores worth stars. Kids mark them done, parents approve — no cheating!' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-purple-500', title: '8+ Mini-Games', desc: 'Math Dash, Word Jump, Memory Match, Counting, Shapes, Science Quizzes — all designed to teach through play.' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-blue-400', title: 'AI Story Engine', desc: 'Create personalized storybooks with AI illustrations and voice narration. Every story is unique and kid-safe.' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-amber-400', title: 'Star Rewards', desc: 'Kids earn stars playing games and redeem them for real rewards set by parents. True motivation that works.' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-lime-400', title: 'Parent Dashboard', desc: 'PIN-protected parent area with real progress stats, accuracy tracking, and full reward management.' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-red-400', title: '3 Difficulty Levels', desc: 'Easy, Medium, and Hard modes that adjust content complexity — grows with your child from age 3 to 12.' },
+            { icon: <span className="block w-9 h-9 rounded-xl bg-white border-[3px] border-black" />, color: 'bg-pink-400', title: 'Chore System', desc: 'Assign real-world chores worth stars. Kids mark them done, parents approve — no cheating!' },
           ].map((f, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               transition={{ delay: i * 0.08 }} whileHover={{ y: -6 }}
@@ -163,10 +178,10 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
             </p>
             <ul className="flex flex-col gap-5">
               {[
-                { i: <img src="/items/kenney/gemBlue.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
-                { i: <img src="/items/kenney/star.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
-                { i: <img src="/items/kenney/buttonGreen.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
-                { i: <img src="/items/kenney/keyRed.png" className="w-8 h-8 filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />, b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
+                { i: <span className="block w-6 h-6 rounded-md bg-sky-400 border-2 border-black" />, b: 'Accuracy Reports:', t: 'See exact win/loss ratios for Math, Science, and Language.' },
+                { i: <span className="block w-6 h-6 rounded-md bg-lime-400 border-2 border-black" />, b: 'Custom Rewards:', t: 'You set the prizes. E.g., "1 hour of iPad" = 500 Stars.' },
+                { i: <span className="block w-6 h-6 rounded-md bg-fuchsia-400 border-2 border-black" />, b: 'Chore Approval:', t: 'Kids mark chores done. You approve them before they get stars.' },
+                { i: <span className="block w-6 h-6 rounded-md bg-orange-400 border-2 border-black" />, b: 'PIN Protected:', t: 'Kids can\'t access the dashboard, change difficulty, or buy rewards without you.' },
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-4 bg-black/20 p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   <div className="bg-white p-2 border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">{item.i}</div>
@@ -226,7 +241,7 @@ export function LandingPage({ onParentSetup, onKidLink, isParentSetup }: Landing
           </div>
           <div className="flex-1 bg-lime-400 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] scale-100 md:scale-110 z-10">
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }} className="flex items-center justify-center w-32 h-32 mb-6 mx-auto">
-               <img src="/characters/kenney/zebra.png" alt="Hadoota App" className="w-full h-full object-contain filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" />
+               <MiniViewer seed={CHARACTERS[1].id} animation="emote-yes" />
             </motion.div>
             <h3 className="font-black text-3xl uppercase text-center mb-6 text-black" style={{ textShadow: '1px 1px 0px white' }}>Hadoota</h3>
             <ul className="flex flex-col gap-4 font-black">

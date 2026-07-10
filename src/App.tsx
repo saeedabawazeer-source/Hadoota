@@ -8,7 +8,7 @@ import { useParentStore } from './hooks/useParentStore';
 import { LandingPage } from './components/LandingPage';
 import { Onboarding } from './components/Onboarding';
 import { KidLinkEntry } from './components/KidLinkEntry';
-import { CarDashGame } from './components/CarDashGame';
+import { GameRouter } from './components/Games3D';
 import { WordPopGame } from './components/WordPopGame';
 import { MemoryMatchGame } from './components/MemoryMatchGame';
 import { QuestMap } from './components/QuestMap';
@@ -17,7 +17,17 @@ import { ShapeSortGame } from './components/ShapeSortGame';
 import { StoryEngine, StoryCard } from './components/StoryEngine';
 import { QuizGame } from './components/QuizGame';
 import { ParentDashboard } from './components/ParentDashboard';
+import { FamilyBuilder } from './components/FamilyBuilder';
+import { CharacterCreator } from './components/CharacterCreator';
+import { AvatarFace } from './avatar/AvatarFace';
+import { DEFAULT_AVATAR } from './avatar/avatar';
 import { mathQuestions, spellingQuestions, logicQuestions, scienceQuestions, geographyQuestions, memoryQuestions } from './data/questions';
+import { CHARACTERS, characterSrc, AVATAR_SEEDS, characterFor, HERO_CHARACTERS, PET_CHARACTERS } from './data/characters';
+import { COMPLEXIONS } from './data/complexions';
+import { FaceIcon } from './components/FaceIcon';
+import { GAME_CONFIGS } from './data/games3d';
+import { MiniViewer } from './components/MiniViewer';
+import { TownHub } from './components/TownHub';
 import type { Task, Reward, GameStats, AppView, KidProfile, ParentProfile } from './types';
 
 export default function App() {
@@ -42,6 +52,7 @@ export default function App() {
   const childName = activeKid?.name || '';
   const avatarSeed = activeKid?.avatarSeed || 'Fin';
   const characterColor = activeKid?.characterColor || 0;
+  const complexion = activeKid?.complexion || 'default';
   const stars = activeKid?.stars || 0;
   const streak = activeKid?.streak || 0;
   const questProgress = activeKid?.questProgress || 0;
@@ -75,6 +86,12 @@ export default function App() {
     if (!activeKid) return;
     store.updateKid(activeKid.id, { avatarSeed: seed });
     setActiveKid(prev => prev ? { ...prev, avatarSeed: seed } : prev);
+  };
+
+  const setComplexion = (id: string) => {
+    if (!activeKid) return;
+    store.updateKid(activeKid.id, { complexion: id });
+    setActiveKid(prev => prev ? { ...prev, complexion: id } : prev);
   };
 
   const setStars = (fn: (p: number) => number) => {
@@ -219,7 +236,11 @@ export default function App() {
             <motion.div key={view + activeTab} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}
               className="w-full h-full flex flex-col min-h-0">
               {view === 'kid' ? (
-                <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} avatarSeed={avatarSeed} characterColor={characterColor}
+                <KidViews activeTab={activeTab} setActiveTab={setActiveTab} setActiveModal={setActiveModal} activeModal={activeModal} avatarSeed={avatarSeed} characterColor={characterColor} complexion={complexion}
+                  familyName={store.parentAccount?.parents?.[0]?.name || childName || 'Our'}
+                  members={store.members} avatarConfig={activeKid?.avatarConfig}
+                  saveAvatarConfig={(cfg: any) => { if (activeKid) { store.updateKid(activeKid.id, { avatarConfig: cfg }); setActiveKid(prev => prev ? { ...prev, avatarConfig: cfg } : prev); } }}
+                  parentSeeds={CHARACTERS.filter(c => c.id !== avatarSeed).slice(0, Math.max(1, (store.parentAccount?.parents?.length || 1))).map(c => c.id)}
                   stars={stars} setStars={setStars} rewards={store.rewards} streak={streak} questProgress={questProgress} setQuestProgress={() => advanceQuest()}
                   showToast={showToast} assignedTasks={assignedTasks} addStars={addStars} playSound={playSound} childName={childName} difficulty={difficulty}
                   setAssignedTasks={setAssignedTasks} soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled}
@@ -259,23 +280,12 @@ export default function App() {
       <AnimatePresence>
         {activeModal && (
           <ModalWrap onClose={() => setActiveModal(null)} fullScreen={activeModal.startsWith('Game:') || activeModal.startsWith('Story:')}>
-            {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} characterColor={characterColor}
-              setAvatarSeed={(seed) => {
-                if (activeKid) store.updateKid(activeKid.id, { avatarSeed: seed });
-              }}
-              setCharacterColor={(color) => {
-                if (activeKid) store.updateKid(activeKid.id, { characterColor: color });
-              }}
+            {activeModal === 'Settings' && <SettingsPanel avatarSeed={avatarSeed} complexion={complexion}
+              setAvatarSeed={setAvatarSeed}
+              setComplexion={setComplexion}
               onClose={() => setActiveModal(null)} />}
-            {activeModal === 'Game: Math Dash' && <CarDashGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
-            {activeModal === 'Game: Spelling' && <WordPopGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor}
-              gameData={{ title: 'Word Ninja!', tutorial: 'Find the right answer!', questions: spellingQuestions.filter(q => q.difficulty === difficulty || difficulty === 'all').slice(0, 5).map(q => ({ q: q.q, visual: null, options: q.options, a: q.a })) }} />}
-            {activeModal === 'Game: Logic' && <MemoryMatchGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
-            {activeModal === 'Game: Counting' && <CountingGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} difficulty={difficulty} />}
-            {activeModal === 'Game: Shapes' && <ShapeSortGame onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} difficulty={difficulty} />}
-            {activeModal === 'Game: Science' && <QuizGame title="Science Lab!" icon={<Lightbulb className="w-full h-full text-yellow-500" />} questions={scienceQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
-            {activeModal === 'Game: Geography' && <QuizGame title="World Explorer!" icon={<Calculator className="w-full h-full text-blue-500" />} questions={geographyQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
-            {activeModal === 'Game: Memory Quiz' && <QuizGame title="Memory Master!" icon={<Brain className="w-full h-full text-lime-600" />} questions={memoryQuestions} difficulty={difficulty} onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} />}
+            {activeModal === 'Family' && <FamilyBuilder members={store.members} addMember={store.addMember} updateMember={store.updateMember} removeMember={store.removeMember} onClose={() => setActiveModal(null)} />}
+            {activeModal.startsWith('Game:') && <GameRouter onClose={() => setActiveModal(null)} {...gameModalProps} avatarSeed={avatarSeed} characterColor={characterColor} complexion={complexion} gameKey={activeModal.split(': ')[1]} difficulty={difficulty} />}
             {activeModal.startsWith('Story:') && <StoryEngine topic={activeModal.split(': ')[1]} onClose={() => setActiveModal(null)} kidName={childName} />}
           </ModalWrap>
         )}
@@ -300,7 +310,7 @@ function NavBtn({ icon, label, active, onClick }: { icon: React.ReactElement; la
     <motion.button whileTap={{ scale: 0.9 }} onClick={onClick} aria-label={label} aria-current={active ? 'page' : undefined}
       className={`flex flex-col items-center justify-center gap-1 transition-all w-16 md:w-full ${active ? 'text-white scale-110' : 'text-white/70 hover:text-white'}`}>
       <div className={active ? 'bg-white border-4 border-black p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl text-black' : 'p-2 text-white'}>
-        {React.cloneElement(icon, { className: "w-6 h-6 md:w-8 md:h-8" })}
+        {React.cloneElement(icon as React.ReactElement<{ className?: string }>, { className: "w-6 h-6 md:w-8 md:h-8" })}
       </div>
       <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${active ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>{label}</span>
     </motion.button>
@@ -308,7 +318,7 @@ function NavBtn({ icon, label, active, onClick }: { icon: React.ReactElement; la
 }
 
 // --- Kid Views ---
-function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, characterColor, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed }: any) {
+function KidViews({ activeTab, setActiveTab, setActiveModal, activeModal, avatarSeed, characterColor, complexion, familyName, parentSeeds, members, avatarConfig, saveAvatarConfig, stars, setStars, rewards, streak, questProgress, setQuestProgress, showToast, assignedTasks, addStars, playSound, childName, difficulty, setAssignedTasks, soundEnabled, setSoundEnabled, setDifficulty, setAvatarSeed }: any) {
   if (activeTab === 'store') {
     return (
       <div className="w-full h-full flex flex-col gap-4 md:gap-6 min-h-0">
@@ -396,14 +406,9 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
           </select>
         </div>
         <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 overflow-y-auto pr-2 pb-4 md:pb-0 content-start">
-          <GameCard color="bg-purple-500" title="Math Dash" iconImg="/icons/Item/Book/64px/Blue Book 1st 64px.png" onClick={() => setActiveModal('Game: Math Dash')} white />
-          <GameCard color="bg-lime-400" title="Word Jump" iconImg="/icons/Item/Pencil/64px/Blue Pencil 1st 64px.png" onClick={() => setActiveModal('Game: Spelling')} />
-          <GameCard color="bg-white" title="Logic Blocks" iconImg="/icons/Item/Dice/64px/Dice 1st 64px.png" onClick={() => setActiveModal('Game: Logic')} />
-          <GameCard color="bg-black" title="Memory Match" iconImg="/icons/Item/Crown/64px/Crown 1st 64px.png" onClick={() => setActiveModal('Game: Memory Quiz')} lime />
-          <GameCard color="bg-sky-400" title="Counting" iconImg="/icons/Item/Target/64px/Golden Target 1st 64px.png" onClick={() => setActiveModal('Game: Counting')} white />
-          <GameCard color="bg-violet-500" title="Shapes" iconImg="/icons/Item/Magnet/64px/Golden Magnet 1st 64px.png" onClick={() => setActiveModal('Game: Shapes')} white />
-          <GameCard color="bg-amber-400" title="Science" iconImg="/icons/Item/Potion/64px/Blue Potion 1st 64px.png" onClick={() => setActiveModal('Game: Science')} />
-          <GameCard color="bg-emerald-500" title="Geography" iconImg="/icons/Nature/Planet/64px/Golden Planet 1st 64px.png" onClick={() => setActiveModal('Game: Geography')} white />
+          {Object.values(GAME_CONFIGS).map((g) => (
+            <GameCard key={g.key} bg={g.color} title={g.title} emoji={g.emoji} onClick={() => setActiveModal('Game: ' + g.key)} />
+          ))}
         </div>
       </div>
     );
@@ -459,78 +464,29 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
   // HOME SCREEN
   return (
     <div className="w-full h-full flex flex-col gap-3 md:gap-5 overflow-y-auto pr-1 pb-4 md:pb-0 content-start">
-      {/* Compact Profile + Level */}
-      <div className="shrink-0 flex items-center gap-3 md:gap-5 bg-white border-4 border-black p-3 md:p-5 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
-        <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3 }} onClick={() => setActiveModal('Settings')}
-          className="w-16 h-16 md:w-20 md:h-20 bg-purple-300 border-3 border-black overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl md:rounded-2xl flex items-center justify-center cursor-pointer shrink-0">
-          <img src={`/characters/kenney/${{ Fin: 'penguin.png', Jae: 'bear.png', Poh: 'frog.png', Mol: 'monkey.png' }[avatarSeed as string] || 'penguin.png'}`} alt="Avatar" style={{ filter: `hue-rotate(${characterColor}deg) drop-shadow(2px 2px 0px rgba(0,0,0,1))` }} className="w-14 h-14 md:w-18 md:h-18 object-cover filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
+      {/* Greeting on top */}
+      <div className="shrink-0 flex items-center gap-3">
+        <motion.div whileTap={{ scale: 0.92 }} onClick={() => setActiveModal('Settings')}
+          className="w-12 h-12 md:w-16 md:h-16 border-4 border-black overflow-hidden shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-2xl flex items-center justify-center cursor-pointer shrink-0" style={{ background: characterFor(avatarSeed).accent }}>
+          <FaceIcon seed={avatarSeed} complexion={complexion} alt="Avatar" className="w-full h-full object-cover" />
         </motion.div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl md:text-4xl font-black text-black uppercase tracking-tighter leading-none truncate">Hi, {childName || 'Friend'}!</h1>
-          <div className="flex items-center gap-2 mt-1.5">
-            <div className="flex -space-x-0.5">
-              {streak > 0 ? [...Array(Math.min(streak, 3))].map((_, i) => <Flame key={i} className="w-4 h-4 text-red-500 fill-red-500" />) : <Flame className="w-4 h-4 text-gray-400" />}
+          {streak > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              {[...Array(Math.min(streak, 3))].map((_, i) => <Flame key={i} className="w-4 h-4 text-red-500 fill-red-500" />)}
+              <span className="font-bold text-xs text-gray-500 uppercase tracking-widest">{streak} day streak</span>
             </div>
-            <span className="font-bold text-xs md:text-sm text-gray-500 uppercase tracking-widest">{streak} day streak</span>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Level Progress */}
-      <QuestMap progress={questProgress} />
-
-      {/* Quick Play - 4 game launchers */}
-      <div className="shrink-0">
-        <h3 className="font-black text-base md:text-lg uppercase tracking-widest text-black mb-2">Play Now</h3>
-        <div className="grid grid-cols-4 gap-2 md:gap-3">
-          {[
-            { color: 'bg-purple-500', icon: '/characters/kenney/duck.png', label: 'Math', modal: 'Game: Math Dash' },
-            { color: 'bg-sky-400', icon: '/characters/kenney/monkey.png', label: 'Words', modal: 'Game: Spelling' },
-            { color: 'bg-amber-400', icon: '/characters/kenney/elephant.png', label: 'Memory', modal: 'Game: Memory Quiz' },
-            { color: 'bg-violet-500', icon: '/items/kenney/fireball.png', label: 'Science', modal: 'Game: Science' },
-          ].map(g => (
-            <motion.button key={g.label} whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveModal(g.modal)}
-              className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex flex-col items-center gap-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <img src={g.icon} alt={g.label} className="w-8 h-8 md:w-12 md:h-12 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
-              <span className="font-black text-[10px] md:text-xs uppercase tracking-wider text-white" style={{ textShadow: '1px 1px 0px black' }}>{g.label}</span>
-            </motion.button>
-          ))}
-        </div>
+      {/* The floating island — lives directly in the UI, no box (unmounts while a game is open) */}
+      <div className="shrink-0 relative h-[46vh] md:h-[52vh] -mx-2 md:-mx-4">
+        {!activeModal?.startsWith('Game:') && (
+          <TownHub seed={avatarSeed} complexion={complexion} familyName={familyName} parentSeeds={parentSeeds} members={members} onPlay={setActiveModal} />
+        )}
       </div>
-
-      {/* More Games Row */}
-      <div className="shrink-0">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-black text-base md:text-lg uppercase tracking-widest text-black">More Games</h3>
-          <button onClick={() => setActiveTab('games')} className="bg-white border-2 border-black px-3 py-1 rounded-full font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-lime-400 uppercase tracking-widest">See All →</button>
-        </div>
-        <div className="grid grid-cols-3 gap-2 md:gap-3">
-          {[
-            { color: 'bg-lime-400', icon: '/items/kenney/coinGold.png', label: 'Count', modal: 'Game: Counting' },
-            { color: 'bg-pink-400', icon: '/items/kenney/gemRed.png', label: 'Shapes', modal: 'Game: Shapes' },
-            { color: 'bg-emerald-500', icon: '/items/kenney/flagGreen.png', label: 'Geo', modal: 'Game: Geography' },
-          ].map(g => (
-            <motion.button key={g.label} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveModal(g.modal)}
-              className={`${g.color} border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-2 md:p-3 flex items-center gap-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]`}>
-              <img src={g.icon} alt={g.label} className="w-6 h-6 md:w-8 md:h-8 object-contain filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" onError={(e) => { e.currentTarget.src = '/characters/kenney/elephant.png' }} />
-              <span className="font-black text-xs md:text-sm uppercase tracking-wider text-black">{g.label}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
-
-      {/* Story Quick Launch */}
-      <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}
-        onClick={() => setActiveTab('stories')}
-        className="shrink-0 bg-gradient-to-r from-purple-500 to-blue-500 border-4 border-black rounded-2xl p-4 md:p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between cursor-pointer active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-        <div>
-          <h3 className="font-black text-lg md:text-2xl text-white uppercase" style={{ textShadow: '1px 1px 0px black' }}>AI Stories ✨</h3>
-          <p className="font-bold text-white/70 text-xs md:text-sm uppercase tracking-widest">Generate a magic story</p>
-        </div>
-        <span className="text-4xl md:text-5xl">📖</span>
-      </motion.button>
 
       {/* Chores Preview */}
       <div className="flex flex-col gap-2 shrink-0">
@@ -559,16 +515,19 @@ function KidViews({ activeTab, setActiveTab, setActiveModal, avatarSeed, charact
 }
 
 // --- Game Card ---
-function GameCard({ color, title, iconImg, onClick, white, lime }: { color: string; title: string; iconImg: string; onClick: () => void; white?: boolean; lime?: boolean }) {
+function GameCard({ color, title, iconImg, emoji, bg, onClick, white, lime }: { color?: string; title: string; iconImg?: string; emoji?: string; bg?: string; onClick: () => void; white?: boolean; lime?: boolean }) {
   const textColor = white ? 'text-white' : lime ? 'text-lime-400' : 'text-black';
   return (
     <motion.button whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} onClick={onClick}
-      className={`${color} border-4 border-black p-4 md:p-6 rounded-[2rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center gap-2 md:gap-4 group h-36 md:h-48 cursor-pointer transition-colors relative overflow-hidden`}>
+      style={bg ? { background: bg } : undefined}
+      className={`${color || ''} border-4 border-black p-4 md:p-6 rounded-[2rem] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center gap-2 md:gap-3 group h-36 md:h-48 cursor-pointer transition-colors relative overflow-hidden`}>
       <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-      <div className="relative z-10 drop-shadow-md">
-        <img src={iconImg} alt={title} className="w-10 h-10 md:w-16 md:h-16 object-contain" />
+      <div className="relative z-10 flex items-center justify-center">
+        {emoji
+          ? <span className="text-5xl md:text-7xl" style={{ filter: 'drop-shadow(3px 3px 0 rgba(0,0,0,0.4))' }}>{emoji}</span>
+          : <img src={iconImg} alt={title} className="w-10 h-10 md:w-16 md:h-16 object-contain" />}
       </div>
-      <span className={`font-black uppercase tracking-tighter text-lg md:text-2xl text-center leading-tight relative z-10 ${textColor}`}>{title}</span>
+      <span className="font-black uppercase tracking-tighter text-lg md:text-2xl text-center leading-tight relative z-10 text-white" style={{ textShadow: '2px 2px 0 #000' }}>{title}</span>
     </motion.button>
   );
 }
@@ -592,45 +551,66 @@ function ModalWrap({ children, onClose, fullScreen }: { children: React.ReactNod
 }
 
 // --- Settings Panel ---
-function SettingsPanel({ avatarSeed, characterColor, setAvatarSeed, setCharacterColor, onClose }: { avatarSeed: string; characterColor: number; setAvatarSeed: (s: string) => void; setCharacterColor: (c: number) => void; onClose: () => void }) {
-  const seeds = ['Fin', 'Jae', 'Poh', 'Mol'];
-  const currentSeed = seeds.includes(avatarSeed) ? avatarSeed : 'Fin';
-  
-  const colors = [
-    { label: 'Original', hue: 0, bg: 'bg-white' },
-    { label: 'Neon', hue: 90, bg: 'bg-green-400' },
-    { label: 'Ocean', hue: 180, bg: 'bg-blue-400' },
-    { label: 'Berry', hue: 270, bg: 'bg-purple-400' },
-    { label: 'Sunset', hue: 320, bg: 'bg-pink-400' }
-  ];
+function SettingsPanel({ avatarSeed, complexion, setAvatarSeed, setComplexion, onClose }: { avatarSeed: string; complexion: string; setAvatarSeed: (s: string) => void; setComplexion: (c: string) => void; onClose: () => void }) {
+  const [tab, setTab] = useState<'hero' | 'pet'>(characterFor(avatarSeed).kind);
+  const roster = (tab === 'hero' ? HERO_CHARACTERS : PET_CHARACTERS);
+  const current = characterFor(avatarSeed);
+  const currentSeed = current.id;
+  const isHero = current.kind === 'hero';
 
   return (
-    <div className="flex-1 flex flex-col items-center w-full max-w-md mx-auto pt-6">
-      <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-6 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Style Hero</h2>
-      
-      <div className="w-32 h-32 md:w-48 md:h-48 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-6 flex items-center justify-center shrink-0" style={{ background: 'var(--lime-accent)' }}>
-        <img src={`/characters/kenney/${{ Fin: 'penguin.png', Jae: 'bear.png', Poh: 'frog.png', Mol: 'monkey.png' }[currentSeed as string] || 'penguin.png'}`} alt="Avatar" className="w-24 h-24 md:w-40 md:h-40 object-cover filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform" style={{ filter: `hue-rotate(${characterColor}deg) drop-shadow(4px 4px 0px rgba(0,0,0,1))` }} />
-      </div>
-      
-      <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 w-full shrink-0">
-        <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) - 1 + seeds.length) % seeds.length])} className="p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer"><ArrowLeft className="w-5 h-5 text-black" /></button>
-        <span className="text-xl md:text-3xl font-black text-white uppercase w-24 md:w-32 text-center" style={{ textShadow: '2px 2px 0px black' }}>{currentSeed}</span>
-        <button onClick={() => setAvatarSeed(seeds[(seeds.indexOf(currentSeed) + 1) % seeds.length])} className="p-3 bg-white border-4 border-black hover:bg-lime-400 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer"><ArrowRight className="w-5 h-5 text-black" /></button>
+    <div className="flex-1 flex flex-col items-center w-full max-w-md mx-auto pt-4 overflow-y-auto pb-4">
+      <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-3 shrink-0" style={{ textShadow: '2px 2px 0px black' }}>Make Your Buddy</h2>
+
+      {/* Hero / Animal toggle */}
+      <div className="flex gap-2 mb-4 shrink-0">
+        {(['hero', 'pet'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-5 py-2 rounded-full border-4 border-black font-black uppercase text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${tab === t ? 'bg-purple-600 text-white' : 'bg-white text-black'}`}>
+            {t === 'hero' ? 'Heroes' : 'Animals'}
+          </button>
+        ))}
       </div>
 
-      <div className="bg-white border-4 border-black p-4 rounded-2xl w-full mb-6">
-        <h3 className="font-black text-center uppercase mb-3 text-sm">Choose a Color</h3>
-        <div className="flex justify-between">
-          {colors.map(c => (
-            <button key={c.label} onClick={() => setCharacterColor(c.hue)}
-              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform ${c.bg} ${characterColor === c.hue ? 'ring-4 ring-offset-2 ring-purple-500' : ''}`}
-              title={c.label}
-            />
+      <div className="w-40 h-40 md:w-52 md:h-52 rounded-3xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden mb-3 shrink-0" style={{ background: current.accent }}>
+        <MiniViewer seed={currentSeed} animation="idle" complexion={complexion} />
+      </div>
+
+      <div className="bg-black/30 border-2 border-black/40 rounded-2xl px-4 py-2.5 mb-4 w-full text-center shrink-0">
+        <span className="text-lg font-black text-white uppercase">{current.name}</span>{' '}
+        <span className="font-black uppercase text-xs tracking-widest text-lime-300">· {current.role}</span>
+        <p className="font-bold text-xs text-white/90 mt-1">{current.blurb}</p>
+      </div>
+
+      {/* Complexion — heroes only */}
+      {isHero && (
+        <div className="bg-white border-4 border-black p-3 rounded-2xl w-full mb-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <h3 className="font-black text-center uppercase mb-2 text-sm">Skin Tone</h3>
+          <div className="flex justify-center flex-wrap gap-2.5">
+            {COMPLEXIONS.map(cx => (
+              <button key={cx.id} onClick={() => setComplexion(cx.id)} title={cx.label}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full border-4 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform ${complexion === cx.id ? 'ring-4 ring-offset-1 ring-lime-500' : ''}`}
+                style={{ background: cx.swatch }} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pick a style — thumbnail grid */}
+      <div className="bg-white border-4 border-black p-3 rounded-2xl w-full mb-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+        <h3 className="font-black text-center uppercase mb-2 text-sm">Pick a Style</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {roster.map(c => (
+            <button key={c.id} onClick={() => setAvatarSeed(c.id)} title={c.name}
+              className={`aspect-square rounded-xl border-4 border-black overflow-hidden cursor-pointer hover:scale-105 transition-transform ${currentSeed === c.id ? 'ring-4 ring-purple-500' : ''}`}
+              style={{ background: c.accent }}>
+              <FaceIcon seed={c.id} className="w-full h-full object-cover" />
+            </button>
           ))}
         </div>
       </div>
 
-      <button onClick={onClose} className="shrink-0 w-full bg-lime-400 border-4 border-black text-black py-3 md:py-4 rounded-2xl font-black text-xl md:text-2xl uppercase hover:bg-lime-500 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer">Save Styles</button>
+      <button onClick={onClose} className="shrink-0 w-full bg-lime-400 border-4 border-black text-black py-3 md:py-4 rounded-2xl font-black text-xl md:text-2xl uppercase hover:bg-lime-500 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer">Save</button>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Sparkles, KeyRound, AlertCircle, Loader2 } from 'lucide-react';
 import type { KidProfile } from '../types';
+import { characterFor } from '../data/characters';
 
 interface KidLinkEntryProps {
   onLink: (kid: KidProfile) => void;
@@ -80,8 +81,8 @@ export function KidLinkEntry({ onLink, onBack, getKidByLinkCode, validatePairing
               <motion.button key={kid.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                 onClick={() => selectKid(kid)}
                 className="bg-white border-4 border-black p-4 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4 cursor-pointer hover:bg-lime-100 transition-colors">
-                <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${kid.avatarSeed}&backgroundColor=transparent`}
-                  alt={kid.name} className="w-16 h-16 rounded-2xl border-3 border-black bg-purple-200" />
+                <img src={characterFor(kid.avatarSeed).poster}
+                  alt={kid.name} className="w-16 h-16 object-contain rounded-2xl border-3 border-black" style={{ background: characterFor(kid.avatarSeed).accent }} />
                 <div className="text-left">
                   <h3 className="font-black text-2xl uppercase">{kid.name}</h3>
                   <p className="font-bold text-gray-500 text-sm">Age {kid.age} · {kid.stars} ⭐</p>
@@ -105,8 +106,8 @@ export function KidLinkEntry({ onLink, onBack, getKidByLinkCode, validatePairing
           className="flex flex-col items-center gap-6 z-10">
           <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }}
             className="w-36 h-36 md:w-48 md:h-48 bg-purple-300 border-4 border-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex items-center justify-center">
-            <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${linkedKid.avatarSeed}&backgroundColor=transparent`}
-              alt="Avatar" className="w-28 h-28 md:w-40 md:h-40" />
+            <img src={characterFor(linkedKid.avatarSeed).poster}
+              alt="Avatar" className="w-28 h-28 md:w-40 md:h-40 object-contain" />
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             className="text-4xl md:text-6xl font-black text-white uppercase text-center" style={{ textShadow: '3px 3px 0px black' }}>

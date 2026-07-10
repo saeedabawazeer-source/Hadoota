@@ -5,6 +5,17 @@ export interface ParentProfile {
   name: string;
 }
 
+import type { AvatarConfig } from './avatar/avatar';
+
+// A member of the family shown on the home island (kid, mom, dad, sibling...)
+export interface FamilyMember {
+  id: string;
+  name: string;
+  role: string;   // e.g. 'Me', 'Mom', 'Dad', 'Brother', 'Sister'
+  seed: string;   // 3D body character id from the roster
+  avatarConfig?: AvatarConfig; // customizable block-face
+}
+
 export interface ParentAccount {
   parents: ParentProfile[];
   kids: KidProfile[];
@@ -17,6 +28,8 @@ export interface KidProfile {
   age: number;
   avatarSeed: string;
   characterColor?: number;
+  complexion?: string;
+  avatarConfig?: AvatarConfig;
   interests: string[];
   difficulty: Difficulty;
   linkCode: string;
